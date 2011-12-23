@@ -47,7 +47,7 @@ $redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari
 $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')), MaxUploadSize*1048576);
 $dirContents;
 $cpExts = array('asp', 'css', 'htm', 'html', 'js', 'java', 'pl', 'php', 'rb', 'sql', 'xsl'); //For CP Editing
-$footer = '<a href="http://mus.tafa.us/projects/pafm" title="PHP AJAX File Manager">pafm</a> by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
+$footer = 'pafm by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
 if (AUTHORIZE) {
 	session_start();
 	doAuth();
@@ -158,7 +158,7 @@ function redirect(){
 }
 function refresh($message, $speed = 2){
 	global $redir;
-	return '<meta http-equiv="refresh" content="'.$speed.';url='.$redir.'" />'.$message;
+	return '<meta http-equiv="refresh" content="'.$speed.';url='.$redir.'">'.$message;
 }
 function getFs($file){
 	if (filesize($file) <= 1024)
@@ -198,11 +198,10 @@ function doAuth(){
 	if ($do && $_SESSION['pwd'] != PASSWORD)
 		exit('Please refresh the page and login');
 	if ($_SESSION['pwd'] != PASSWORD)
-		exit ('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+		exit ('<!DOCTYPE html>
+<html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title>Log In | pafm</title>
   <style type="text/css">
     /*<![CDATA[*/
@@ -242,8 +241,8 @@ function doAuth(){
   <form action="?do=login&path='. $pathURL .'" method="post">
     <fieldset>
       <legend style="text-align: left;">Log in</legend>
-      <input type="password" name="pwd" title="Password" />
-      <input type="submit" value="&#10003;" title="Log In" />
+      <input type="password" name="pwd" title="Password">
+      <input type="submit" value="&#10003;" title="Log In">
     </fieldset>
     <p>'.$footer.'</p>
   </form>
@@ -591,11 +590,10 @@ function getFiles($path){
 	}
 }
 ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
   <style type="text/css">@import "pafm/style.css";</style>
   <script src="pafm/js-min.js" type="text/javascript"></script><!--when debugging replace with js.js-->
@@ -642,9 +640,9 @@ getFiles($path);
 </div>
 
 <div id="add" class="b">
-  <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="pafm/images/addfile.gif" alt="Create File" /></a>
-  <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="pafm/images/addfolder.gif" alt="Create Folder" /></a>
-  <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="pafm/images/upload.gif" alt="Upload File" /></a>
+  <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="pafm/images/addfile.gif" alt="Create File"></a>
+  <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="pafm/images/addfolder.gif" alt="Create Folder"></a>
+  <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="pafm/images/upload.gif" alt="Upload File"></a>
 </div>
 
 <div id="footer">
