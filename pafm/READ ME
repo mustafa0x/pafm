@@ -1,0 +1,26 @@
+Open pafm.php with your code editor of choice,
+then scroll down to the CONFIG section
+(marked with '/*** CONFIG ***/').
+
+Change these directives as you see fit.
+The most important one to change is 'PASSWORD'.
+
+Explantion of directives:
+
+AUTHORIZE
+	Require authorization (ask for a password)?
+
+PASSWORD
+	Password for authorization.
+
+AllowPathInject
+	Allow path injection? e.g. ../, /, etc.?
+
+MaxUploadSize
+	Max file size for uploading. In mega-bytes
+
+MaxEditableSize
+	Max file size for Editing. In mega-bytes
+
+ROOT
+	ROOT path of where you want to manage. Do NOT include the domain. Must be local

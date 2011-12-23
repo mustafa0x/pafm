@@ -1,0 +1,259 @@
+/*
+	// License block \\
+	
+	   *   @filename:          style.css
+	   *   @date:              February 19th, 2009
+
+	   *   Copyright (C) 2007-2008 mustafa
+	   *   This program is free software; you can redistribute it and/or modify it under the terms of the 
+	   *   GNU General Public Licenseas published by the Free Software Foundation. See gpl-3.0.txt
+	   
+	\\ License block //
+*/
+html, body {
+	height: 100%;
+	width: 100%;
+}
+body {
+	margin: 0;
+	font-family: Calibri, Consolas, Georgia, Trebuchet;
+}
+a {
+	text-decoration: none;
+	color: #B22424;
+}
+a:visited {
+	color: #FF2F00;
+}
+a:hover {
+	color: #DD836F;
+}
+img {
+	border: none;
+}
+a:hover.b, .b a:hover, #add a img:hover {
+	border: 1px dotted #B22424;
+}
+#header {
+	padding: .2em;
+	background-color: #E8E8E8;
+	font-size: 1em;
+}
+#logout {
+	float:right;
+}
+.pathCrumbs {
+	font-style: italic;
+}
+.pathCrumbs a:hover {
+	background-color:white;
+}
+#dirList ul {
+	list-style: none;
+	margin: .5em 0 0 1.5em;
+	padding: 0em;
+}
+#dirList li {
+	margin: .05em 0;
+	padding: .1em 0 .1em .1em;
+	width:98%;
+}
+#dirList li:hover {
+	background: #FFDAC6
+}
+#body .pathCrumbs a:hover {
+	background-color:#E8E8E8;
+}
+/*coloumn info*/
+#info li:hover {
+	background: none;
+}
+#file {
+	padding-left: .3em;
+	font-size: .7em;
+	bottom: .10em;
+}
+#fileop {
+	position: absolute;
+	right: 3em;
+	font-size: .7em;
+	margin-top: .30em;
+}
+#info .mode {
+	right: 13.1em;
+}
+/*1st col: name*/
+.dir, .file {
+	position: relative;
+	bottom: .05em;
+	right: .11em;
+	font-family: Consolas, MonoSpace;
+	font-weight: bold;
+	color: black;
+}
+.dir {
+	background: url(images/dir.png) no-repeat bottom left;
+	padding-left: 1.25em;
+	padding-top: 2px;
+}
+.file {
+	padding-left: .30em;
+}
+/*middle cols: extension, filesize, mode*/
+.fs, .mode, .extension {
+	position: absolute;
+	right: 16.4em;
+	font-family:calibri;
+	font-size: .7em;
+	margin-top: .30em;
+}
+.mode {
+	right: 13.4em;
+}
+.extension {
+	right: 22em;
+}
+/*end cols: file operations*/
+.del, .edit, .rename, .move, .chmod, .extract {
+	position: absolute;
+	margin-top: .11em;
+	min-width: .97em;
+	min-height: .97em;
+}
+.del {
+	background: url(images/del.png) no-repeat top right;
+	right: 2.22em;
+}
+.edit {
+	background: url(images/edit.png) no-repeat top right;
+	right: 6.67em;
+}
+.cp {
+	background: url(images/cp.png) no-repeat top right;
+	padding: 0 0 1px 1px;
+}
+.rename {
+	background: url(images/ren.gif) no-repeat top right;
+	right: 3.33em;
+}
+.move {
+	background: url(images/move.gif) no-repeat top right;
+	right: 4.44em;
+}
+.chmod {
+	background: url(images/chmod.gif) no-repeat top right;
+	right: 5.56em;
+}
+.extract {
+	background: url(images/extract.png) no-repeat top right;
+	right: 7.78em;
+}
+/*add file, add folder, upload file*/
+#add {
+	float: right;
+	position:relative;
+	right: 2em;
+	top: 1em;
+}
+#add a:hover, #add a:focus {
+	border: none;
+}
+/*move file/folder list*/
+#movelist {
+	text-align:left;
+	margin-left: .5em;
+}
+#moveListUL {
+	margin-top: .75em;
+	margin-bottom: .5em;
+	list-style: none;
+	overflow: auto;
+}
+#movelist a img {
+	vertical-align:-15%;
+}
+#movehere {
+	margin-left:.5em;
+	background: url(images/movehere.gif) no-repeat center left;
+	padding-left: .90em;
+	font-family:calibri;
+}
+/*edit area*/
+#ea {
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:125;
+}
+#editMsg {
+	margin-left: 2px;
+}
+.failed, .succeeded {
+	color: red;
+	font-weight: bold;
+}
+.succeeded {
+	color: green;
+}
+/*footer*/
+#footer {
+	position: relative;
+	top: 3em;
+	padding-bottom: 1em;
+	clear: both;
+	text-align: center;
+	font-size: .85em;
+}
+#footer a {
+	font-style:italic;
+}
+/*modal window*/
+#popup {
+	position:fixed;
+	left:50%;
+	top:50%;
+	min-width: 15em;
+	min-height: 3em;
+	border: 2px solid #525252;
+	background:white;
+	z-index:150;
+	padding-bottom:10px;
+}
+#head {
+	background-color:#E8E8E8;
+	font-family:calibri;
+}
+#x {
+	float: right;
+}
+#body {
+	text-align: center;
+	margin: .5em 0;
+	white-space: nowrap
+}
+/*opacity/fade overlays*/
+#popOverlay, #editOverlay, #ajaxOverlay {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 105;
+	background-color: #FFFFFF !important;
+}
+#editOverlay {
+	opacity: 1;
+	filter: alpha(opacity = 100);
+	z-index: 115;
+}
+#ajaxOverlay {
+	z-index: 150;
+}
+#ajaxImg {
+	position:fixed;
+	left:50%;
+	top:50%;
+	margin-left:-1.5em;
+	margin-top:-1em;
+	z-index:160;
+}
