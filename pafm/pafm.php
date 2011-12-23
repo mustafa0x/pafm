@@ -541,6 +541,8 @@ function getDirContents($path){
 		$dirContents[is_file($fullPath) ? 'files' : 'folders'][] = $dirItem;
 	}
 	closedir($dirHandle);
+	sort($dirContents['files']);
+	sort($dirContents['folders']);
 }
 //list directory contents functions
 function getDirs($path){
