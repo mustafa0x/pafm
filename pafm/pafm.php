@@ -186,7 +186,7 @@ function pathCrumbs(){
 	for ($i = 0; $i < count($crumbs); $i++) {
 		$slash = $i ? '/' : null;
 		$pathSplit .= $slash . escape($crumbs[$i]);
-		$crumb .= '<a href="?path=' . $pathSplit . '" title="Go to ' . $crumbs[$i] . '">' . $crumbs[$i] . '</a> /' . "\n";
+		$crumb .= '<a href="?path=' . $pathSplit . '" title="Go to ' . $crumbs[$i] . '">' . ($i === 0 ? '<em>root</em>' : $crumbs[$i]) . '</a> /' . "\n";
 	}
 	return $crumb;
 }

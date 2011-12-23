@@ -43,7 +43,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 	float:right;
 }
 .pathCrumbs {
-	font-style: italic;
+	/*font-style: italic;*/
 }
 .pathCrumbs a:hover {
 	background-color:white;
