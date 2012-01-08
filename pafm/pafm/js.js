@@ -81,23 +81,37 @@ function json2markup(json, path) {
 		else if (json[i].constructor == Object){
 			if (json[i].attributes)
 				for (attrib in json[i].attributes)
-					attrib.toLowerCase() == "style" ?
-						el.style.cssText = json[i].attributes[attrib] : 
-						attrib.toLowerCase() == "class" ?
-							el.className = json[i].attributes[attrib] :
-							attrib.toLowerCase() == "for" ?
-								el.htmlFor = json[i].attributes[attrib] :
-								el.setAttribute(attrib, json[i].attributes[attrib]);
+					switch (attrib.toLowerCase()){
+						case "class":
+							el.className = json[i].attributes[attrib];
+							break;
+						case "style":
+							el.style.cssText = json[i].attributes[attrib];
+							break;
+						case "for":
+							el.htmlFor = json[i].attributes[attrib]
+							break;
+						default:
+							el.setAttribute(attrib, json[i].attributes[attrib]);
+					}
 			if (json[i].events)
 				for (event in json[i].events)
-					el.addEventListener ?
-						el.addEventListener(event, json[i].events[event], false) :
-						el.attachEvent("on" + event, json[i].events[event]);
+					el.addEventListener(event, json[i].events[event], false);
 			if (json[i].preText)
 				path.appendChild(document.createTextNode(json[i].preText));
 			if (json[i].text)
 				el.appendChild(document.createTextNode(json[i].text));
-			path.appendChild(el);
+			switch (json[i].insert){
+				case "before":
+					path.parentNode.insertBefore(el, path);
+					break;
+				case "after":
+					path.parentNode.insertBefore(el, path.nextSibling);
+					break;
+				case "under":
+				default:
+					path.appendChild(el);
+			}
 			if (json[i].postText)
 				path.appendChild(document.createTextNode(json[i].postText));
 		}
