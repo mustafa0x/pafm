@@ -454,7 +454,7 @@ edit = {
 				obj.attributes.selected = "true";
 			tempAr.push("option", obj);
 		}
-		(ll = $("ll")).innerHTML = ""; //language list
+		(ll = $("ll")).innerHTML = "";
 		json2markup(tempAr, ll);
 		ajax("?do=readFile&path=" + path + "&subject=" + subject, "get", null, function(response){
 			$("ta").value = response;
@@ -481,7 +481,6 @@ edit = {
 			else
 				CodePress.run();
 		});
-		location = "#header";
 	},
 	save : function(subject, path){
 		$("editMsg").innerHTML = null;
