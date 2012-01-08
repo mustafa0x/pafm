@@ -45,7 +45,7 @@ $do = $_GET['do'];
 $pafm = basename($_SERVER['SCRIPT_NAME']);
 $redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari
 $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')), MaxUploadSize*1048576);
-$dirContents;
+$dirContents = array('folders' => array(), 'files' => array());
 $cpExts = array('asp', 'css', 'htm', 'html', 'js', 'java', 'pl', 'php', 'rb', 'sql', 'xsl'); //For CP Editing
 $footer = 'pafm by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
 if (AUTHORIZE) {
@@ -181,8 +181,8 @@ function rrd($dir){
 }
 function pathCrumbs(){
 	global $pathHTML, $pathURL;
-	$crumbs = split('/', $pathHTML);
-	$crumbsLink = split('/', $pathURL);
+	$crumbs = explode('/', $pathHTML);
+	$crumbsLink = explode('/', $pathURL);
 	for ($i = 0; $i < count($crumbs); $i++) {
 		$slash = $i ? '/' : null;
 		$pathSplit .= $slash . escape($crumbs[$i]);
@@ -281,29 +281,33 @@ function doUpload($path){
 	if (!$_FILES)
 		return refresh('$_FILES array can not be read');
 	$uploadErrors = array(null, 'The uploaded file exceeds the upload_max_filesize directive in php.ini.', 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.', 'The uploaded file was only partially uploaded.', 'No file was uploaded.', 'Missing a temporary folder.', 'Failed to write file to disk.', 'File upload stopped by extension.');
-	if ($_FILES['file']['error']) {
-		if ($uploadErrors[$_FILES['file']['error']])
-			return refresh($uploadErrors[$_FILES['file']['error']] . ' Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>');
-		else 
-			return refresh('Unknown error occurred. Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>');
+	$l = count($_FILES['file']['name']);
+	for ($i = 0; $i < $l; $i++) {
+		if ($_FILES['file']['error'][$i]) {
+			if ($uploadErrors[$_FILES['file']['error'][$i]])
+				return refresh($uploadErrors[$_FILES['file']['error'][$i]] . ' Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>');
+			else 
+				return refresh('Unknown error occurred. Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>');
+		}
+
+		if (!is_file($_FILES['file']['tmp_name'][$i]))
+			return refresh($_FILES['file']['name'][$i] . ' could not be uploaded. Possible causes could be the <b>post_max_size</b> and <b>memory_limit</b> directives in php.ini.');
+
+		if (!is_uploaded_file($_FILES['file']['tmp_name'][$i]))
+			return refresh(basename($_FILES['file']['name'][$i]) . ' is not a POST-uploaded file');
+
+		$name = basename($_FILES['file']['name'][$i]);
+		if ($_FILES['file']['size'][$i] > MaxUploadSize * 1048576) {
+			unlink($_FILES['file']['tmp_name'][$i]);
+			return refresh($name . '\'s size exceeds the MaxUploadSize directive.');
+		}
+
+		if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $path.'/'.$name))
+			$fail = true;
 	}
-
-	if (!is_file($_FILES['file']['tmp_name']))
-		return refresh($_FILES['file']['name'] . ' could not be uploaded. Possible causes could be the <b>post_max_size</b> and <b>memory_limit</b> directives in php.ini.');
-
-	if (!is_uploaded_file($_FILES['file']['tmp_name']))
-		return refresh(basename($_FILES['file']['name']) . ' is not a POST-uploaded file');
-
-	$name = basename($_FILES['file']['name']);
-	if ($_FILES['file']['size'] > MaxUploadSize * 1048576) {
-		unlink($_FILES['file']['tmp_name']);
-		return refresh($name . '\'s size exceeds the MaxUploadSize directive.');
-	}
-
-	if (move_uploaded_file($_FILES['file']['tmp_name'], $path.'/'.$name))
-		redirect();
-	else
-		return refresh($name . ' could not be moved.');
+	if ($fail)
+		return refresh('One or more files could not be moved.');
+	redirect();
 }
 function doChmod($subject, $path, $mod){
 	if (isNull($mod))
@@ -350,6 +354,36 @@ function doExtract($subject, $path){
 function doReadFile($subject, $path){
 	return file_get_contents($path.'/'.$subject);
 }
+/*function doCopy($subject, $path){
+	if (isNull($subject, $path))
+		return refresh('Values could not be read');
+	
+	$fileN = 0;
+	$newName = "";
+	$fileName = "";
+	$isFile = true;
+	if(!is_file($path ."/". $subject))
+		$isFile = false;
+	if($isFile){
+		$extension = end(explode(".", $subject));
+		$fileName = implode(".", array_slice(explode(".", $subject), 0, -1));
+	}else{
+		$fileName = $subject;
+	}
+	do{
+		$newName = $fileName."_copy";
+		if($fileN > 0){
+			$newName .= "(".$fileN.")";
+		}
+		if($isFile)
+			$newName .= ".".$extension;
+		$fileN++;
+	}while(is_file($path . '/' . $newName));
+	
+	if(!$fm->copy($path . '/' . $subject, $path.'/'.$newName))
+		return refresh($subject.' could not be copied to '.$newName);
+	redirect();
+}*/
 function doMove($subject, $path){
 	global $pathHTML, $subjectHTML, $to, $toHTML;
 	if (isNull($subject, $path, $to))
@@ -430,8 +464,8 @@ function moveList($subject, $path){
 		},
 		[
 	';
-	$crumbs = split('/', $toHTML);
-	$crumbsLink = split('/', $toURL);
+	$crumbs = explode('/', $toHTML);
+	$crumbsLink = explode('/', $toURL);
 	for ($i = 0; $i < count($crumbs); $i++) {
 		$slash = $i ? '/' : null;
 		$pathSplit .= $slash . $crumbsLink[$i];
@@ -541,13 +575,19 @@ function getDirContents($path){
 		$dirContents[is_file($fullPath) ? 'files' : 'folders'][] = $dirItem;
 	}
 	closedir($dirHandle);
-	sort($dirContents['files']);
-	sort($dirContents['folders']);
 }
 //list directory contents functions
 function getDirs($path){
 	global $dirContents, $pathURL;
-	for ($i = 0, $l = count($dirContents['folders']); $i < $l; $i++){
+	$i = 0;
+	$l = count($dirContents['folders']);
+
+	if ($l)
+		sort($dirContents['folders']);
+	else
+		return;
+
+	for (; $i < $l; $i++){
 		$dirItem = $dirContents['folders'][$i];
 		$dirItemURL = escape($dirItem);
 		$dirItemHTML = htmlspecialchars($dirItem);
@@ -564,9 +604,18 @@ function getDirs($path){
 	}
 }
 function getFiles($path){
-	global $dirContents, $pathURL, $cpExts, $denyAccess;
+	global $dirContents, $pathURL, $cpExts;
 	$filePath = $path == '.' ? '/' : '/' . $path.'/';
-	for ($i = 0, $l = count($dirContents['files']); $i < $l; $i++){
+	
+	$i = 0;
+	$l = count($dirContents['files']);
+
+	if ($l)
+		sort($dirContents['files']);
+	else
+		return;
+
+	for (; $i < $l; $i++){
 		$dirItem = $dirContents['files'][$i];
 		$dirItemURL = escape($dirItem);
 		$dirItemHTML = htmlspecialchars($dirItem);
@@ -598,7 +647,7 @@ function getFiles($path){
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
   <style type="text/css">@import "pafm/style.css";</style>
-  <script src="pafm/js-min.js" type="text/javascript"></script><!--when debugging replace with js.js-->
+  <script src="pafm/js.js" type="text/javascript"></script><!--when debugging replace with js.js-->
 </head>
 <body>
 
