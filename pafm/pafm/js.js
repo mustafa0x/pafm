@@ -1,3 +1,4 @@
+
 /*
 	// License block \\
 	
@@ -468,7 +469,7 @@ edit = {
 				obj.attributes.selected = "true";
 			tempAr.push("option", obj);
 		}
-		(ll = $("ll")).innerHTML = "";
+		(ll = $("ll")).innerHTML = ""; //language list
 		json2markup(tempAr, ll);
 		ajax("?do=readFile&path=" + path + "&subject=" + subject, "get", null, function(response){
 			$("ta").value = response;
@@ -495,6 +496,7 @@ edit = {
 			else
 				CodePress.run();
 		});
+		location = "#header";
 	},
 	save : function(subject, path){
 		$("editMsg").innerHTML = null;
@@ -525,6 +527,18 @@ edit = {
 };
 upload = {
 	init : function(path, fsize) {
+		window.__FILEUPLOAD = 0;
+		var uploadInput = {
+			attributes : {
+				"type" : "file",
+				"name" : "file[0]"
+			},
+			events : {
+				change : function(e) {
+					upload.chk((e.srcElement || e.target).value, path, e.target.name.substring(5, e.target.name.length-1));
+				}
+			}
+		};
 		popup.init("Upload:", [
 			"form",
 			{
@@ -546,73 +560,76 @@ upload = {
 					}
 				},
 				"input",
-				{
-					attributes : {
-						"type" : "file",
-						"name" : "file"
-					},
-					events : {
-						change : function(e) {
-							$("rc").innerHTML = "";
-							upload.chk((e.srcElement || e.target).value, path);
-						}
-					}
+				uploadInput
+			],
+			"input",
+			{
+				attributes : {
+					"type" : "button",
+					"value" : "+",
+					"id" : "addFileUpload",
+					"title" : "Add Upload"
 				},
-				"span",
-				{
-					attributes : {
-						"id" : "rc"
+				events : {
+					click : function(e) {
+						window.__FILEUPLOAD++;
+						uploadInput.attributes.name = "file["+window.__FILEUPLOAD+"]";
+						json2markup([
+							"br",
+							{},
+							"input",
+							uploadInput
+						],
+						$("upload")); //should be added after last input
 					}
 				}
-			]
+			},
+			"input", //should be disabled
+			{
+				attributes : {
+					"title" : "Ok",
+					"type" : "button",
+					"value" : "\u2713",
+					"id" : "uploadOk",
+				},
+				events : {
+					click : function(){
+						$("upload").submit();
+					}
+				}
+			}
 		]);
 	},
-	chk : function(subject, path) {
-		var name = subject.split(/\\|\//g), markup;
+	chk : function(subject, path, uploadInputNumber) {
+		var name = subject.split(/\\|\//g),
+			markup,
+			fileInput = document.getElementsByName("file["+ uploadInputNumber +"]")[0]
 		name = name.push ? name[name.length-1] : name;
 		ajax("?do=fileExists&path="+path+"&subject=" + name, "get", null, function(response){
-			if (response == "1")
-				markup = [
-					"br",
-					{},
-					"b",
-					{
-						text : "File exists, overwrite?"
-					},
-					"br",
-					{},
+			if (response == "1"){
+				fileInput.disabled = true;
+				json2markup([
 					"input",
 					{
+						insert : "after",
 						attributes : {
-							"type" : "submit",
-							"value" : "Yes"
-						}
-					},
-					"input",
-					{
-						attributes : {
-							"type" : "button",
-							"id" : "tb",
-							"value" : "No"
+							"type" : "checkbox", 
 						},
 						events : {
-							click : popup.close
+							change : function(e){
+								fileInput.disabled = !e.target.checked;
+							}
 						}
-					}
-				];
-			else
-				markup = [
-					"input",
+					},
+					"b",
 					{
-						attributes : {
-							"title" : "Ok",
-							"type" : "submit",
-							"value" : "\u2713",
-							"id" : "uploadOk"
-						}
+						insert : "after",
+						text : " Overwrite?"
 					}
-				];
-			json2markup(markup, $("rc"));
+				], fileInput);
+			}
 		});
+		$("addFileUpload").click();
 	}
 };
+
