@@ -602,7 +602,6 @@ upload = {
 	},
 	chk : function(subject, path, uploadInputNumber) {
 		var name = subject.split(/\\|\//g),
-			markup,
 			fileInput = document.getElementsByName("file["+ uploadInputNumber +"]")[0]
 		name = name.push ? name[name.length-1] : name;
 		ajax("?do=fileExists&path="+path+"&subject=" + name, "get", null, function(response){
