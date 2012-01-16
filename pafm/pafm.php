@@ -4,17 +4,17 @@
 	
 	   *   @name:                    PHP AJAX File Manager (PAFM)
 	   *   @filename:                pafm.php
-	   *   @version:                 1.0.2
-	   *   @date:                    May 18th, 2009
+	   *   @version:                 1.0.3
+	   *   @date:                    January 8th, 2012
 
 	   *   @author:                  mustafa
 	   *   @website:                 http://mus.tafa.us
 	   *   @email:                   mmj048@gmail.com
 
 	   *   @server requirements:     PHP 4.4+
-	   *   @browser requirements:    Firefox 3+, Internet Explorer 7+, Opera 9.5+, Safari 3+
+	   *   @browser requirements:    Firefox, Internet Explorer 7+, Opera 9.5+, Safari 3+
 
-	   *    Copyright (C) 2007-2008 mustafa
+	   *    Copyright (C) 2007-2012 mustafa
 	   *    This program is free software; you can redistribute it and/or modify it under the terms of the 
 	   *    GNU General Public License as published by the Free Software Foundation. See COPYING
 	   
