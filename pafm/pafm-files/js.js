@@ -628,7 +628,7 @@ upload = {
 				], fileInput);
 			}
 		});
-		$("addFileUpload").click();
+		//$("addFileUpload").click(); //causes empty file upload error
 	}
 };
 

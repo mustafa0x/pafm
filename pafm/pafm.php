@@ -524,7 +524,7 @@ function moveList($subject, $path){
 				"img",
 				{
 					attributes : {
-						"src" : "pafm/images/odir.png",
+						"src" : "pafm-files/images/odir.png",
 						"title" : "Open '.$dirItemHTML.'"
 					}
 				}
@@ -646,8 +646,8 @@ function getFiles($path){
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
-  <style type="text/css">@import "pafm/style.css";</style>
-  <script src="pafm/js.js" type="text/javascript"></script><!--when debugging replace with js.js-->
+  <style type="text/css">@import "pafm-files/style.css";</style>
+  <script src="pafm-files/js.js" type="text/javascript"></script><!--when debugging replace with js.js-->
 </head>
 <body>
 
@@ -691,9 +691,9 @@ getFiles($path);
 </div>
 
 <div id="add" class="b">
-  <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="pafm/images/addfile.gif" alt="Create File"></a>
-  <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="pafm/images/addfolder.gif" alt="Create Folder"></a>
-  <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="pafm/images/upload.gif" alt="Upload File"></a>
+  <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="pafm-files/images/addfile.gif" alt="Create File"></a>
+  <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="pafm-files/images/addfolder.gif" alt="Create Folder"></a>
+  <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="pafm-files/images/upload.gif" alt="Upload File"></a>
 </div>
 
 <div id="footer">
