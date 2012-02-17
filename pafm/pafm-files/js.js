@@ -40,7 +40,7 @@ function ajax(url, method, data, handler) {
 	"img",
 	{
 		attributes : {
-			"src" : "pafm/images/ajax.gif",
+			"src" : "pafm-files/images/ajax.gif",
 			"id" : "ajaxImg",
 			"title" : "Loading",
 			"alt" : "Loading"
@@ -477,7 +477,7 @@ edit = {
 				json2markup(["script",
 				{
 					attributes : {
-						"src" : "pafm/codepress/codepress.js",
+						"src" : "pafm-files/codepress/codepress.js",
 						"type" : "text/javascript",
 						"id" : "cpjs"
 					},
