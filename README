@@ -1,26 +1,11 @@
-Open pafm.php with your code editor of choice,
-then scroll down to the CONFIG section
-(marked with '/*** CONFIG ***/').
+Open pafm.php with your code editor of choice
+then scroll down till you see /** configuration **/
 
 Change these directives as you see fit.
-The most important one to change is 'PASSWORD'.
 
-Explantion of directives:
+PASSWORD is, obviously, the password for PAFM.
 
-AUTHORIZE
-	Require authorization (ask for a password)?
-
-PASSWORD
-	Password for authorization.
-
-AllowPathInject
-	Allow path injection? e.g. ../, /, etc.?
-
-MaxUploadSize
-	Max file size for uploading. In mega-bytes
-
-MaxEditableSize
-	Max file size for Editing. In mega-bytes
-
-ROOT
-	ROOT path of where you want to manage. Do NOT include the domain. Must be local
+ROOT is the path to the directory you want to
+manage. E.g. if you want to manage your home directoy,
+change ROOT to '/home/'. I usually set this to '..',
+the directory "above" the pafm folder.
