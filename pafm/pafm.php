@@ -1,78 +1,92 @@
 <?php
-/*
-	// License block \\
-	
-	   *   @name:                    PHP AJAX File Manager (PAFM)
-	   *   @filename:                pafm.php
-	   *   @version:                 1.0.3
-	   *   @date:                    January 8th, 2012
+/**
+	@name:                    PHP AJAX File Manager (PAFM)
+	@filename:                pafm.php
+	@version:                 1.0.4
+	@date:                    February 16th, 2012
 
-	   *   @author:                  mustafa
-	   *   @website:                 http://mus.tafa.us
-	   *   @email:                   mmj048@gmail.com
+	@author:                  mustafa
+	@website:                 http://mus.tafa.us
+	@email:                   mmj048@gmail.com
 
-	   *   @server requirements:     PHP 4.4+
-	   *   @browser requirements:    Firefox, Internet Explorer 7+, Opera 9.5+, Safari 3+
+	@server requirements:     PHP 4.4+
+	@browser requirements:    modern browser
 
-	   *    Copyright (C) 2007-2012 mustafa
-	   *    This program is free software; you can redistribute it and/or modify it under the terms of the 
-	   *    GNU General Public License as published by the Free Software Foundation. See COPYING
-	   
-	\\ License block //
-*/
+	Copyright (C) 2007-2012 mustafa
+	This program is free software; you can redistribute it and/or modify it under the terms of the 
+	GNU General Public License as published by the Free Software Foundation. See COPYING
+**/
 
 
-/*** CONFIG ***/
-define('AUTHORIZE', true); //Require authorization?
-//@bool : true
-define('PASSWORD', 'auth'); //Authorization password
+/** configuration **/
+
+define('PASSWORD', 'auth'); // password
 //@string : auth
-define('AllowPathInjection', false); //Allow path injection? e.g. ../, /, etc.
+
+define('ROOT', '.'); // _relative_ path of root folder to manage
+//@string : .
+
+/** end configuration **/
+
+define('AUTHORIZE', true);
+//@bool : true
+
+define('SanatizePath', true); //Allow path injection? e.g. ../, /, etc.
 //@bool : false
-define('MaxUploadSize', 25); //Max file size for uploading. In mega-bytes
-//@int : 25
+
 define('MaxEditableSize', 1); //Max file size for Editing. In mega-bytes
 //@int : 1
-define('ROOT', '.'); //ROOT path of where you want to manage. Do NOT include the domain. Must be local
-//@string : .
-/*** END CONFIG ***/
 
-$pathRegEx = AllowPathInjection ? '//' : '/\.\.|\/\/|\/$|^\/|^$/';
+$pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
+
 $path = preg_match($pathRegEx, $_GET['path']) ? '.' : $_GET['path'];
 $pathURL = escape($path);
 $pathHTML = htmlspecialchars($path);
-$do = $_GET['do'];
+
 $pafm = basename($_SERVER['SCRIPT_NAME']);
 $redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari
-$maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')), MaxUploadSize*1048576);
+
+$maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')));
 $dirContents = array('folders' => array(), 'files' => array());
 $cpExts = array('asp', 'css', 'htm', 'html', 'js', 'java', 'pl', 'php', 'rb', 'sql', 'xsl'); //For CP Editing
 $footer = 'pafm by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
+
+$do = $_GET['do'];
+
 if (AUTHORIZE) {
 	session_start();
 	doAuth();
 }
+
+/** directory checks and chdir **/
+
 if (!is_dir(ROOT))
 	exit('ROOT (' . htmlspecialchars(ROOT) . ') is not a valid directory');
 chdir(ROOT);
+
 if (!is_dir($path))
 	exit('path (' . $pathHTML . ') is not a valid directory');
+
 if(!is_readable($path)) {
 	chmod($path, 0777);
 	if (!is_readable($path))
 		exit('path (' . $pathHTML . ') can\'t be read');
 }
 
+/** clean variables **/
 if (!isNull($_GET['subject'])) {
 	$subject = str_replace('/', null, $_GET['subject']);
 	$subjectURL = escape($subject);
 	$subjectHTML = htmlspecialchars($subject);
 }
+
 if (!isNull($_GET['to'])) {
 	$to = preg_match($pathRegEx, $_GET['to']) ? null : $_GET['to'];
 	$toHTML = htmlspecialchars($to);
 	$toURL = escape($to);
 }
+
+/** perform requested action **/
 if ($do) {
 	switch ($do) {
 		case 'login':
@@ -105,7 +119,10 @@ if ($do) {
 			exit(doLogout());
 	}
 }
+
+/** no action; list current directory **/
 getDirContents($path);
+
 // helper functions
 function isNull() {
 	foreach (func_get_args() as $value)
@@ -279,7 +296,7 @@ function doCreate($file, $folder, $path){
 }
 function doUpload($path){
 	if (!$_FILES)
-		return refresh('$_FILES array can not be read');
+		return refresh('$_FILES array can not be read. Check file size limits and the max execution time limit.');
 	$uploadErrors = array(null, 'The uploaded file exceeds the upload_max_filesize directive in php.ini.', 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.', 'The uploaded file was only partially uploaded.', 'No file was uploaded.', 'Missing a temporary folder.', 'Failed to write file to disk.', 'File upload stopped by extension.');
 	$l = count($_FILES['file']['name']);
 	for ($i = 0; $i < $l; $i++) {
@@ -296,13 +313,7 @@ function doUpload($path){
 		if (!is_uploaded_file($_FILES['file']['tmp_name'][$i]))
 			return refresh(basename($_FILES['file']['name'][$i]) . ' is not a POST-uploaded file');
 
-		$name = basename($_FILES['file']['name'][$i]);
-		if ($_FILES['file']['size'][$i] > MaxUploadSize * 1048576) {
-			unlink($_FILES['file']['tmp_name'][$i]);
-			return refresh($name . '\'s size exceeds the MaxUploadSize directive.');
-		}
-
-		if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $path.'/'.$name))
+		if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $path . '/' . basename($_FILES['file']['name'][$i])))
 			$fail = true;
 	}
 	if ($fail)
@@ -647,7 +658,7 @@ function getFiles($path){
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
   <style type="text/css">@import "pafm-files/style.css";</style>
-  <script src="pafm-files/js.js" type="text/javascript"></script><!--when debugging replace with js.js-->
+  <script src="pafm-files/js.js" type="text/javascript"></script><!-- pafm-files/js.js for dev -->
 </head>
 <body>
 
