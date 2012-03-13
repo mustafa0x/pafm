@@ -1,11 +1,11 @@
-/**
+/*
 	@filename:          js.js
 	@date:              February 16th, 2012
 
 	Copyright (C) 2007-2012 mustafa
 	This program is free software; you can redistribute it and/or modify it under the terms of the 
-	GNU General Public License as published by the Free Software Foundation. See gpl-3.0.txt
-**/
+	GNU General Public License as published by the Free Software Foundation.
+*/
 function $(element) {
 	return document.getElementById(element);
 }

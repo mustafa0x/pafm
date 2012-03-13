@@ -1,13 +1,13 @@
 <?php
-/**
+/*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.0.4
-	@date:                    February 16th, 2012
+	@version:                 1.0.5
+	@date:                    March 12th, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
-	@email:                   mmj048@gmail.com
+	@email:                   mustafa.0x@gmail.com
 
 	@server requirements:     PHP 4.4+
 	@browser requirements:    modern browser
@@ -15,7 +15,7 @@
 	Copyright (C) 2007-2012 mustafa
 	This program is free software; you can redistribute it and/or modify it under the terms of the 
 	GNU General Public License as published by the Free Software Foundation. See COPYING
-**/
+*/
 
 
 /** configuration **/
@@ -23,19 +23,29 @@
 define('PASSWORD', 'auth'); // password
 //@string : auth
 
-define('ROOT', '.'); // _relative_ path of root folder to manage
+/*
+ * _relative_ path of root folder to manage.
+ *
+ * Setting this to a path outside of webroot works,
+ * but your URIs will be broken.
+ *
+ * If set to an invalid directory, will do nothing.
+ */
+define('ROOT', '.');
 //@string : .
 
-/** end configuration **/
+/** /configuration **/
 
 define('AUTHORIZE', true);
 //@bool : true
 
-define('SanatizePath', true); //Allow path injection? e.g. ../, /, etc.
+define('SanatizePath', true); //Sanitize Path? i.e. remove ../, /, etc.
 //@bool : false
 
-define('MaxEditableSize', 1); //Max file size for Editing. In mega-bytes
+define('MaxEditableSize', 1); //Max file size for Editing (in mega-bytes)
 //@int : 1
+
+define('VERSION', '1.0.5');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -49,7 +59,7 @@ $redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari
 $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')));
 $dirContents = array('folders' => array(), 'files' => array());
 $cpExts = array('asp', 'css', 'htm', 'html', 'js', 'java', 'pl', 'php', 'rb', 'sql', 'xsl'); //For CP Editing
-$footer = 'pafm by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
+$footer = '<a href="http://github.com/mustafa0x/pafm" title="pafm @ github">pafm v'.VERSION.'</a> by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
 
 $do = $_GET['do'];
 
@@ -60,9 +70,9 @@ if (AUTHORIZE) {
 
 /** directory checks and chdir **/
 
-if (!is_dir(ROOT))
-	exit('ROOT (' . htmlspecialchars(ROOT) . ') is not a valid directory');
-chdir(ROOT);
+if (is_dir(ROOT))
+	chdir(ROOT);
+	//exit('ROOT (' . htmlspecialchars(ROOT) . ') is not a valid directory');
 
 if (!is_dir($path))
 	exit('path (' . $pathHTML . ') is not a valid directory');
@@ -207,6 +217,7 @@ function pathCrumbs(){
 	}
 	return $crumb;
 }
+
 //authorize functions
 function doAuth(){
 	global $do, $pathURL, $footer;
@@ -277,6 +288,7 @@ function doLogout(){
 	session_destroy();
 	redirect();
 }
+
 //fOp functions
 function doCreate($file, $folder, $path){
 	if (isNull($file) && isNull($folder))
