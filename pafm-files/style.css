@@ -232,6 +232,11 @@ a:hover.b, .b a:hover, #add a img:hover {
 	margin: .5em 0;
 	white-space: nowrap
 }
+#response {
+	font-weight: bold;
+	font-size: small;
+	margin-top: 10px;
+}
 /*opacity/fade overlays*/
 #popOverlay, #editOverlay, #ajaxOverlay {
 	width: 100%;

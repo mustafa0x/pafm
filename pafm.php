@@ -318,7 +318,7 @@ function doUpload($path){
 		return refresh('$_FILES array can not be read. Check file size limits and the max execution time limit.');
 	$uploadErrors = array(null, 'The uploaded file exceeds the upload_max_filesize directive in php.ini.', 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.', 'The uploaded file was only partially uploaded.', 'No file was uploaded.', 'Missing a temporary folder.', 'Failed to write file to disk.', 'File upload stopped by extension.');
 	$l = count($_FILES['file']['name']);
-	for ($i = 0; $i < $l; $i++) {
+	for ($i = 0; $i < $l; $i++) { //FIXME: this loop is no longer relavent
 		if ($_FILES['file']['error'][$i]) {
 			if ($uploadErrors[$_FILES['file']['error'][$i]])
 				return refresh($uploadErrors[$_FILES['file']['error'][$i]] . ' Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>');
@@ -335,9 +335,7 @@ function doUpload($path){
 		if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $path . '/' . basename($_FILES['file']['name'][$i])))
 			$fail = true;
 	}
-	if ($fail)
-		return refresh('One or more files could not be moved.');
-	redirect();
+	return $fail ? 'One or more files could not be moved.' : $_FILES['file']['name'][0] . ' uploaded';
 }
 function doChmod($subject, $path, $mod){
 	if (isNull($mod))

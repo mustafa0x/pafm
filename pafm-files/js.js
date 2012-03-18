@@ -24,7 +24,7 @@ CPLanguages = {
 	sql : "SQL",
 	vbscript : "VBScript"
 };
-function ajax(url, method, data, handler) {
+function ajax(url, method, data, handler, upload, uploadProgressHandler) {
 	json2markup([
 	"div",
 	{
@@ -44,6 +44,7 @@ function ajax(url, method, data, handler) {
 	$("ajaxOverlay").style.height = document.body.offsetHeight + "px";
 	fade($("ajaxOverlay"), 0, 6, 25, "in");
 	var xhr = window.ActiveXObject ? new ActiveXObject("MSXML2.XMLHTTP.3.0") : new XMLHttpRequest();
+	uploadProgressHandler && xhr.upload.addEventListener("progress", uploadProgressHandler, false);
 	xhr.open(method, url, true);
 	xhr.onreadystatechange = function(){
 		if (xhr.readyState != 4)
@@ -65,7 +66,7 @@ function ajax(url, method, data, handler) {
 			+ "\nParameters: " + url);
 		xhr = null;
 	};
-	if (method.toLowerCase() == "post")
+	if (method.toLowerCase() == "post" && !upload)
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 	xhr.send(data);
 }
@@ -525,15 +526,16 @@ edit = {
 };
 upload = {
 	init : function(path, fsize) {
-		window.__FILEUPLOAD = 0;
 		var uploadInput = {
 			attributes : {
 				"type" : "file",
-				"name" : "file[0]"
+				"id" : "file_input",
+				"name" : "file[]",
+				"multiple" : ""
 			},
 			events : {
 				change : function(e) {
-					upload.chk((e.srcElement || e.target).value, path, e.target.name.substring(5, e.target.name.length-1));
+					upload.chk((e.srcElement || e.target).value, path);
 				}
 			}
 		};
@@ -560,84 +562,56 @@ upload = {
 				"input",
 				uploadInput
 			],
-			"input",
-			{
-				attributes : {
-					"type" : "button",
-					"value" : "+",
-					"id" : "addFileUpload",
-					"title" : "Add Upload"
-				},
-				events : {
-					click : function(e) {
-						window.__FILEUPLOAD++;
-						uploadInput.attributes.name = "file["+window.__FILEUPLOAD+"]";
-						json2markup([
-							"br",
-							{},
-							"input",
-							uploadInput
-						],
-						$("upload")); //should be added after last input - uh, isn't it?
-					}
-				}
-			},
-			"input", //should be disabled
-			{
-				attributes : {
-					"title" : "Ok",
-					"type" : "button",
-					"value" : "\u2713",
-					"id" : "uploadOk",
-				},
-				events : {
-					click : function(){
-						$("upload").submit();
-					}
-				}
-			},
 			"div",
 			{
 				attributes : {
-					"style" :  "font-weight:bold; font-size:small; margin-top:10px"
+					"id" : "response"
 				},
 				text : "php.ini upload limit: " + Math.floor(fsize/1048576) + " MB"
 			},
-			[
-				"br",
-				{}
-			]
 		]);
 	},
-	chk : function(subject, path, uploadInputNumber) {
-		var name = subject.split(/\\|\//g),
-			fileInput = document.getElementsByName("file["+ uploadInputNumber +"]")[0]
+	chk : function(subject, path) {
+		var name = subject.split(/\\|\//g);
 		name = name.push ? name[name.length-1] : name;
-		ajax("?do=fileExists&path="+path+"&subject=" + name, "get", null, function(response){
+		ajax("?do=fileExists&path="+path+"&subject=" + name, "GET", null, function(response){
 			if (response == "1"){
-				fileInput.disabled = true;
 				json2markup([
 					"input",
 					{
 						insert : "after",
 						attributes : {
-							"type" : "checkbox", 
+							"type" : "button", 
+							"value" : "Replace?"
 						},
 						events : {
-							change : function(e){
-								fileInput.disabled = !e.target.checked;
+							click : function(e){
+								upload.submit(path);
 							}
 						}
-					},
-					"b",
-					{
-						insert : "after",
-						text : " Overwrite?"
 					}
-				], fileInput);
+				], $("file_input"));
 			}
+			else
+				upload.submit(path);
 		});
-		//$("addFileUpload").click(); //causes empty file upload error
+	},
+	submit : function(path){
+		var uploadData = new FormData();
+		uploadData.append("file[]", $("file_input").files[0]);
+	
+		ajax("?do=upload&path=" + path, "POST", uploadData,
+			function (response) {
+				$("response").innerHTML = response;
+			},
+			true,
+			function (e){
+				if (e.lengthComputable) {
+					var percentage = Math.round((e.loaded * 100) / e.total);
+					$("response").innerHTML = "uploaded:" + percentage + "%";
+				}
+			}
+		);
+		location.reload(true); //TODO: auto-update file list
 	}
 };
-
