@@ -1,11 +1,11 @@
 /*
-	@filename:          js.js
-	@date:              February 16th, 2012
+	@filename: js.js
 
 	Copyright (C) 2007-2012 mustafa
 	This program is free software; you can redistribute it and/or modify it under the terms of the 
 	GNU General Public License as published by the Free Software Foundation.
 */
+
 function $(element) {
 	return document.getElementById(element);
 }
@@ -333,7 +333,7 @@ fOp = {
 edit = {
 	init : function(subject, path, syntax) {
 		var tempAr = [], key, ll, obj;
-		syntax = syntax || "text";
+		/*syntax = syntax || "text";
 		switch (syntax) {
 			case "js":
 				syntax = "javascript";
@@ -346,7 +346,7 @@ edit = {
 				break;
 			case "rb":
 				syntax = "ruby";
-		}
+		}*/
 		json2markup([
 			"div",
 			{
@@ -368,7 +368,7 @@ edit = {
 			{
 				attributes : {
 					"id" : "ta",
-					"class" : "codepress " + syntax,
+					//"class" : "codepress " + syntax,
 					"rows" : "30",
 					"cols" : "90"
 				}
@@ -409,7 +409,7 @@ edit = {
 					}
 				}
 			},
-			"input",
+			/*"input",
 			{
 				attributes : {
 					"type" : "button",
@@ -439,7 +439,7 @@ edit = {
 				{
 					text : "Loading"
 				}
-			],
+			],*/
 			"span",
 			{
 				attributes : {
@@ -453,7 +453,7 @@ edit = {
 				return false;
 			}
 		};
-		for (key in CPLanguages){
+		/*for (key in CPLanguages){
 			obj = {
 				attributes : {
 					"value" : key
@@ -463,12 +463,12 @@ edit = {
 			if (syntax == key)
 				obj.attributes.selected = "true";
 			tempAr.push("option", obj);
-		}
-		(ll = $("ll")).innerHTML = ""; //language list
-		json2markup(tempAr, ll);
+		}*/
+		//(ll = $("ll")).innerHTML = ""; //language list
+		//json2markup(tempAr, ll);
 		ajax("?do=readFile&path=" + path + "&subject=" + subject, "get", null, function(response){
 			$("ta").value = response;
-			if (!$("cpjs")) {
+			/*if (!$("cpjs")) {
 				json2markup(["script",
 				{
 					attributes : {
@@ -489,13 +489,13 @@ edit = {
 				}
 			}
 			else
-				CodePress.run();
+				CodePress.run();*/
 		});
 		location = "#header";
 	},
 	save : function(subject, path){
 		$("editMsg").innerHTML = null;
-		var postData = "data=" + encodeURIComponent(window.ta ? ta.getCode() : $("ta").value);
+		var postData = "data=" + encodeURIComponent(/*window.ta ? ta.getCode() :*/ $("ta").value);
 		ajax("?do=saveEdit&subject=" + subject + "&path=" + path, "post", postData, function(response){
 			$("editMsg").className = response != "Saved" ? "failed" : "succeeded"
 			$("editMsg").innerHTML = response;

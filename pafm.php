@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.0.5
-	@date:                    March 12th, 2012
+	@version:                 1.0.6
+	@date:                    March 18th, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -24,12 +24,15 @@ define('PASSWORD', 'auth'); // password
 //@string : auth
 
 /*
+ *
  * _relative_ path of root folder to manage.
  *
  * Setting this to a path outside of webroot works,
  * but your URIs will be broken.
  *
- * If set to an invalid directory, will do nothing.
+ * This directive will be ignored if set to an
+ * invalid directory.
+ *
  */
 define('ROOT', '.');
 //@string : .
@@ -45,7 +48,7 @@ define('SanatizePath', true); //Sanitize Path? i.e. remove ../, /, etc.
 define('MaxEditableSize', 1); //Max file size for Editing (in mega-bytes)
 //@int : 1
 
-define('VERSION', '1.0.5');
+define('VERSION', '1.0.6');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -58,7 +61,7 @@ $redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari
 
 $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')));
 $dirContents = array('folders' => array(), 'files' => array());
-$cpExts = array('asp', 'css', 'htm', 'html', 'js', 'java', 'pl', 'php', 'rb', 'sql', 'xsl'); //For CP Editing
+//$cpExts = array('asp', 'css', 'htm', 'html', 'js', 'java', 'pl', 'php', 'rb', 'sql', 'xsl'); //For CP Editing
 $footer = '<a href="http://github.com/mustafa0x/pafm" title="pafm @ github">pafm v'.VERSION.'</a> by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
 
 $do = $_GET['do'];
@@ -627,7 +630,7 @@ function getDirs($path){
 	}
 }
 function getFiles($path){
-	global $dirContents, $pathURL, $cpExts;
+	global $dirContents, $pathURL;//, $cpExts;
 	$filePath = $path == '.' ? '/' : '/' . $path.'/';
 	
 	$i = 0;
@@ -653,7 +656,7 @@ function getFiles($path){
 		((zipSupport() && $ext == 'zip')
 			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Extract '.$dirItemHTML.'" class="extract b"></a><!-- Extract '.$dirItemHTML." -->" //Zip extract $dirItem
 			: null) .
-		(filesize($fullPath) <= (1048576 * MaxEditableSize) ? (in_array($ext, $cpExts)
+		(filesize($fullPath) <= (1048576 * MaxEditableSize) ? (false
 			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.getext($dirItem).'\'); return false;" class="edit cp b"></a><!-- Edit '.$dirItemHTML." -->" //Edit $dirItem
 			: "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', null); return false;" class="edit b"></a><!-- Edit '.$dirItemHTML." -->") : null) . //Edit $dirItem
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a><!-- Chmod '.$dirItemHTML." -->" . //Chmod $dirItem
