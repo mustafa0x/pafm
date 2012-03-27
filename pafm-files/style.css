@@ -1,14 +1,9 @@
 /*
-	// License block \\
-	
-	   *   @filename:          style.css
-	   *   @date:              January 8th, 2012
+	@filename: style.css
 
-	   *   Copyright (C) 2007-2012 mustafa
-	   *   This program is free software; you can redistribute it and/or modify it under the terms of the 
-	   *   GNU General Public Licenseas published by the Free Software Foundation. See gpl-3.0.txt
-	   
-	\\ License block //
+	Copyright (C) 2007-2012 mustafa
+	This program is free software; you can redistribute it and/or modify it under the terms of the
+	GNU General Public License as published by the Free Software Foundation.
 */
 html, body {
 	height: 100%;
@@ -79,9 +74,6 @@ a:hover.b, .b a:hover, #add a img:hover {
 	font-size: .7em;
 	margin-top: .30em;
 }
-#info .mode {
-	right: 13.1em;
-}
 /*1st col: name*/
 .dir, .file {
 	position: relative;
@@ -99,38 +91,35 @@ a:hover.b, .b a:hover, #add a img:hover {
 .file {
 	padding-left: .30em;
 }
-/*middle cols: extension, filesize, mode*/
-.fs, .mode, .extension {
+
+/* middle cols: extension, filesize, mode, filemtime */
+.mode, .fs, .extension, .filemtime {
 	position: absolute;
-	right: 16.4em;
+	right: 15em;
 	font-family:calibri;
 	font-size: .7em;
 	margin-top: .30em;
 }
-.mode {
-	right: 13.4em;
+.fs {
+	margin-right: 3.2em;
 }
 .extension {
-	right: 22em;
+	margin-right: 8em;
 }
+.filemtime {
+	margin-right: 13.4em;
+}
+
 /*end cols: file operations*/
-.del, .edit, .rename, .move, .chmod, .extract {
+.del, .edit, .rename, .move, .copy, .chmod, .extract {
 	position: absolute;
 	margin-top: .11em;
-	min-width: .97em;
-	min-height: .97em;
+	min-width: 1em;
+	min-height: 1em;
 }
 .del {
 	background: url(images/del.png) no-repeat top right;
 	right: 2.22em;
-}
-.edit {
-	background: url(images/edit.png) no-repeat top right;
-	right: 6.67em;
-}
-.cp {
-	background: url(images/cp.png) no-repeat top right;
-	padding: 0 0 1px 1px;
 }
 .rename {
 	background: url(images/ren.gif) no-repeat top right;
@@ -142,11 +131,23 @@ a:hover.b, .b a:hover, #add a img:hover {
 }
 .chmod {
 	background: url(images/chmod.gif) no-repeat top right;
+	right: 6.55em;
+}
+.copy {
+	background: url(images/copy.png) no-repeat top right;
 	right: 5.56em;
 }
 .extract {
 	background: url(images/extract.png) no-repeat top right;
-	right: 7.78em;
+	right: 8.92em;
+}
+.edit {
+	background: url(images/edit.png) no-repeat top right;
+	right: 7.65em;
+}
+.cp {
+	background: url(images/cp.png) no-repeat top right;
+	padding: 0 0 1px 1px;
 }
 /*add file, add folder, upload file*/
 #add {

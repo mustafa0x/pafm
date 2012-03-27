@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.0.6
-	@date:                    March 18th, 2012
+	@version:                 1.2
+	@date:                    March 27th, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -48,7 +48,7 @@ define('SanatizePath', true); //Sanitize Path? i.e. remove ../, /, etc.
 define('MaxEditableSize', 1); //Max file size for Editing (in mega-bytes)
 //@int : 1
 
-define('VERSION', '1.0.6');
+define('VERSION', '1.2');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -120,6 +120,8 @@ if ($do) {
 			exit(doDelete($subject, $path));
 		case 'saveEdit':
 			exit(doSaveEdit($subject, $path));
+		case 'copy':
+			exit(doCopy($subject, $path));
 		case 'move':
 			exit(doMove($subject, $path));
 		case 'moveList':
@@ -128,6 +130,8 @@ if ($do) {
 			exit(file_exists($path .'/'. $subject));
 		case 'getfs':
 			exit(getFs($path .'/'. $subject));
+		case 'remoteCopy':
+			exit(doRemoteCopy($path));
 		case 'logout':
 			exit(doLogout());
 	}
@@ -380,36 +384,26 @@ function doExtract($subject, $path){
 function doReadFile($subject, $path){
 	return file_get_contents($path.'/'.$subject);
 }
-/*function doCopy($subject, $path){
+function doCopy($subject, $path){
 	if (isNull($subject, $path))
 		return refresh('Values could not be read');
-	
-	$fileN = 0;
-	$newName = "";
-	$fileName = "";
-	$isFile = true;
-	if(!is_file($path ."/". $subject))
-		$isFile = false;
-	if($isFile){
-		$extension = end(explode(".", $subject));
-		$fileName = implode(".", array_slice(explode(".", $subject), 0, -1));
-	}else{
-		$fileName = $subject;
-	}
-	do{
-		$newName = $fileName."_copy";
-		if($fileN > 0){
-			$newName .= "(".$fileN.")";
-		}
-		if($isFile)
-			$newName .= ".".$extension;
-		$fileN++;
-	}while(is_file($path . '/' . $newName));
-	
-	if(!$fm->copy($path . '/' . $subject, $path.'/'.$newName))
-		return refresh($subject.' could not be copied to '.$newName);
+	$name = $_POST['name'];
+	//TODO: more var checks
+
+	if(!copy($path . '/' . $subject, $path.'/'.$name))
+		return refresh($subject.' could not be copied to '.$name);
 	redirect();
-}*/
+}
+function doRemoteCopy($path, $location, $name){
+	$location = $_POST['location'];
+	$name = $_POST['name'];
+	if (isNull($path, $location, $name))
+		return refresh('Values could not be read');
+	
+	if(!copy($location, $path.'/'.$name)) //TODO: more checks of what location is
+		return refresh($location . ' could not be copied to '. ($path . '/' . $name));
+	redirect();
+}
 function doMove($subject, $path){
 	global $pathHTML, $subjectHTML, $to, $toHTML;
 	if (isNull($subject, $path, $to))
@@ -507,7 +501,7 @@ function moveList($subject, $path){
 					e.preventDefault ? e.preventDefault() : e.returnValue = false;
 				}
 			},
-			text : "' . $crumbs[$i] . '",
+			text : "' . ($i ? $crumbs[$i] : 'root') . '",
 			postText : " / "
 		}';
 	}
@@ -621,6 +615,7 @@ function getDirs($path){
 		$mod = getmod($path.'/'.$dirItem);
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="?path=' . escape($fullPath) . '" title="' . $dirItemHTML . '" class="dir">'.$dirItemHTML.'</a><!-- '.$dirItemHTML." -->" .
+		"\n\t" . '<span class="filemtime" title="file modified time">' . date('c', filemtime($fullPath)) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a><!-- Chmod '.$dirItemHTML." -->" . //Chmod $dirItem
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a><!-- Move '.$dirItemHTML." -->" . //Move $dirItem
@@ -652,6 +647,7 @@ function getFiles($path){
 		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a><!-- '.$dirItemHTML." -->" .
 		"\n\t" . '<span class="fs"  title="file size">' . getfs($path.'/'.$dirItem) . '</span>' .
 		"\n\t" . '<span class="extension" title="file extension">' . $ext . '</span>' .
+		"\n\t" . '<span class="filemtime" title="file modified time">' . date('c', filemtime($fullPath)) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		((zipSupport() && $ext == 'zip')
 			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Extract '.$dirItemHTML.'" class="extract b"></a><!-- Extract '.$dirItemHTML." -->" //Zip extract $dirItem
@@ -661,6 +657,7 @@ function getFiles($path){
 			: "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', null); return false;" class="edit b"></a><!-- Edit '.$dirItemHTML." -->") : null) . //Edit $dirItem
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a><!-- Chmod '.$dirItemHTML." -->" . //Chmod $dirItem
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a><!-- Move '.$dirItemHTML." -->" . //Move $dirItem
+		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a><!-- copy '.$dirItemHTML." -->" . //copy $dirItem
 		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemURL.'\', \''.$pathURL.'\'); return false;" class="rename b"></a><!-- Rename '.$dirItemHTML.' -->' . //Rename $dirItem
 		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a><!-- Delete '.$dirItemHTML." -->" . //Delete $dirItem
 		"\n  </li>\n";
@@ -692,9 +689,10 @@ function getFiles($path){
 <ul id="info">
   <li>
     <span id="file">name</span>
-    <span class="fs">size</span>
     <span class="extension">extension</span>
+    <span class="filemtime">last modified</span>
     <span class="mode">mode</span>
+    <span class="fs">size</span>
     <span id="fileop">file operations</span>
   </li>
 </ul>
@@ -717,6 +715,7 @@ getFiles($path);
 </div>
 
 <div id="add" class="b">
+  <a href="#" title="Remote Copy File" onclick="fOp.remoteCopy('<?php echo $pathURL; ?>'); return false;"><img src="pafm-files/images/remotecopy.png" alt="Remote Copy"></a>
   <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="pafm-files/images/addfile.gif" alt="Create File"></a>
   <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="pafm-files/images/addfolder.gif" alt="Create Folder"></a>
   <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="pafm-files/images/upload.gif" alt="Upload File"></a>

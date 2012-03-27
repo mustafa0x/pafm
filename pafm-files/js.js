@@ -2,7 +2,7 @@
 	@filename: js.js
 
 	Copyright (C) 2007-2012 mustafa
-	This program is free software; you can redistribute it and/or modify it under the terms of the 
+	This program is free software; you can redistribute it and/or modify it under the terms of the
 	GNU General Public License as published by the Free Software Foundation.
 */
 
@@ -85,7 +85,7 @@ function json2markup(json, path) {
 							el.style.cssText = json[i].attributes[attrib];
 							break;
 						case "for":
-							el.htmlFor = json[i].attributes[attrib]
+							el.htmlFor = json[i].attributes[attrib];
 							break;
 						default:
 							el.setAttribute(attrib, json[i].attributes[attrib]);
@@ -312,6 +312,36 @@ fOp = {
 			]
 		]);
 	},
+	copy : function(subject, path){
+		popup.init("Copy " + unescape(subject) + ":", [
+			"form",
+			{
+				attributes : {
+					"method" : "post",
+					"action" : "?do=copy&subject=" + subject + "&path=" + path
+				}
+			},
+			[
+				"input",
+				{
+					attributes : {
+						"title" : "copy to",
+						"type" : "text",
+						"name" : "name",
+						"value" : "copy-" + subject
+					}
+				},
+				"input",
+				{
+					attributes : {
+						"title" : "Ok",
+						"type" : "submit",
+						"value" : "\u2713"
+					}
+				}
+			]
+		]);
+	},
 	moveList : function(subject, path, to){
 		ajax(("?do=moveList&subject=" + subject + "&path=" + path + "&to=" + to), "get", null, function (response) {
 			if (!$("popup"))
@@ -328,25 +358,65 @@ fOp = {
 				popupEl.style.marginLeft = "-" + parseInt(popupEl.offsetWidth) / 2 + "px";
 			}
 		});
+	},
+	remoteCopy : function(path){
+		popup.init("Remote Copy:", [
+			"form",
+			{
+				attributes : {
+					"method" : "post",
+					"action" : "?do=remoteCopy&path=" + path
+				}
+			},
+			[
+				"legend",
+				{
+					text : "Location: "
+				},
+				[
+					"input",
+					{
+						attributes : {
+							"title" : "Remote Copy",
+							"type" : "text",
+							"name" : "location"
+						},
+						events : {
+							change : function(e){
+								$('remoteCopyName').value = this.value.replace(/\\/g,'/').replace(/.*\//, '');
+							}
+						}
+					}
+				],
+				"legend",
+				{
+					text : "Name: "
+				},
+				[
+					"input",
+					{
+						attributes : {
+							"id" : "remoteCopyName",
+							"title" : "Name",
+							"type" : "text",
+							"name" : "name"
+						}
+					}
+				],
+				"input",
+				{
+					attributes : {
+						"title" : "Ok",
+						"type" : "submit",
+						"value" : "\u2713"
+					}
+				}
+			]
+		]);
 	}
 };
 edit = {
 	init : function(subject, path, syntax) {
-		var tempAr = [], key, ll, obj;
-		/*syntax = syntax || "text";
-		switch (syntax) {
-			case "js":
-				syntax = "javascript";
-				break;
-			case "htm":
-				syntax = "html";
-				break;
-			case "pl":
-				syntax = "perl";
-				break;
-			case "rb":
-				syntax = "ruby";
-		}*/
 		json2markup([
 			"div",
 			{
@@ -368,7 +438,6 @@ edit = {
 			{
 				attributes : {
 					"id" : "ta",
-					//"class" : "codepress " + syntax,
 					"rows" : "30",
 					"cols" : "90"
 				}
@@ -409,37 +478,6 @@ edit = {
 					}
 				}
 			},
-			/*"input",
-			{
-				attributes : {
-					"type" : "button",
-					"value" : "Toggle CodePress"
-				},
-				events : {
-					click : function(){
-						ta.toggleEditor();
-					}
-				}
-			},
-			"select",
-			{
-				attributes : {
-					"id" : "ll",
-					"style" : "margin-left: 1px;"
-				},
-				events : {
-					change : function(e){
-						var el = e.srcElement || e.target;
-						ta.setLanguage(el[el.selectedIndex].value);
-					}
-				}
-			},
-			[
-				"option",
-				{
-					text : "Loading"
-				}
-			],*/
 			"span",
 			{
 				attributes : {
@@ -453,49 +491,14 @@ edit = {
 				return false;
 			}
 		};
-		/*for (key in CPLanguages){
-			obj = {
-				attributes : {
-					"value" : key
-				},
-				text : CPLanguages[key]
-			};
-			if (syntax == key)
-				obj.attributes.selected = "true";
-			tempAr.push("option", obj);
-		}*/
-		//(ll = $("ll")).innerHTML = ""; //language list
-		//json2markup(tempAr, ll);
 		ajax("?do=readFile&path=" + path + "&subject=" + subject, "get", null, function(response){
 			$("ta").value = response;
-			/*if (!$("cpjs")) {
-				json2markup(["script",
-				{
-					attributes : {
-						"src" : "pafm-files/codepress/codepress.js",
-						"type" : "text/javascript",
-						"id" : "cpjs"
-					},
-					events : {
-						load : function(){
-							if (!/webkit/.test(navigator.userAgent.toLowerCase()))
-								CodePress.run();
-						}
-					}
-				}], document.getElementsByTagName("head")[0]);
-				$("cpjs").onreadystatechange = function(){ //ie
-					if (this.readyState == "complete")
-						CodePress.run();
-				}
-			}
-			else
-				CodePress.run();*/
 		});
 		location = "#header";
 	},
 	save : function(subject, path){
 		$("editMsg").innerHTML = null;
-		var postData = "data=" + encodeURIComponent(/*window.ta ? ta.getCode() :*/ $("ta").value);
+		var postData = "data=" + encodeURIComponent($("ta").value);
 		ajax("?do=saveEdit&subject=" + subject + "&path=" + path, "post", postData, function(response){
 			$("editMsg").className = response != "Saved" ? "failed" : "succeeded"
 			$("editMsg").innerHTML = response;

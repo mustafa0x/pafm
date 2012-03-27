@@ -32,6 +32,12 @@ then scroll down till you see **/\*\* configuration \*\*/**
 
 ## Recent Changes
 
+### 1.2:
+* File Copying
+* Remote Copy
+* File Last Modifed Column
+
+### 1.0.6:
 * Removed CodePress
 * ROOT directive changes
 * Display version number
@@ -39,13 +45,12 @@ then scroll down till you see **/\*\* configuration \*\*/**
 
 ## Upcoming
 
-* HTML5 uploading
 * CodeMirror
-* File Copying
+* HTML5 uploading
 
 ## Wishlist
 
-* PHP Shell
-* Hash file operations (e.g. #edit&file=foo.bar)
 * Updating functionality
 * One-file release
+* PHP Shell
+* Hash file operations (e.g. #edit&file=foo.bar)
