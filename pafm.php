@@ -2,7 +2,7 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.2
+	@version:                 1.3
 	@date:                    March 27th, 2012
 
 	@author:                  mustafa
@@ -13,7 +13,7 @@
 	@browser requirements:    modern browser
 
 	Copyright (C) 2007-2012 mustafa
-	This program is free software; you can redistribute it and/or modify it under the terms of the 
+	This program is free software; you can redistribute it and/or modify it under the terms of the
 	GNU General Public License as published by the Free Software Foundation. See COPYING
 */
 
@@ -48,7 +48,7 @@ define('SanatizePath', true); //Sanitize Path? i.e. remove ../, /, etc.
 define('MaxEditableSize', 1); //Max file size for Editing (in mega-bytes)
 //@int : 1
 
-define('VERSION', '1.2');
+define('VERSION', '1.3');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -322,7 +322,7 @@ function doUpload($path){
 		if ($_FILES['file']['error'][$i]) {
 			if ($uploadErrors[$_FILES['file']['error'][$i]])
 				return refresh($uploadErrors[$_FILES['file']['error'][$i]] . ' Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>');
-			else 
+			else
 				return refresh('Unknown error occurred. Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>');
 		}
 
@@ -397,7 +397,7 @@ function doRemoteCopy($path, $location, $name){
 	$name = $_POST['name'];
 	if (isNull($path, $location, $name))
 		return refresh('Values could not be read');
-	
+
 	if(!copy($location, $path.'/'.$name)) //TODO: more checks of what location is
 		return refresh($location . ' could not be copied to '. ($path . '/' . $name));
 	redirect();
@@ -409,7 +409,7 @@ function doMove($subject, $path){
 
 	if ($path == $to)
 		return refresh('The source and destination are the same');
-		
+
 	if (array_search($subject, explode('/', $to)) == array_search($subject, explode('/', $path . '/' . $subject)))
 		return refresh($toHTML . ' is a subfolder of ' . $pathHTML);
 
@@ -503,7 +503,7 @@ function moveList($subject, $path){
 			postText : " / "
 		}';
 	}
-	
+
 	$return .= '
 		],
 		"ul",
@@ -601,7 +601,7 @@ function getDirs($path){
 	$l = count($dirContents['folders']);
 
 	if ($l)
-		sort($dirContents['folders']);
+		sort($dirContents['folders']); //TODO: Better sort (below also)
 	else
 		return;
 
@@ -625,7 +625,7 @@ function getDirs($path){
 function getFiles($path){
 	global $dirContents, $pathURL;//, $cpExts;
 	$filePath = $path == '.' ? '/' : '/' . $path.'/';
-	
+
 	$i = 0;
 	$l = count($dirContents['files']);
 

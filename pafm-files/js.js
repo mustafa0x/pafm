@@ -9,21 +9,7 @@
 function $(element) {
 	return document.getElementById(element);
 }
-var CPLanguages, popup, fOp, edit, upload; // global objects
-CPLanguages = {
-	csharp : "C#",
-	css : "CSS",
-	generic : "Generic",
-	html : "HTML",
-	java : "Java",
-	javascript : "JavaScript",
-	perl : "Perl",
-	ruby : "Ruby",
-	php : "PHP",
-	text : "Text",
-	sql : "SQL",
-	vbscript : "VBScript"
-};
+var popup, fOp, edit, upload; // global objects
 function ajax(url, method, data, handler, upload, uploadProgressHandler) {
 	json2markup([
 	"div",
@@ -60,7 +46,7 @@ function ajax(url, method, data, handler, upload, uploadProgressHandler) {
 				handler(xhr.responseText);
 		}
 		else
-			alert("AJAX request unsuccessful." 
+			alert("AJAX request unsuccessful."
 			+ "\nStatus Code: " + xhr.status
 			+ "\nStatus Text: " + xhr.statusText
 			+ "\nParameters: " + url);
@@ -581,7 +567,7 @@ upload = {
 					{
 						insert : "after",
 						attributes : {
-							"type" : "button", 
+							"type" : "button",
 							"value" : "Replace?"
 						},
 						events : {
@@ -599,7 +585,7 @@ upload = {
 	submit : function(path){
 		var uploadData = new FormData();
 		uploadData.append("file[]", $("file_input").files[0]);
-	
+
 		ajax("?do=upload&path=" + path, "POST", uploadData,
 			function (response) {
 				$("response").innerHTML = response;

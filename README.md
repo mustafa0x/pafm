@@ -32,6 +32,9 @@ then scroll down till you see **/\*\* configuration \*\*/**
 
 ## Recent Changes
 
+### 1.3:
+* HTML5 uploading
+
 ### 1.2:
 * File Copying
 * Remote Copy
@@ -46,7 +49,6 @@ then scroll down till you see **/\*\* configuration \*\*/**
 ## Upcoming
 
 * CodeMirror
-* HTML5 uploading
 
 ## Wishlist
 
