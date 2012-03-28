@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.3
-	@date:                    March 27th, 2012
+	@version:                 1.3.1
+	@date:                    March 29th, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -48,7 +48,7 @@ define('SanatizePath', true); //Sanitize Path? i.e. remove ../, /, etc.
 define('MaxEditableSize', 1); //Max file size for Editing (in mega-bytes)
 //@int : 1
 
-define('VERSION', '1.3');
+define('VERSION', '1.3.1');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -188,7 +188,7 @@ function getMod($subject){
 }
 function redirect(){
 	global $redir;
-	header('Location: ' . $redir);
+	@header('Location: ' . $redir);
 }
 function refresh($message, $speed = 2){
 	global $redir;
@@ -392,7 +392,7 @@ function doCopy($subject, $path){
 		return refresh($subject.' could not be copied to '.$name);
 	redirect();
 }
-function doRemoteCopy($path, $location, $name){
+function doRemoteCopy($path){
 	$location = $_POST['location'];
 	$name = $_POST['name'];
 	if (isNull($path, $location, $name))

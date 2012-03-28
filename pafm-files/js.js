@@ -9,39 +9,43 @@
 function $(element) {
 	return document.getElementById(element);
 }
-var popup, fOp, edit, upload; // global objects
+var popup, fOp, edit, upload, __AJAX_ACTIVE; // global objects
 function ajax(url, method, data, handler, upload, uploadProgressHandler) {
-	json2markup([
-	"div",
-	{
-		attributes : {
-			"id" : "ajaxOverlay"
-		}
-	},
-	"img",
-	{
-		attributes : {
-			"src" : "pafm-files/images/ajax.gif",
-			"id" : "ajaxImg",
-			"title" : "Loading",
-			"alt" : "Loading"
-		}
-	}], document.body);
-	$("ajaxOverlay").style.height = document.body.offsetHeight + "px";
-	fade($("ajaxOverlay"), 0, 6, 25, "in");
+	__AJAX_ACTIVE = true;
+	if (!upload) {
+		json2markup([
+		"div",
+		{
+			attributes : {
+				"id" : "ajaxOverlay"
+			}
+		},
+		"img",
+		{
+			attributes : {
+				"src" : "pafm-files/images/ajax.gif",
+				"id" : "ajaxImg",
+				"title" : "Loading",
+				"alt" : "Loading"
+			}
+		}], document.body);
+		$("ajaxOverlay").style.height = document.body.offsetHeight + "px";
+		fade($("ajaxOverlay"), 0, 6, 25, "in");
+	}
 	var xhr = window.ActiveXObject ? new ActiveXObject("MSXML2.XMLHTTP.3.0") : new XMLHttpRequest();
 	uploadProgressHandler && xhr.upload.addEventListener("progress", uploadProgressHandler, false);
 	xhr.open(method, url, true);
 	xhr.onreadystatechange = function(){
 		if (xhr.readyState != 4)
 			return;
-		fade($("ajaxOverlay"), 6, 0, 25, "out", function(){
+		__AJAX_ACTIVE = false;
+		upload || fade($("ajaxOverlay"), 6, 0, 25, "out", function(){
 			document.body.removeChild($("ajaxOverlay"));
 			document.body.removeChild($("ajaxImg"));
 		});
 		if (xhr.status == 200 || xhr.statusText == "OK") {
 			if (xhr.responseText == "Please refresh the page and login")
-				alert("Please refresh the page and login");
+				alert(xhr.responseText);
 			else
 				handler(xhr.responseText);
 		}
@@ -199,6 +203,8 @@ popup = {
 		};
 	},
 	close : function() {
+		if (__AJAX_ACTIVE)
+			return;
 		if ($("popup")){
 			var popOverlayEl = $("popOverlay");
 			fade(popOverlayEl, 6, 0, 25, "out", function(){
@@ -589,6 +595,7 @@ upload = {
 		ajax("?do=upload&path=" + path, "POST", uploadData,
 			function (response) {
 				$("response").innerHTML = response;
+				location.reload(true); //TODO: auto-update file list
 			},
 			true,
 			function (e){
@@ -598,6 +605,5 @@ upload = {
 				}
 			}
 		);
-		location.reload(true); //TODO: auto-update file list
 	}
 };
