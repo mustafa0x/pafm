@@ -376,7 +376,7 @@ fOp = {
 						},
 						events : {
 							change : function(e){
-								$('remoteCopyName').value = this.value.replace(/\\/g,'/').replace(/.*\//, '');
+								$('remoteCopyName').value = this.value.substring(this.value.lastIndexOf('/') + 1);
 							}
 						}
 					}

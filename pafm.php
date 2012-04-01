@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.3.1
-	@date:                    March 29th, 2012
+	@version:                 1.4
+	@date:                    March 31th, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -21,7 +21,6 @@
 /** configuration **/
 
 define('PASSWORD', 'auth'); // password
-//@string : auth
 
 /*
  *
@@ -35,20 +34,36 @@ define('PASSWORD', 'auth'); // password
  *
  */
 define('ROOT', '.');
-//@string : .
 
 /** /configuration **/
 
 define('AUTHORIZE', true);
-//@bool : true
+/*
+ * Removes:
+ *  - leading /
+ *  - trailing /
+ *  - ..
+ * 
+ * Checks for:
+ *  - empty path
+ *  - //
+ */
+define('SanatizePath', true);
 
-define('SanatizePath', true); //Sanitize Path? i.e. remove ../, /, etc.
-//@bool : false
+/*
+ * files larger than this are not editable
+ *
+ * the unit is mega-bytes
+ */
+define('MaxEditableSize', 1);
 
-define('MaxEditableSize', 1); //Max file size for Editing (in mega-bytes)
-//@int : 1
+/*
+ * Makefile
+ *   1 -> 0
+ */
+define('DEV', 1);
 
-define('VERSION', '1.3.1');
+define('VERSION', '1.4');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -57,13 +72,29 @@ $pathURL = escape($path);
 $pathHTML = htmlspecialchars($path);
 
 $pafm = basename($_SERVER['SCRIPT_NAME']);
-$redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari
+$redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari (still relavent?)
 
 $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')));
 $dirContents = array('folders' => array(), 'files' => array());
-//$cpExts = array('asp', 'css', 'htm', 'html', 'js', 'java', 'pl', 'php', 'rb', 'sql', 'xsl'); //For CP Editing
 $footer = '<a href="http://github.com/mustafa0x/pafm" title="pafm @ github">pafm v'.VERSION.'</a> by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
 
+/*
+ * resource retrieval
+ */
+$_R_HEADERS = array('js' => 'text/javascript', 'css' => 'text/css', 'png' => 'image/png', 'gif' => 'image/gif');
+$_R = array();
+
+if (!DEV && isset($_GET['r'])){
+	$r = $_GET['r'];
+	$is_image = strpos($r, '.') !== false;
+	//TODO: cache headers
+	header('Content-Type: ' . $_R_HEADERS[$is_image ? getExt($r) : $r]);
+	exit($is_image ? base64_decode($_R[$r]) : $_R[$r]); //security concern?
+}
+
+/*
+ * init
+ */
 $do = $_GET['do'];
 
 if (AUTHORIZE) {
@@ -75,7 +106,6 @@ if (AUTHORIZE) {
 
 if (is_dir(ROOT))
 	chdir(ROOT);
-	//exit('ROOT (' . htmlspecialchars(ROOT) . ') is not a valid directory');
 
 if (!is_dir($path))
 	exit('path (' . $pathHTML . ') is not a valid directory');
@@ -667,8 +697,8 @@ function getFiles($path){
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
-  <style type="text/css">@import "pafm-files/style.css";</style>
-  <script src="pafm-files/js.js" type="text/javascript"></script><!-- pafm-files/js.js for dev -->
+  <style type="text/css">@import "<?php echo DEV ? "pafm-files/style.css" : "?r=css";?>";</style>
+  <script src="<?php echo DEV ? "pafm-files/js.js" : "?r=js";?>" type="text/javascript"></script>
 </head>
 <body>
 
@@ -713,10 +743,10 @@ getFiles($path);
 </div>
 
 <div id="add" class="b">
-  <a href="#" title="Remote Copy File" onclick="fOp.remoteCopy('<?php echo $pathURL; ?>'); return false;"><img src="pafm-files/images/remotecopy.png" alt="Remote Copy"></a>
-  <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="pafm-files/images/addfile.gif" alt="Create File"></a>
-  <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="pafm-files/images/addfolder.gif" alt="Create Folder"></a>
-  <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="pafm-files/images/upload.gif" alt="Upload File"></a>
+  <a href="#" title="Remote Copy File" onclick="fOp.remoteCopy('<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/remotecopy.png" alt="Remote Copy"></a>
+  <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/addfile.gif" alt="Create File"></a>
+  <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/addfolder.gif" alt="Create Folder"></a>
+  <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/upload.gif" alt="Upload File"></a>
 </div>
 
 <div id="footer">

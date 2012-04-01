@@ -2,16 +2,15 @@
 
 ## Installation
 
-Open pafm.php with your code editor of choice
-then scroll down till you see **/\*\* configuration \*\*/**
+Open pafm.php with your code editor of choice (note that you can change the password of pafm *using* pafm)
+then scroll down till you see `/** configuration **/`
 
-* PASSWORD is, obviously, the password for PAFM.
+* `PASSWORD` is, obviously, the password for PAFM.
 
-* ROOT is the path to the directory you want to
-  manage.
+* `ROOT` is the path to the directory you want to
+  manage (this is done by `chdir`).
   *  E.g. if you want to manage your home directoy,
-  change ROOT to **'/home/'**. I usually set this to **'..'**,
-  the directory "above" the pafm folder.
+  change `ROOT` to `/home`
 
 ## Screenshots
 
@@ -32,15 +31,20 @@ then scroll down till you see **/\*\* configuration \*\*/**
 
 ## Recent Changes
 
-### 1.3:
+### 1.4
+*   One-file release
+
+    > This is made possible by [Makefile](https://github.com/mustafa0x/pafm/blob/master/Makefile), which combines the project into a single file, for portablility.
+
+### 1.3
 * HTML5 uploading
 
-### 1.2:
+### 1.2
 * File Copying
 * Remote Copy
 * File Last Modifed Column
 
-### 1.0.6:
+### 1.0.6
 * Removed CodePress
 * ROOT directive changes
 * Display version number
@@ -53,6 +57,5 @@ then scroll down till you see **/\*\* configuration \*\*/**
 ## Wishlist
 
 * Updating functionality
-* One-file release
 * PHP Shell
-* Hash file operations (e.g. #edit&file=foo.bar)
+* Hash file operations (e.g. `#edit&file=foo.bar`)
