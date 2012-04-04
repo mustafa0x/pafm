@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.4
-	@date:                    March 31th, 2012
+	@version:                 1.4.1
+	@date:                    April 2nd, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -63,7 +63,7 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.4');
+define('VERSION', '1.4.1');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -572,7 +572,7 @@ function moveList($subject, $path){
 				"img",
 				{
 					attributes : {
-						"src" : "pafm-files/images/odir.png",
+						"src" : "'. (DEV ? 'pafm-files/' : '?r=') .'images/odir.png",
 						"title" : "Open '.$dirItemHTML.'"
 					}
 				}
@@ -751,6 +751,13 @@ getFiles($path);
 
 <div id="footer">
   <p><?php echo $footer; ?></p>
+  <?php
+  	if (PASSWORD == 'auth'):
+  ?>
+  	<span>change your password</span>
+  <?php
+  	endif;
+  ?>
 </div>
 
 </body>

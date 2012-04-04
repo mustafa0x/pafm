@@ -527,7 +527,7 @@ upload = {
 			},
 			events : {
 				change : function(e) {
-					upload.chk((e.srcElement || e.target).value, path);
+					upload.chk(e.target.files[0].name, path);
 				}
 			}
 		};

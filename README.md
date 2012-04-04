@@ -31,31 +31,36 @@ then scroll down till you see `/** configuration **/`
 
 ## Recent Changes
 
+### 1.4.1
+  * Fixed upload-check bug in Chrome
+  * Fixed bug with move list directory icon
+  * Added warning when the password is default
+
 ### 1.4
-*   One-file release
+  *   One-file release
 
     > This is made possible by [Makefile](https://github.com/mustafa0x/pafm/blob/master/Makefile), which combines the project into a single file, for portablility.
 
 ### 1.3
-* HTML5 uploading
+  * HTML5 uploading
 
 ### 1.2
-* File Copying
-* Remote Copy
-* File Last Modifed Column
+  * File Copying
+  * Remote Copy
+  * File Last Modifed Column
 
 ### 1.0.6
-* Removed CodePress
-* ROOT directive changes
-* Display version number
-* Multiple file upload
+  * Removed CodePress
+  * ROOT directive changes
+  * Display version number
+  * Multiple file upload
 
 ## Upcoming
 
-* CodeMirror
+  * CodeMirror
 
 ## Wishlist
 
-* Updating functionality
-* PHP Shell
-* Hash file operations (e.g. `#edit&file=foo.bar`)
+  * Updating functionality
+  * PHP Shell
+  * Hash file operations (e.g. `#edit&file=foo.bar`)
