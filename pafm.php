@@ -107,13 +107,19 @@ if (AUTHORIZE) {
 if (is_dir(ROOT))
 	chdir(ROOT);
 
-if (!is_dir($path))
-	exit('path (' . $pathHTML . ') is not a valid directory');
+if (!is_dir($path)) {
+	if ($path != '.') {
+		header('Location: ?path=.');
+		exit();
+	}
+	else
+		echo 'path (' . $pathHTML . ') can\'t be read'; //exit shouldn't be necessary
+}
 
 if(!is_readable($path)) {
 	chmod($path, 0777);
 	if (!is_readable($path))
-		exit('path (' . $pathHTML . ') can\'t be read');
+		echo 'path (' . $pathHTML . ') can\'t be read';
 }
 
 /** clean variables **/
@@ -627,27 +633,29 @@ function getDirContents($path){
 //list directory contents functions
 function getDirs($path){
 	global $dirContents, $pathURL;
-	$i = 0;
+
 	$l = count($dirContents['folders']);
 
-	if ($l)
-		sort($dirContents['folders']); //TODO: Better sort (below also)
-	else
+	if (!$l)
 		return;
 
-	for (; $i < $l; $i++){
+	sort($dirContents['folders']); //TODO: Better sort (below also)
+
+	for ($i = 0; $i < $l; $i++){
 		$dirItem = $dirContents['folders'][$i];
 		$dirItemURL = escape($dirItem);
 		$dirItemHTML = htmlspecialchars($dirItem);
 		$fullPath = $path.'/'.$dirItem;
+
 		$mod = getmod($path.'/'.$dirItem);
+
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="?path=' . escape($fullPath) . '" title="' . $dirItemHTML . '" class="dir">'.$dirItemHTML.'</a><!-- '.$dirItemHTML." -->" .
 		"\n\t" . '<span class="filemtime" title="file modified time">' . date('c', filemtime($fullPath)) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a><!-- Chmod '.$dirItemHTML." -->" . //Chmod $dirItem
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a><!-- Move '.$dirItemHTML." -->" . //Move $dirItem
-		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemURL.'\', \''.$pathURL.'\'); return false;" class="rename b"></a><!-- Rename '.$dirItemHTML." -->" . //Rename $dirItem
+		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a><!-- Rename '.$dirItemHTML." -->" . //Rename $dirItem
 		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a><!-- Delete '.$dirItemHTML." -->" . //Delete $dirItem
 		"\n  </li>\n";
 	}
@@ -656,21 +664,22 @@ function getFiles($path){
 	global $dirContents, $pathURL;//, $cpExts;
 	$filePath = $path == '.' ? '/' : '/' . $path.'/';
 
-	$i = 0;
 	$l = count($dirContents['files']);
 
-	if ($l)
-		sort($dirContents['files']);
-	else
+	if (!$l)
 		return;
 
-	for (; $i < $l; $i++){
+	sort($dirContents['files']);
+
+	for ($i = 0; $i < $l; $i++){
 		$dirItem = $dirContents['files'][$i];
 		$dirItemURL = escape($dirItem);
 		$dirItemHTML = htmlspecialchars($dirItem);
 		$fullPath = $path.'/'.$dirItem;
-		$ext = getext($dirItem);
+
 		$mod = getmod($fullPath);
+		$ext = getext($dirItem);
+
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a><!-- '.$dirItemHTML." -->" .
 		"\n\t" . '<span class="fs"  title="file size">' . getfs($path.'/'.$dirItem) . '</span>' .
@@ -686,7 +695,7 @@ function getFiles($path){
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a><!-- Chmod '.$dirItemHTML." -->" . //Chmod $dirItem
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a><!-- Move '.$dirItemHTML." -->" . //Move $dirItem
 		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a><!-- copy '.$dirItemHTML." -->" . //copy $dirItem
-		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemURL.'\', \''.$pathURL.'\'); return false;" class="rename b"></a><!-- Rename '.$dirItemHTML.' -->' . //Rename $dirItem
+		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a><!-- Rename '.$dirItemHTML.' -->' . //Rename $dirItem
 		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a><!-- Delete '.$dirItemHTML." -->" . //Delete $dirItem
 		"\n  </li>\n";
 	}

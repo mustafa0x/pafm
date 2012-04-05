@@ -34,6 +34,7 @@ ${IMAGES_LIST}: ;
 	printf "\n\$$_R['images/$@'] = '%s';" "`cat ${IMAGES_PATH}/$@ | base64 -w0`" >> ${TMP}
 
 zip: ${PAFM_BUILD}
+	rm ${BUILD}/pafm-${VERSION}.zip
 	zip -j ${BUILD}/pafm-${VERSION}.zip ${PAFM_BUILD}
 	@printf "\nZipped\n"
 #TODO:
