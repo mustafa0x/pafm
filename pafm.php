@@ -2,7 +2,7 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.5
+	@version:                 1.5.1
 	@date:                    April 6th, 2012
 
 	@author:                  mustafa
@@ -66,7 +66,8 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.5');
+define('VERSION', '1.5.1');
+
 define('CODEMIRROR_PATH', '_codemirror');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
@@ -83,6 +84,11 @@ $codeMirrorModes = array("js", "php", "css", "py", "rb"); //TODO: complete array
 $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')));
 $dirContents = array('folders' => array(), 'files' => array());
 $footer = '<a href="http://github.com/mustafa0x/pafm" title="pafm @ github">pafm v'.VERSION.'</a> by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
+
+/*
+ * A warning is issued when TZ is not set
+ */
+date_default_timezone_set('America/Chicago');
 
 /*
  * resource retrieval
