@@ -9,7 +9,15 @@
 function $(element) {
 	return document.getElementById(element);
 }
-var popup, fOp, edit, upload, __AJAX_ACTIVE; // global objects
+var popup, fOp, edit, upload, __AJAX_ACTIVE,
+	__CODEMIRROR, __CODEMIRROR_MODE, __LOAD_COUNT = 0, __CODEMIRROR_PATH = "_codemirror",
+	__CODEMIRROR_MODES = {
+		"js": "javascript",
+		"py": "python",
+		"rb": "ruby"
+		//TODO: complete list
+	};
+
 function ajax(url, method, data, handler, upload, uploadProgressHandler) {
 	__AJAX_ACTIVE = true;
 	if (!upload) {
@@ -60,6 +68,31 @@ function ajax(url, method, data, handler, upload, uploadProgressHandler) {
 		xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 	xhr.send(data);
 }
+
+/*
+ * Structure:
+ *
+ * [
+ * 	"element",
+ *	{
+ *		attributes:{},
+ *		events:{},
+ *		style: {},
+ *		text: ""
+ *	}
+ *	[
+ *		"childElement",
+ *		{
+ *			...
+ *		}
+ *		[
+ *			...
+ *		]
+ *	],
+ *	"..."
+ * ]
+ *
+ */
 function json2markup(json, path) {
 	var i = 0, l = json.length, el, attrib, event;
 	for ( ; i < l; i++) {
@@ -409,7 +442,8 @@ fOp = {
 	}
 };
 edit = {
-	init : function(subject, path, syntax) {
+	init : function(subject, path, mode, codeMirrorInstalled) {
+		__CODEMIRROR_MODE = mode;
 		json2markup([
 			"div",
 			{
@@ -443,6 +477,27 @@ edit = {
 					"type" : "text",
 					"value" : unescape(subject),
 					"readonly" : ""
+				}
+			},
+			"input",
+			{
+				attributes : {
+					"type" : "button",
+					"value" : "CodeMirror"
+				},
+				events : {
+					click : function(){
+						if (codeMirrorInstalled)
+							edit.codeMirrorLoad();
+						else if (confirm("Install CodeMirror?"))
+							ajax("?do=installCodeMirror", "get", null, function(response){
+								if (response == "")
+									edit.codeMirrorLoad();
+								else
+									alert("Install failed. Manually upload CodeMirror and place it in _codemirror, in the same directory as pafm");
+							});
+						this.disabled = true;
+					}
 				}
 			},
 			"input",
@@ -489,7 +544,60 @@ edit = {
 		});
 		location = "#header";
 	},
+	codeMirrorResourceLoad : function(e){
+		if (++__LOAD_COUNT == 2)
+			return edit.codeMirrorLoad();
+
+		json2markup([ //this has to load after codemirror.js
+			"script",
+			{
+				attributes : {
+					"src" : __CODEMIRROR_PATH + "/lib/util/loadmode.js",
+					"type" : "text/javascript"
+				},
+				events : {
+					load : edit.codeMirrorResourceLoad
+				}
+			}
+		], document.getElementsByTagName("head")[0]);
+	},
+	codeMirrorLoad: function(){
+		if (__LOAD_COUNT == 2) {
+			var modeName = __CODEMIRROR_MODES[__CODEMIRROR_MODE] || __CODEMIRROR_MODE;
+			__CODEMIRROR_LOADED = true;
+
+			CodeMirror.modeURL = "_codemirror/mode/%N/%N.js";
+			__CODEMIRROR = CodeMirror.fromTextArea($("ta"), {
+				lineNumbers: true
+			});
+
+			__CODEMIRROR.setOption("mode", modeName);
+			CodeMirror.autoLoadMode(__CODEMIRROR, modeName);
+		}
+		else {
+			json2markup([
+				"script",
+				{
+					attributes : {
+						"src" : __CODEMIRROR_PATH + "/lib/codemirror.js",
+						"type" : "text/javascript"
+					},
+					events : {
+						load : edit.codeMirrorResourceLoad
+					}
+				},
+				"link",
+				{
+					attributes : {
+						"rel" : "stylesheet",
+						"href" : __CODEMIRROR_PATH + "/lib/codemirror.css"
+					}
+				},
+			], document.getElementsByTagName("head")[0]);
+		}
+	},
 	save : function(subject, path){
+		__CODEMIRROR && __CODEMIRROR.save();
 		$("editMsg").innerHTML = null;
 		var postData = "data=" + encodeURIComponent($("ta").value);
 		ajax("?do=saveEdit&subject=" + subject + "&path=" + path, "post", postData, function(response){
@@ -510,6 +618,7 @@ edit = {
 				}
 			});
 		}
+		__CODEMIRROR = null;
 		document.body.removeChild($("ea"));
 		document.body.removeChild($("editOverlay"));
 		window.__FILESAVED = null;

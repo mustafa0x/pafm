@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.4.1
-	@date:                    April 2nd, 2012
+	@version:                 1.5
+	@date:                    April 6th, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -18,9 +18,11 @@
 */
 
 
-/** configuration **/
+/*
+ * configuration
+ */
 
-define('PASSWORD', 'auth'); // password
+define('PASSWORD', 'auth');
 
 /*
  *
@@ -35,16 +37,17 @@ define('PASSWORD', 'auth'); // password
  */
 define('ROOT', '.');
 
-/** /configuration **/
+/*
+ * /configuration
+ */
 
 define('AUTHORIZE', true);
+
 /*
- * Removes:
+ * Checks for:
  *  - leading /
  *  - trailing /
  *  - ..
- * 
- * Checks for:
  *  - empty path
  *  - //
  */
@@ -63,7 +66,8 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.4.1');
+define('VERSION', '1.5');
+define('CODEMIRROR_PATH', '_codemirror');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -73,6 +77,8 @@ $pathHTML = htmlspecialchars($path);
 
 $pafm = basename($_SERVER['SCRIPT_NAME']);
 $redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari (still relavent?)
+
+$codeMirrorModes = array("js", "php", "css", "py", "rb"); //TODO: complete array
 
 $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')));
 $dirContents = array('folders' => array(), 'files' => array());
@@ -162,6 +168,8 @@ if ($do) {
 			exit(doMove($subject, $path));
 		case 'moveList':
 			exit(moveList($subject, $path, $to));
+		case 'installCodeMirror':
+			exit(installCodeMirror());
 		case 'fileExists':
 			exit(file_exists($path .'/'. $subject));
 		case 'getfs':
@@ -260,6 +268,18 @@ function pathCrumbs(){
 	}
 	return $crumb;
 }
+/*
+ * TODO: rewrite entire function
+ *
+ * FIXME: pulling from remote server has risks
+ */
+function installCodeMirror(){
+	global $path;
+	$name = 'codemirror2-latest.zip';
+	copy('http://codemirror.net/'.$name, $name);
+	doExtract($name, $path, true);
+	rename($path . '/CodeMirror2', $path . '/' . CODEMIRROR_PATH);
+}
 
 //authorize functions
 function doAuth(){
@@ -309,7 +329,7 @@ function doAuth(){
   </script>
 </head>
 <body>
-  <form action="?do=login&path='. $pathURL .'" method="post">
+  <form action="?do=login&amp;path='. $pathURL .'" method="post">
     <fieldset>
       <legend style="text-align: left;">Log in</legend>
       <input type="password" name="pwd" title="Password">
@@ -380,7 +400,7 @@ function doChmod($subject, $path, $mod){
 	chmod($path . '/' . $subject, octdec(strlen($mod) == 3 ? 0 . $mod : $mod));
 	redirect();
 }
-function doExtract($subject, $path){
+function doExtract($subject, $path, $codeMirror){
 	global $subjectHTML;
 	switch (zipSupport()) {
 		case 'function':
@@ -397,6 +417,7 @@ function doExtract($subject, $path){
 				}
 				else {
 					$fopen = fopen($path.'/'.zip_entry_name($zip_entry), "w");
+					//TODO: file-exists check
 					fwrite($fopen, zip_entry_read($zip_entry, zip_entry_filesize($zip_entry)), zip_entry_filesize($zip_entry));
 				}
 				zip_entry_close($zip_entry);
@@ -413,7 +434,7 @@ function doExtract($subject, $path){
 		case 'exec':
 			shell_exec('unzip ' . escapeshellarg($path.'/'.$subject));
 	}
-	redirect();
+	$codeMirror || redirect();
 }
 function doReadFile($subject, $path){
 	return file_get_contents($path.'/'.$subject);
@@ -661,7 +682,7 @@ function getDirs($path){
 	}
 }
 function getFiles($path){
-	global $dirContents, $pathURL;//, $cpExts;
+	global $dirContents, $pathURL, $codeMirrorModes;
 	$filePath = $path == '.' ? '/' : '/' . $path.'/';
 
 	$l = count($dirContents['files']);
@@ -678,7 +699,7 @@ function getFiles($path){
 		$fullPath = $path.'/'.$dirItem;
 
 		$mod = getmod($fullPath);
-		$ext = getext($dirItem);
+		$ext = getExt($dirItem);
 
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a><!-- '.$dirItemHTML." -->" .
@@ -689,8 +710,8 @@ function getFiles($path){
 		((zipSupport() && $ext == 'zip')
 			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Extract '.$dirItemHTML.'" class="extract b"></a><!-- Extract '.$dirItemHTML." -->" //Zip extract $dirItem
 			: null) .
-		(filesize($fullPath) <= (1048576 * MaxEditableSize) ? (false
-			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.getext($dirItem).'\'); return false;" class="edit cp b"></a><!-- Edit '.$dirItemHTML." -->" //Edit $dirItem
+		(filesize($fullPath) <= (1048576 * MaxEditableSize) ? (in_array($ext, $codeMirrorModes)
+			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.getExt($dirItem).'\', '.(int)is_dir(CODEMIRROR_PATH).'); return false;" class="edit cp b"></a><!-- Edit '.$dirItemHTML." -->" //Edit $dirItem
 			: "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', null); return false;" class="edit b"></a><!-- Edit '.$dirItemHTML." -->") : null) . //Edit $dirItem
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a><!-- Chmod '.$dirItemHTML." -->" . //Chmod $dirItem
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a><!-- Move '.$dirItemHTML." -->" . //Move $dirItem

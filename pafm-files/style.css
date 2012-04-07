@@ -196,6 +196,10 @@ a:hover.b, .b a:hover, #add a img:hover {
 .succeeded {
 	color: green;
 }
+.CodeMirror-scroll {
+	width:800px;
+	height:600px !important;
+}
 /*footer*/
 #footer {
 	position: relative;
