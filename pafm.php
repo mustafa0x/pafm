@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.5.1
-	@date:                    April 6th, 2012
+	@version:                 1.5.2
+	@date:                    April 7th, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -66,9 +66,9 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.5.1');
+define('VERSION', '1.5.2');
 
-define('CODEMIRROR_PATH', '_codemirror');
+define('CODEMIRROR_PATH', realpath(ROOT) . '/_codemirror');
 
 $pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -79,7 +79,7 @@ $pathHTML = htmlspecialchars($path);
 $pafm = basename($_SERVER['SCRIPT_NAME']);
 $redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari (still relavent?)
 
-$codeMirrorModes = array("js", "php", "css", "py", "rb"); //TODO: complete array
+$codeMirrorModes = array('html', 'md', 'js', 'php', 'css', 'py', 'rb'); //TODO: complete array
 
 $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')));
 $dirContents = array('folders' => array(), 'files' => array());
@@ -275,16 +275,18 @@ function pathCrumbs(){
 	return $crumb;
 }
 /*
- * TODO: rewrite entire function
+ * TODO: rewrite entire function, use stable
  *
  * FIXME: pulling from remote server has risks
  */
 function installCodeMirror(){
 	global $path;
 	$name = 'codemirror2-latest.zip';
-	copy('http://codemirror.net/'.$name, $name);
-	doExtract($name, $path, true);
-	rename($path . '/CodeMirror2', $path . '/' . CODEMIRROR_PATH);
+	$script_dir = dirname($_SERVER['SCRIPT_FILENAME']);
+	copy('http://codemirror.net/'.$name, $script_dir . '/' . $name);
+	doExtract($name, $script_dir, true);
+	unlink($script_dir . '/' . $name);
+	rename($script_dir . '/CodeMirror2', CODEMIRROR_PATH);
 }
 
 //authorize functions

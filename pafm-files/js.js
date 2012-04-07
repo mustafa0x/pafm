@@ -12,9 +12,11 @@ function $(element) {
 var popup, fOp, edit, upload, __AJAX_ACTIVE,
 	__CODEMIRROR, __CODEMIRROR_MODE, __LOAD_COUNT = 0, __CODEMIRROR_PATH = "_codemirror",
 	__CODEMIRROR_MODES = {
+		"html": "htmlmixed",
 		"js": "javascript",
 		"py": "python",
-		"rb": "ruby"
+		"rb": "ruby",
+		"md": "markdown"
 		//TODO: complete list
 	};
 

@@ -199,6 +199,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 .CodeMirror-scroll {
 	width:800px;
 	height:600px !important;
+	border: 1px solid black;
 }
 /*footer*/
 #footer {

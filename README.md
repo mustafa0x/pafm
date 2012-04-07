@@ -1,5 +1,8 @@
 # PHP AJAX File Manager
 
+## About
+PHP AJAX File Manager (PAFM) is a web file manager influenced by the [KISS Principle](http://en.wikipedia.org/wiki/KISS_principle "Keep it simple, stupid")
+
 ## Installation
 
 Open pafm.php with your code editor of choice (note that you can change the password of pafm *using* pafm)
@@ -30,6 +33,9 @@ then scroll down till you see `/** configuration **/`
 [3]: http://mus.tafa.us/projects/pafm/images/upload-sm.png "the upload window"
 
 ## Recent Changes
+
+### 1.5.2
+  * Bug fixes
 
 ### 1.5
   * CodeMirror Added
