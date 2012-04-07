@@ -2,7 +2,7 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.5.2
+	@version:                 1.5.3
 	@date:                    April 7th, 2012
 
 	@author:                  mustafa
@@ -66,7 +66,7 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.5.2');
+define('VERSION', '1.5.3');
 
 define('CODEMIRROR_PATH', realpath(ROOT) . '/_codemirror');
 
@@ -86,7 +86,7 @@ $dirContents = array('folders' => array(), 'files' => array());
 $footer = '<a href="http://github.com/mustafa0x/pafm" title="pafm @ github">pafm v'.VERSION.'</a> by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
 
 /*
- * A warning is issued when TZ is not set
+ * A warning is issued when the timezone is not set
  */
 date_default_timezone_set('America/Chicago');
 
@@ -408,7 +408,7 @@ function doChmod($subject, $path, $mod){
 	chmod($path . '/' . $subject, octdec(strlen($mod) == 3 ? 0 . $mod : $mod));
 	redirect();
 }
-function doExtract($subject, $path, $codeMirror){
+function doExtract($subject, $path, $codeMirror = false){
 	global $subjectHTML;
 	switch (zipSupport()) {
 		case 'function':

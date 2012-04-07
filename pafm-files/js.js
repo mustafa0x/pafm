@@ -489,7 +489,7 @@ edit = {
 				},
 				events : {
 					click : function(){
-						if (codeMirrorInstalled)
+						if (codeMirrorInstalled || __LOAD_COUNT)
 							edit.codeMirrorLoad();
 						else if (confirm("Install CodeMirror?"))
 							ajax("?do=installCodeMirror", "get", null, function(response){
@@ -566,7 +566,6 @@ edit = {
 	codeMirrorLoad: function(){
 		if (__LOAD_COUNT == 2) {
 			var modeName = __CODEMIRROR_MODES[__CODEMIRROR_MODE] || __CODEMIRROR_MODE;
-			__CODEMIRROR_LOADED = true;
 
 			CodeMirror.modeURL = "_codemirror/mode/%N/%N.js";
 			__CODEMIRROR = CodeMirror.fromTextArea($("ta"), {

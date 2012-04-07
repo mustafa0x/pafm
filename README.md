@@ -1,7 +1,7 @@
 # PHP AJAX File Manager
 
 ## About
-PHP AJAX File Manager (PAFM) is a web file manager influenced by the [KISS Principle](http://en.wikipedia.org/wiki/KISS_principle "Keep it simple, stupid")
+PHP AJAX File Manager (PAFM) is a web file manager influenced by the [KISS Principle](http://en.wikipedia.org/wiki/KISS_principle "Keep it simple, stupid").
 
 ## Installation
 
@@ -34,7 +34,7 @@ then scroll down till you see `/** configuration **/`
 
 ## Recent Changes
 
-### 1.5.2
+### 1.5.3
   * Bug fixes
 
 ### 1.5
