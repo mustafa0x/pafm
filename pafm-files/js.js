@@ -493,7 +493,7 @@ edit = {
 							edit.codeMirrorLoad();
 						else if (confirm("Install CodeMirror?"))
 							ajax("?do=installCodeMirror", "get", null, function(response){
-								if (response == "")
+								if (response == "1")
 									edit.codeMirrorLoad();
 								else
 									alert("Install failed. Manually upload CodeMirror and place it in _codemirror, in the same directory as pafm");

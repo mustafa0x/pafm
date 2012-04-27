@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.5.3
-	@date:                    April 7th, 2012
+	@version:                 1.5.4
+	@date:                    April 27th, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -51,7 +51,7 @@ define('AUTHORIZE', true);
  *  - empty path
  *  - //
  */
-define('SanatizePath', true);
+define('SanitizePath', true);
 
 /*
  * files larger than this are not editable
@@ -66,11 +66,11 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.5.3');
+define('VERSION', '1.5.4');
 
-define('CODEMIRROR_PATH', realpath(ROOT) . '/_codemirror');
+define('CODEMIRROR_PATH', dirname(realpath($_SERVER['SCRIPT_FILENAME'])) . '/_codemirror.js');
 
-$pathRegEx = SanatizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
+$pathRegEx = SanitizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
 $path = preg_match($pathRegEx, $_GET['path']) ? '.' : $_GET['path'];
 $pathURL = escape($path);
@@ -128,7 +128,7 @@ if (!is_dir($path)) {
 		echo 'path (' . $pathHTML . ') can\'t be read'; //exit shouldn't be necessary
 }
 
-if(!is_readable($path)) {
+if (!is_readable($path)) {
 	chmod($path, 0777);
 	if (!is_readable($path))
 		echo 'path (' . $pathHTML . ') can\'t be read';
@@ -175,7 +175,8 @@ if ($do) {
 		case 'moveList':
 			exit(moveList($subject, $path, $to));
 		case 'installCodeMirror':
-			exit(installCodeMirror());
+			//TODO: file checksum
+			exit(copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.js', CODEMIRROR_PATH));
 		case 'fileExists':
 			exit(file_exists($path .'/'. $subject));
 		case 'getfs':
@@ -274,44 +275,31 @@ function pathCrumbs(){
 	}
 	return $crumb;
 }
-/*
- * TODO: rewrite entire function, use stable
- *
- * FIXME: pulling from remote server has risks
- */
-function installCodeMirror(){
-	global $path;
-	$name = 'codemirror2-latest.zip';
-	$script_dir = dirname($_SERVER['SCRIPT_FILENAME']);
-	copy('http://codemirror.net/'.$name, $script_dir . '/' . $name);
-	doExtract($name, $script_dir, true);
-	unlink($script_dir . '/' . $name);
-	rename($script_dir . '/CodeMirror2', CODEMIRROR_PATH);
-}
 
 //authorize functions
 function doAuth(){
 	global $do, $pathURL, $footer;
 	if ($do == 'login' || $do == 'logout')
-		return;
+		return; //TODO: login/logout take place here
 	if ($do && $_SESSION['pwd'] != PASSWORD)
 		exit('Please refresh the page and login');
 	if ($_SESSION['pwd'] != PASSWORD)
 		exit ('<!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
   <title>Log In | pafm</title>
   <style type="text/css">
     /*<![CDATA[*/
-    form {
-    	position: absolute;
-    	left: 50%;
-    	top: 45%;
-    	margin-left: -6.50em;
-    	margin-top: -1em;
+    body {
+    	margin: auto;
+    	max-width: 20em;
     	text-align: center;
-    	font-family: calibri;
+    	font-family: sans-serif;
+    }
+    form {
+    	position: fixed;
+    	top: 30%;
     }
     a {
     	text-decoration: none;
@@ -329,18 +317,12 @@ function doAuth(){
     }
     /*]]>*/
   </style>
-  <script type="text/javascript">
-    onload = function(){
-    	var pwd = document.getElementsByName("pwd")[0];
-    	pwd.focus();
-    };
-  </script>
 </head>
 <body>
   <form action="?do=login&amp;path='. $pathURL .'" method="post">
     <fieldset>
       <legend style="text-align: left;">Log in</legend>
-      <input type="password" name="pwd" title="Password">
+      <input type="password" name="pwd" title="Password" autofocus>
       <input type="submit" value="&#10003;" title="Log In">
     </fieldset>
     <p>'.$footer.'</p>
@@ -663,9 +645,7 @@ function getDirContents($path){
 function getDirs($path){
 	global $dirContents, $pathURL;
 
-	$l = count($dirContents['folders']);
-
-	if (!$l)
+	if (!($l = count($dirContents['folders'])))
 		return;
 
 	sort($dirContents['folders']); //TODO: Better sort (below also)
@@ -679,13 +659,13 @@ function getDirs($path){
 		$mod = getmod($path.'/'.$dirItem);
 
 		echo '  <li title="' . $dirItemHTML . '">' .
-		"\n\t" . '<a href="?path=' . escape($fullPath) . '" title="' . $dirItemHTML . '" class="dir">'.$dirItemHTML.'</a><!-- '.$dirItemHTML." -->" .
+		"\n\t" . '<a href="?path=' . escape($fullPath) . '" title="' . $dirItemHTML . '" class="dir">'.$dirItemHTML.'</a>'.
 		"\n\t" . '<span class="filemtime" title="file modified time">' . date('c', filemtime($fullPath)) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
-		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a><!-- Chmod '.$dirItemHTML." -->" . //Chmod $dirItem
-		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a><!-- Move '.$dirItemHTML." -->" . //Move $dirItem
-		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a><!-- Rename '.$dirItemHTML." -->" . //Rename $dirItem
-		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a><!-- Delete '.$dirItemHTML." -->" . //Delete $dirItem
+		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a>' .
+		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
+		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a>' .
+		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>' .
 		"\n  </li>\n";
 	}
 }
@@ -693,9 +673,7 @@ function getFiles($path){
 	global $dirContents, $pathURL, $codeMirrorModes;
 	$filePath = $path == '.' ? '/' : '/' . $path.'/';
 
-	$l = count($dirContents['files']);
-
-	if (!$l)
+	if (!($l = count($dirContents['files'])))
 		return;
 
 	sort($dirContents['files']);
@@ -708,24 +686,25 @@ function getFiles($path){
 
 		$mod = getmod($fullPath);
 		$ext = getExt($dirItem);
+		$codeMirrorExists = (int)is_file(CODEMIRROR_PATH);
 
 		echo '  <li title="' . $dirItemHTML . '">' .
-		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a><!-- '.$dirItemHTML." -->" .
+		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a>' .
 		"\n\t" . '<span class="fs"  title="file size">' . getfs($path.'/'.$dirItem) . '</span>' .
 		"\n\t" . '<span class="extension" title="file extension">' . $ext . '</span>' .
 		"\n\t" . '<span class="filemtime" title="file modified time">' . date('c', filemtime($fullPath)) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		((zipSupport() && $ext == 'zip')
-			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Extract '.$dirItemHTML.'" class="extract b"></a><!-- Extract '.$dirItemHTML." -->" //Zip extract $dirItem
+			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Extract '.$dirItemHTML.'" class="extract b"></a>'
 			: null) .
 		(filesize($fullPath) <= (1048576 * MaxEditableSize) ? (in_array($ext, $codeMirrorModes)
-			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.getExt($dirItem).'\', '.(int)is_dir(CODEMIRROR_PATH).'); return false;" class="edit cp b"></a><!-- Edit '.$dirItemHTML." -->" //Edit $dirItem
-			: "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', null); return false;" class="edit b"></a><!-- Edit '.$dirItemHTML." -->") : null) . //Edit $dirItem
-		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a><!-- Chmod '.$dirItemHTML." -->" . //Chmod $dirItem
-		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a><!-- Move '.$dirItemHTML." -->" . //Move $dirItem
-		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a><!-- copy '.$dirItemHTML." -->" . //copy $dirItem
-		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a><!-- Rename '.$dirItemHTML.' -->' . //Rename $dirItem
-		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a><!-- Delete '.$dirItemHTML." -->" . //Delete $dirItem
+			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.getExt($dirItem).'\', '.$codeMirrorExists.'); return false;" class="edit cp b"></a>'
+			: "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', null); return false;" class="edit b"></a>') : null) .
+		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a>' .
+		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
+		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a>' .
+		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a>' .
+		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>'.
 		"\n  </li>\n";
 	}
 }
@@ -733,7 +712,7 @@ function getFiles($path){
 <!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
   <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
   <style type="text/css">@import "<?php echo DEV ? "pafm-files/style.css" : "?r=css";?>";</style>
   <script src="<?php echo DEV ? "pafm-files/js.js" : "?r=js";?>" type="text/javascript"></script>
@@ -763,21 +742,17 @@ function getFiles($path){
   </li>
 </ul>
 
-<!-- BEGIN list dirs -->
 <ul>
 <?php
 getDirs($path);
 ?>
 </ul>
-<!-- //END list dirs -->
 
-<!-- BEGIN list files -->
 <ul>
 <?php
 getFiles($path);
 ?>
 </ul>
-<!-- //END list files -->
 </div>
 
 <div id="add" class="b">

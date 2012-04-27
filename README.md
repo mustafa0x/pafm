@@ -34,6 +34,10 @@ then scroll down till you see `/** configuration **/`
 
 ## Recent Changes
 
+### 1.5.4
+  * Rewrote CodeMirror installation method
+  * Minor code changes
+
 ### 1.5.3
   * Bug fixes
 
