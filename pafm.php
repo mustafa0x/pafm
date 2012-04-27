@@ -2,7 +2,7 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.5.4
+	@version:                 1.5.5
 	@date:                    April 27th, 2012
 
 	@author:                  mustafa
@@ -66,9 +66,9 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.5.4');
+define('VERSION', '1.5.5');
 
-define('CODEMIRROR_PATH', dirname(realpath($_SERVER['SCRIPT_FILENAME'])) . '/_codemirror.js');
+define('CODEMIRROR_PATH', dirname(realpath($_SERVER['SCRIPT_FILENAME'])) . '/_cm');
 
 $pathRegEx = SanitizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
 
@@ -175,8 +175,7 @@ if ($do) {
 		case 'moveList':
 			exit(moveList($subject, $path, $to));
 		case 'installCodeMirror':
-			//TODO: file checksum
-			exit(copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.js', CODEMIRROR_PATH));
+			exit(installCodeMirror());
 		case 'fileExists':
 			exit(file_exists($path .'/'. $subject));
 		case 'getfs':
@@ -359,6 +358,12 @@ function doCreate($file, $folder, $path){
 		return refresh(htmlspecialchars($file).htmlspecialchars($folder).' already exists');
 	redirect();
 }
+function installCodeMirror(){
+	mkdir(CODEMIRROR_PATH);
+	//TODO: checksum
+	copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.js', CODEMIRROR_PATH . '/cm.js');
+	copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.css', CODEMIRROR_PATH . '/cm.css');
+}
 function doUpload($path){
 	if (!$_FILES)
 		return refresh('$_FILES array can not be read. Check file size limits and the max execution time limit.');
@@ -390,7 +395,7 @@ function doChmod($subject, $path, $mod){
 	chmod($path . '/' . $subject, octdec(strlen($mod) == 3 ? 0 . $mod : $mod));
 	redirect();
 }
-function doExtract($subject, $path, $codeMirror = false){
+function doExtract($subject, $path){
 	global $subjectHTML;
 	switch (zipSupport()) {
 		case 'function':
@@ -424,7 +429,7 @@ function doExtract($subject, $path, $codeMirror = false){
 		case 'exec':
 			shell_exec('unzip ' . escapeshellarg($path.'/'.$subject));
 	}
-	$codeMirror || redirect();
+	redirect();
 }
 function doReadFile($subject, $path){
 	return file_get_contents($path.'/'.$subject);
@@ -686,7 +691,7 @@ function getFiles($path){
 
 		$mod = getmod($fullPath);
 		$ext = getExt($dirItem);
-		$codeMirrorExists = (int)is_file(CODEMIRROR_PATH);
+		$codeMirrorExists = (int)is_dir(CODEMIRROR_PATH);
 
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a>' .

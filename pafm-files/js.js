@@ -10,7 +10,7 @@ function $(element) {
 	return document.getElementById(element);
 }
 var popup, fOp, edit, upload, __AJAX_ACTIVE,
-	__CODEMIRROR, __CODEMIRROR_MODE, __LOAD_COUNT = 0, __CODEMIRROR_PATH = "_codemirror",
+	__CODEMIRROR, __CODEMIRROR_MODE, __CODEMIRROR_LOADED, __CODEMIRROR_PATH = "_cm",
 	__CODEMIRROR_MODES = {
 		"html": "htmlmixed",
 		"js": "javascript",
@@ -217,11 +217,6 @@ popup = {
 			]
 		], document.body);
 		var popupEl = $("popup"), popOverlayEl = $("popOverlay"), xEl = $('x'), mlEl;
-		if (window.ActiveXObject){ //I can't even begin to tell you how much I hate IE
-			xEl.style.cssFloat = "none";
-			xEl.style.position = "absolute";
-			xEl.style.right = xEl.parentNode.offsetLeft + 3;
-		}
 		json2markup(content, $("body"));
 		if (mlEl = $('moveListUL')) {
 			if (mlEl.offsetHeight > (document.body.offsetHeight - 150))
@@ -489,11 +484,11 @@ edit = {
 				},
 				events : {
 					click : function(){
-						if (codeMirrorInstalled || __LOAD_COUNT)
+						if (codeMirrorInstalled)
 							edit.codeMirrorLoad();
 						else if (confirm("Install CodeMirror?"))
 							ajax("?do=installCodeMirror", "get", null, function(response){
-								if (response == "1")
+								if (response == "")
 									edit.codeMirrorLoad();
 								else
 									alert("Install failed. Manually upload CodeMirror and place it in _codemirror, in the same directory as pafm");
@@ -546,56 +541,40 @@ edit = {
 		});
 		location = "#header";
 	},
-	codeMirrorResourceLoad : function(e){
-		if (++__LOAD_COUNT == 2)
-			return edit.codeMirrorLoad();
-
-		json2markup([ //this has to load after codemirror.js
-			"script",
-			{
-				attributes : {
-					"src" : __CODEMIRROR_PATH + "/lib/util/loadmode.js",
-					"type" : "text/javascript"
-				},
-				events : {
-					load : edit.codeMirrorResourceLoad
-				}
-			}
-		], document.getElementsByTagName("head")[0]);
-	},
 	codeMirrorLoad: function(){
-		if (__LOAD_COUNT == 2) {
+		if(!__CODEMIRROR_LOADED)
+			json2markup([
+				"script",
+				{
+					attributes: {
+						"src":  __CODEMIRROR_PATH + "/cm.js",
+						"type": "text/javascript"
+					},
+					events: {
+						load: function(){
+							__CODEMIRROR_LOADED = true;
+							edit.codeMirrorLoad();
+						}
+					}
+				},
+				"link",
+				{
+					attributes: {
+						"rel": "stylesheet",
+						"href": __CODEMIRROR_PATH + "/cm.css"
+					}
+				},
+			], document.getElementsByTagName("head")[0]);
+		else {
 			var modeName = __CODEMIRROR_MODES[__CODEMIRROR_MODE] || __CODEMIRROR_MODE;
 
-			CodeMirror.modeURL = "_codemirror/mode/%N/%N.js";
 			__CODEMIRROR = CodeMirror.fromTextArea($("ta"), {
 				lineNumbers: true
 			});
 
 			__CODEMIRROR.setOption("mode", modeName);
-			CodeMirror.autoLoadMode(__CODEMIRROR, modeName);
 		}
-		else {
-			json2markup([
-				"script",
-				{
-					attributes : {
-						"src" : __CODEMIRROR_PATH + "/lib/codemirror.js",
-						"type" : "text/javascript"
-					},
-					events : {
-						load : edit.codeMirrorResourceLoad
-					}
-				},
-				"link",
-				{
-					attributes : {
-						"rel" : "stylesheet",
-						"href" : __CODEMIRROR_PATH + "/lib/codemirror.css"
-					}
-				},
-			], document.getElementsByTagName("head")[0]);
-		}
+
 	},
 	save : function(subject, path){
 		__CODEMIRROR && __CODEMIRROR.save();
