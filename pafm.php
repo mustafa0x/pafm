@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.5.5
-	@date:                    April 27th, 2012
+	@version:                 1.5.6
+	@date:                    May 2nd, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -66,7 +66,7 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.5.5');
+define('VERSION', '1.5.6');
 
 define('CODEMIRROR_PATH', dirname(realpath($_SERVER['SCRIPT_FILENAME'])) . '/_cm');
 
@@ -294,9 +294,9 @@ function doAuth(){
     	margin: auto;
     	max-width: 20em;
     	text-align: center;
-    	font-family: sans-serif;
     }
     form {
+    	width:20em;
     	position: fixed;
     	top: 30%;
     }
@@ -683,6 +683,8 @@ function getFiles($path){
 
 	sort($dirContents['files']);
 
+	$codeMirrorExists = (int)is_dir(CODEMIRROR_PATH);
+
 	for ($i = 0; $i < $l; $i++){
 		$dirItem = $dirContents['files'][$i];
 		$dirItemURL = escape($dirItem);
@@ -691,7 +693,6 @@ function getFiles($path){
 
 		$mod = getmod($fullPath);
 		$ext = getExt($dirItem);
-		$codeMirrorExists = (int)is_dir(CODEMIRROR_PATH);
 
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a>' .
