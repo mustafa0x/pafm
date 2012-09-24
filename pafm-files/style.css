@@ -11,7 +11,7 @@ html, body {
 }
 body {
 	margin: 0;
-	font-family: Calibri, Consolas, Georgia, Trebuchet;
+	font-family: Calibri, Consolas, Trebuchet, sans-serif;
 }
 a {
 	text-decoration: none;
@@ -32,16 +32,15 @@ a:hover.b, .b a:hover, #add a img:hover {
 #header {
 	padding: .2em;
 	background-color: #E8E8E8;
-	font-size: 1em;
 }
 #logout {
-	float:right;
+	float: right;
 }
 .pathCrumbs {
 	/*font-style: italic;*/
 }
 .pathCrumbs a:hover {
-	background-color:white;
+	background-color: white;
 }
 #dirList ul {
 	list-style: none;
@@ -57,7 +56,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 	background: #EBEBEB;
 }
 #body .pathCrumbs a:hover {
-	background-color:#E8E8E8;
+	background-color: #E8E8E8;
 }
 /*coloumn info*/
 #info li:hover {
@@ -96,7 +95,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 .mode, .fs, .extension, .filemtime {
 	position: absolute;
 	right: 15em;
-	font-family:calibri;
+	font-family: Calibri, sans-serif;
 	font-size: .7em;
 	margin-top: .30em;
 }
@@ -152,7 +151,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 /*add file, add folder, upload file*/
 #add {
 	float: right;
-	position:relative;
+	position: relative;
 	right: 2em;
 	top: 1em;
 }
@@ -161,7 +160,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 }
 /*move file/folder list*/
 #movelist {
-	text-align:left;
+	text-align: left;
 	margin-left: .5em;
 }
 #moveListUL {
@@ -177,14 +176,14 @@ a:hover.b, .b a:hover, #add a img:hover {
 	margin-left:.5em;
 	background: url(images/movehere.gif) no-repeat center left;
 	padding-left: .90em;
-	font-family:calibri;
+	font-family: Calibri, sans-serif;
 }
 /*edit area*/
 #ea {
-	position:absolute;
-	top:0;
-	left:0;
-	z-index:125;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 125;
 }
 #editMsg {
 	margin-left: 2px;
@@ -197,8 +196,8 @@ a:hover.b, .b a:hover, #add a img:hover {
 	color: green;
 }
 .CodeMirror-scroll {
-	width:800px;
-	height:600px !important;
+	width: 800px;
+	height: 600px !important;
 	border: 1px solid black;
 }
 /*footer*/
@@ -211,23 +210,23 @@ a:hover.b, .b a:hover, #add a img:hover {
 	font-size: .85em;
 }
 #footer a {
-	font-style:italic;
+	font-style: italic;
 }
 /*modal window*/
 #popup {
-	position:fixed;
-	left:50%;
-	top:50%;
+	position: fixed;
+	left: 50%;
+	top: 50%;
 	min-width: 15em;
 	min-height: 3em;
 	border: 2px solid #525252;
-	background:white;
-	z-index:150;
-	padding-bottom:10px;
+	background: white;
+	z-index: 150;
+	padding-bottom: 10px;
 }
 #head {
-	background-color:#E8E8E8;
-	font-family:calibri;
+	background-color: #E8E8E8;
+	font-family: Calibri, sans-serif;
 }
 #x {
 	float: right;
@@ -261,10 +260,10 @@ a:hover.b, .b a:hover, #add a img:hover {
 	z-index: 150;
 }
 #ajaxImg {
-	position:fixed;
-	left:50%;
-	top:50%;
-	margin-left:-1.5em;
-	margin-top:-1em;
-	z-index:160;
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	margin-left: -1.5em;
+	margin-top: -1em;
+	z-index: 160;
 }

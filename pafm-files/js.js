@@ -251,7 +251,7 @@ fOp = {
 			"form",
 			{
 				attributes : {
-					"action" : "?do=rename&subject=" + subject + "&path=" + path,
+					"action" : "?do=rename&subject=" + subject + "&path=" + path + "&token=" + token,
 					"method" : "post"
 				}
 			},
@@ -282,7 +282,7 @@ fOp = {
 			{
 				attributes : {
 					"method" : "post",
-					"action" : "?do=create&path=" + path
+					"action" : "?do=create&path=" + path + "&token=" + token
 				}
 			},
 			[
@@ -311,7 +311,7 @@ fOp = {
 			{
 				attributes : {
 					"method" : "post",
-					"action" : "?do=chmod&subject=" + subject + "&path=" + path
+					"action" : "?do=chmod&subject=" + subject + "&path=" + path + "&token=" + token
 				}
 			},
 			[
@@ -341,7 +341,7 @@ fOp = {
 			{
 				attributes : {
 					"method" : "post",
-					"action" : "?do=copy&subject=" + subject + "&path=" + path
+					"action" : "?do=copy&subject=" + subject + "&path=" + path + "&token=" + token
 				}
 			},
 			[
@@ -386,7 +386,7 @@ fOp = {
 			{
 				attributes : {
 					"method" : "post",
-					"action" : "?do=remoteCopy&path=" + path
+					"action" : "?do=remoteCopy&path=" + path + "&token=" + token
 				}
 			},
 			[
@@ -410,9 +410,7 @@ fOp = {
 					}
 				],
 				"legend",
-				{
-					text : "Name: "
-				},
+				{text: "Name: "},
 				[
 					"input",
 					{
@@ -442,9 +440,7 @@ edit = {
 		json2markup([
 			"div",
 			{
-				attributes : {
-					"id" : "editOverlay"
-				}
+				attributes: {"id": "editOverlay"}
 			}
 		], document.body)
 		$("editOverlay").style.height = document.body.offsetHeight + "px";
@@ -578,8 +574,8 @@ edit = {
 		__CODEMIRROR && __CODEMIRROR.save();
 		$("editMsg").innerHTML = null;
 		var postData = "data=" + encodeURIComponent($("ta").value);
-		ajax("?do=saveEdit&subject=" + subject + "&path=" + path, "post", postData, function(response){
-			$("editMsg").className = response != "Saved" ? "failed" : "succeeded"
+		ajax("?do=saveEdit&subject=" + subject + "&path=" + path + "&token=" + token, "post", postData, function(response){
+			$("editMsg").className = response.indexOf("saved") == -1 ? "failed" : "succeeded"
 			$("editMsg").innerHTML = response;
 		});
 		window.__FILESAVED = true;
@@ -679,7 +675,7 @@ upload = {
 		var uploadData = new FormData();
 		uploadData.append("file[]", $("file_input").files[0]);
 
-		ajax("?do=upload&path=" + path, "POST", uploadData,
+		ajax("?do=upload&path=" + path + "&token=" + token, "POST", uploadData,
 			function (response) {
 				$("response").innerHTML = response;
 				location.reload(true); //TODO: auto-update file list

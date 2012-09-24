@@ -2,7 +2,7 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.5.7
+	@version:                 1.6 RC
 	@date:                    September 24th, 2012
 
 	@author:                  mustafa
@@ -79,7 +79,7 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.5.7');
+define('VERSION', '1.6 RC');
 
 define('CODEMIRROR_PATH', dirname(realpath($_SERVER['SCRIPT_FILENAME'])) . '/_cm');
 
@@ -90,7 +90,7 @@ $pathURL = escape($path);
 $pathHTML = htmlspecialchars($path);
 
 $pafm = basename($_SERVER['SCRIPT_NAME']);
-$redir = $pafm . '?path=' . $pathURL; //$pafm is prefixed for safari (still relavent?)
+$redir = '?path=' . $pathURL;
 
 $codeMirrorModes = array('html', 'md', 'js', 'php', 'css', 'py', 'rb'); //TODO: complete array
 
@@ -100,6 +100,8 @@ $footer = '<a href="http://github.com/mustafa0x/pafm" title="pafm @ github">pafm
 
 /*
  * A warning is issued when the timezone is not set
+ *
+ * TODO: Set timezone to user's timezone
  */
 if (function_exists('date_default_timezone_set'))
 	date_default_timezone_set('UTC');
@@ -128,6 +130,8 @@ if (AUTHORIZE) {
 	doAuth();
 }
 
+$token = crypt(uniqid(), rand());
+
 /** directory checks and chdir **/
 
 if (is_dir(ROOT))
@@ -139,7 +143,7 @@ if (!is_dir($path)) {
 		exit();
 	}
 	else
-		echo 'path (' . $pathHTML . ') can\'t be read'; //exit shouldn't be necessary
+		echo 'path (' . $pathHTML . ') can\'t be read';
 }
 
 if (!is_readable($path)) {
@@ -166,25 +170,36 @@ if ($do) {
 	switch ($do) {
 		case 'login':
 			exit(doLogin($_POST['pwd']));
+		case 'logout':
+			exit(doLogout());
 		case 'create':
+			token_check();
 			exit(doCreate($_POST['file'], $_POST['folder'], $path));
 		case 'upload':
+			token_check();
 			exit(doUpload($path));
 		case 'chmod':
+			token_check();
 			exit(doChmod($subject, $path, $_POST['mod']));
 		case 'extract':
+			token_check();
 			exit(doExtract($subject, $path));
 		case 'readFile':
 			exit(doReadFile($subject, $path));
 		case 'rename':
+			token_check();
 			exit(doRename($subject, $path));
 		case 'delete':
+			token_check();
 			exit(doDelete($subject, $path));
 		case 'saveEdit':
+			token_check();
 			exit(doSaveEdit($subject, $path));
 		case 'copy':
+			token_check();
 			exit(doCopy($subject, $path));
 		case 'move':
+			token_check();
 			exit(doMove($subject, $path));
 		case 'moveList':
 			exit(moveList($subject, $path, $to));
@@ -195,11 +210,13 @@ if ($do) {
 		case 'getfs':
 			exit(getFs($path .'/'. $subject));
 		case 'remoteCopy':
+			token_check();
 			exit(doRemoteCopy($path));
-		case 'logout':
-			exit(doLogout());
 	}
 }
+
+$_SESSION['token'] = $token;
+$_SESSION['token_time'] = time();
 
 /** no action; list current directory **/
 getDirContents($path);
@@ -269,12 +286,12 @@ function getFs($file){
 function rrd($dir){
 	$handle = opendir($dir);
 	while (($dirItem = readdir($handle)) !== false) {
-		if($dirItem == '.' || $dirItem == '..')
+		if ($dirItem == '.' || $dirItem == '..')
 			continue;
 		$path = $dir.'/'.$dirItem;
 		is_dir($path) ? rrd($path) : unlink($path);
 	}
-    closedir($handle);
+	closedir($handle);
 	return rmdir($dir);
 }
 function pathCrumbs(){
@@ -344,7 +361,8 @@ function doAuth(){
 </html>');
 }
 function doLogin($pwd){
-	if (file_exists(BRUTEFORCE_FILE)){
+	$bruteforce_file_exists = file_exists(BRUTEFORCE_FILE);
+	if ($bruteforce_file_exists){
 		$bruteforce_contents = file_get_contents(BRUTEFORCE_FILE);
 		$bruteforce_contents = explode('|', $bruteforce_contents);
 		if ((time() - $bruteforce_contents[0]) < BRUTEFORCE_TIME_LOCK && $bruteforce_contents[1] >= BRUTEFORCE_ATTEMPTS)
@@ -352,7 +370,7 @@ function doLogin($pwd){
 	}
 	if ($pwd == PASSWORD){
 		$_SESSION['pwd'] = PASSWORD;
-		unlink(BRUTEFORCE_FILE);
+		$bruteforce_file_exists && unlink(BRUTEFORCE_FILE);
 		return redirect();
 	}
 	file_put_contents(BRUTEFORCE_FILE, time() . '|' . ($bruteforce_contents[1] >= 5 ? '0' : ++$bruteforce_contents[1]));
@@ -361,6 +379,10 @@ function doLogin($pwd){
 function doLogout(){
 	session_destroy();
 	redirect();
+}
+function token_check(){
+	if ($_GET['token'] != $_SESSION['token'] || (time() - $_SESSION['token_time']) >= 300)
+		exit(refresh('Invalid token, try again.'));
 }
 
 //fOp functions
@@ -382,9 +404,20 @@ function doCreate($file, $folder, $path){
 }
 function installCodeMirror(){
 	mkdir(CODEMIRROR_PATH);
-	//TODO: checksum
-	copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.js', CODEMIRROR_PATH . '/cm.js');
-	copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.css', CODEMIRROR_PATH . '/cm.css');
+	$cmjs = CODEMIRROR_PATH . '/cm.js';
+	$cmcss = CODEMIRROR_PATH . '/cm.css';
+
+	copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.js', $cmjs);
+	copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.css', $cmcss);
+
+	/*
+	 * prevents using modified CodeMirror files
+	 */
+	if (md5_file($cmjs) != '65f5ba3c8d38bb08544717fc93c14024')
+		$out = unlink($cmjs);
+	if (md5_file($cmcss) != '23d441d9125538e3c5d69448f8741bfe')
+		$out = unlink($cmcss);
+	return $out ? '-' : ''; 
 }
 function doUpload($path){
 	if (!$_FILES)
@@ -531,30 +564,25 @@ function doSaveEdit($subject, $path){
 	if (isNull($data))
 		return 'Error: There is nothing to save';
 
- 	if (!($openf = fopen($path .'/'. $subject, 'w')))
-		return $subject . ' could not be opened';
-	fwrite($openf, $data);
-	fclose($openf);
-	return 'Saved';
+ 	if (file_put_contents($path .'/'. $subject, $data) === false)
+		return $subject . ' could not be saved';
+	else
+		return 'saved at ' . date('H:i:s');
 }
 function moveList($subject, $path){
-	global $pathURL, $pathHTML, $subjectURL, $subjectHTML, $to, $toURL, $toHTML;
+	global $pathURL, $pathHTML, $subjectURL, $subjectHTML, $to, $toURL, $toHTML, $token;
+
+	$_SESSION['token'] = $token;
+	$_SESSION['token_time'] = time();
+
 	if (isNull($subject, $path, $to))
 		return refresh('Values could not be read');
 
 	$return = '["div",
-	{
-		attributes : {
-			"id" : "movelist"
-		}
-	},
+	{attributes: {"id": "movelist"}},
 	[
 		"span",
-		{
-			attributes : {
-				"class" : "pathCrumbs"
-			}
-		},
+		{attributes: {"class": "pathCrumbs"}},
 		[
 	';
 	$crumbs = explode('/', $toHTML);
@@ -582,11 +610,7 @@ function moveList($subject, $path){
 	$return .= '
 		],
 		"ul",
-		{
-			attributes : {
-				"id" : "moveListUL"
-			}
-		}';
+		{attributes: {"id": "moveListUL"}}';
 
 	$j = 0;
 	$handle = opendir($to);
@@ -603,9 +627,7 @@ function moveList($subject, $path){
 		[
 			"a",
 			{
-				attributes : {
-					"href" : "#"
-				},
+				attributes : {"href" : "#"},
 				events : {
 					click : function(e){
 						fOp.moveList("'.$subjectURL.'", "'.$pathURL.'", "'.$fullPathURL.'");
@@ -613,23 +635,11 @@ function moveList($subject, $path){
 					}
 				}
 			},
-			[
-				"img",
-				{
-					attributes : {
-						"src" : "'. (DEV ? 'pafm-files/' : '?r=') .'images/odir.png",
-						"title" : "Open '.$dirItemHTML.'"
-					}
-				}
-			],
+			["img", {attributes: {"src": "'. (DEV ? 'pafm-files/' : '?r=') .'images/odir.png", "title": "Open '.$dirItemHTML.'"}}],
 			"a",
 			{
-				attributes : {
-					"href" : "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$fullPathURL.'",
-					"title" : "move '.$subject.' to '.$dirItemHTML.'",
-					"class" : "dir"
-				},
-				text : "'.$dirItemHTML.'"
+				attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$fullPathURL.'&token='.$token.'", "title" : "move '.$subject.' to '.$dirItemHTML.'", "class": "dir"},
+				text: "'.$dirItemHTML.'"
 			}
 		]
 	]';
@@ -637,22 +647,13 @@ function moveList($subject, $path){
 	}
 	if (!$j)
 		$return .= ',
-		"b",
-		{
-			text : "No directories found"
-		},
-		"br",
-		{},
-		"br",
-		{}';
+		"b", {text: "No directories found"},
+		"br", {},
+		"br", {}';
 	$return .= ',
 	"a",
 	{
-		attributes : {
-			"href" : "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$toURL.'",
-			"id" : "movehere",
-			"title" : "move here ('.$toHTML.')"
-		},
+		attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$toURL.'&token='.$token.'", "id": "movehere", "title": "move here ('.$toHTML.')"},
 		text : "move here"
 	}]
 ]';
@@ -674,7 +675,7 @@ function getDirContents($path){
  * the following two functions output the file list
  */
 function getDirs($path){
-	global $dirContents, $pathURL;
+	global $dirContents, $pathURL, $token;
 
 	if (!count($dirContents['folders']))
 		return;
@@ -691,17 +692,17 @@ function getDirs($path){
 
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="?path=' . escape($fullPath) . '" title="' . $dirItemHTML . '" class="dir">'.$dirItemHTML.'</a>'.
-		"\n\t" . '<span class="filemtime" title="'.date('c',$mtime).'">' . date('y-m-d | H:i:s', $mtime) . '</span>' .
+		"\n\t" . '<span class="filemtime" title="'.date('c', $mtime).'">' . date('y-m-d | H:i:s', $mtime) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a>' .
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
 		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a>' .
-		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>' .
+		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;token=' . $token.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>' .
 		"\n  </li>\n";
 	}
 }
 function getFiles($path){
-	global $dirContents, $pathURL, $codeMirrorModes;
+	global $dirContents, $pathURL, $codeMirrorModes, $token;
 	$filePath = $path == '.' ? '/' : '/' . $path.'/';
 
 	if (!count($dirContents['files']))
@@ -726,10 +727,10 @@ function getFiles($path){
 		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a>' .
 		"\n\t" . '<span class="fs"  title="file size">' . getfs($path.'/'.$dirItem) . '</span>' .
 		"\n\t" . '<span class="extension" title="file extension">' . $ext . '</span>' .
-		"\n\t" . '<span class="filemtime" title="'.date('c',$mtime).'">' . date('y-m-d | H:i:s', $mtime) . '</span>' .
+		"\n\t" . '<span class="filemtime" title="'.date('c', $mtime).'">' . date('y-m-d | H:i:s', $mtime) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		(($zipSupport && $ext == 'zip')
-			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Extract '.$dirItemHTML.'" class="extract b"></a>'
+			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;token=' . $token.'" title="Extract '.$dirItemHTML.'" class="extract b"></a>'
 			: '') .
 		(filesize($fullPath) <= (1048576 * MaxEditableSize)
 			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$ext.'\', '.$codeMirrorExists.'); return false;" class="edit '.$cmSupport.'b"></a>'
@@ -738,7 +739,7 @@ function getFiles($path){
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
 		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a>' .
 		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a>' .
-		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>'.
+		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;token=' . $token.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>'.
 		"\n  </li>\n";
 	}
 }
@@ -749,6 +750,7 @@ function getFiles($path){
   <meta charset="UTF-8">
   <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
   <style type="text/css">@import "<?php echo DEV ? "pafm-files/style.css" : "?r=css";?>";</style>
+  <script type="text/javascript">var token = "<?php echo $token; ?>";</script>
   <script src="<?php echo DEV ? "pafm-files/js.js" : "?r=js";?>" type="text/javascript"></script>
 </head>
 <body>

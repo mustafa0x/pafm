@@ -34,6 +34,12 @@ then scroll down till you see `/** configuration **/`
 
 ## Recent Changes
 
+### 1.6
+  * Added CSRF protection
+  * Fixed bug in bruteforce protection
+  * CodeMirror installation more secure
+  * Minor code and CSS changes
+
 ### 1.5.7
   * Added bruteforce protection
   * Improved file list sorting
