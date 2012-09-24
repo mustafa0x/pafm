@@ -54,7 +54,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 	width:98%;
 }
 #dirList li:hover {
-	background: #FFDAC6
+	background: #EBEBEB;
 }
 #body .pathCrumbs a:hover {
 	background-color:#E8E8E8;
@@ -85,7 +85,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 }
 .dir {
 	background: url(images/dir.png) no-repeat bottom left;
-	padding-left: 1.25em;
+	padding-left: 1.45em;
 	padding-top: 2px;
 }
 .file {

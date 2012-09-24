@@ -216,7 +216,7 @@ popup = {
 				}
 			]
 		], document.body);
-		var popupEl = $("popup"), popOverlayEl = $("popOverlay"), xEl = $('x'), mlEl;
+		var popupEl = $("popup"), popOverlayEl = $("popOverlay"), mlEl;
 		json2markup(content, $("body"));
 		if (mlEl = $('moveListUL')) {
 			if (mlEl.offsetHeight > (document.body.offsetHeight - 150))
@@ -370,11 +370,9 @@ fOp = {
 			if (!$("popup"))
 				popup.init("Move " + unescape(subject) + " to:", Function("return " + response)());
 			else {
-				var popupEl = $("popup"), xEl = $('x'), mlEl;
+				var popupEl = $("popup"), mlEl;
 				$("body").innerHTML = "";
 				json2markup(Function("return " + response)(), $("body"));
-				if (window.ActiveXObject)
-					xEl.style.right = xEl.parentNode.offsetLeft + 3;
 				if ((mlEl = $('moveListUL')).offsetHeight > (document.body.offsetHeight - 150))
 					mlEl.style.height = document.body.offsetHeight - 150 + "px";
 				popupEl.style.marginTop = "-" + parseInt(popupEl.offsetHeight) / 2 + "px";

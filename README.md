@@ -34,6 +34,11 @@ then scroll down till you see `/** configuration **/`
 
 ## Recent Changes
 
+### 1.5.7
+  * Added bruteforce protection
+  * Improved file list sorting
+  * Minor code and CSS changes
+
 ### 1.5.6
   * Minor changes
 

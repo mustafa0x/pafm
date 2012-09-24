@@ -2,14 +2,14 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.5.6
-	@date:                    May 2nd, 2012
+	@version:                 1.5.7
+	@date:                    September 24th, 2012
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
 	@email:                   mustafa.0x@gmail.com
 
-	@server requirements:     PHP 4.4+
+	@server requirements:     PHP 5
 	@browser requirements:    modern browser
 
 	Copyright (C) 2007-2012 mustafa
@@ -41,6 +41,19 @@ define('ROOT', '.');
  * /configuration
  */
 
+
+/*
+ * bruteforce prevention options
+ */
+define('BRUTEFORCE_FILE', './_pafm_bruteforce');
+
+define('BRUTEFORCE_ATTEMPTS', 5);
+
+/*
+ * in seconds
+ */
+define('BRUTEFORCE_TIME_LOCK', 15 * 60);
+
 define('AUTHORIZE', true);
 
 /*
@@ -66,7 +79,7 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.5.6');
+define('VERSION', '1.5.7');
 
 define('CODEMIRROR_PATH', dirname(realpath($_SERVER['SCRIPT_FILENAME'])) . '/_cm');
 
@@ -88,7 +101,8 @@ $footer = '<a href="http://github.com/mustafa0x/pafm" title="pafm @ github">pafm
 /*
  * A warning is issued when the timezone is not set
  */
-date_default_timezone_set('America/Chicago');
+if (function_exists('date_default_timezone_set'))
+	date_default_timezone_set('UTC');
 
 /*
  * resource retrieval
@@ -330,11 +344,19 @@ function doAuth(){
 </html>');
 }
 function doLogin($pwd){
-	if ($pwd == PASSWORD)
+	if (file_exists(BRUTEFORCE_FILE)){
+		$bruteforce_contents = file_get_contents(BRUTEFORCE_FILE);
+		$bruteforce_contents = explode('|', $bruteforce_contents);
+		if ((time() - $bruteforce_contents[0]) < BRUTEFORCE_TIME_LOCK && $bruteforce_contents[1] >= BRUTEFORCE_ATTEMPTS)
+				return refresh('Attempt limit reached, please wait: ' . ($bruteforce_contents[0] + BRUTEFORCE_TIME_LOCK - time()) . ' seconds');
+	}
+	if ($pwd == PASSWORD){
 		$_SESSION['pwd'] = PASSWORD;
-	else
-		return refresh('Password is incorrect');
-	redirect();
+		unlink(BRUTEFORCE_FILE);
+		return redirect();
+	}
+	file_put_contents(BRUTEFORCE_FILE, time() . '|' . ($bruteforce_contents[1] >= 5 ? '0' : ++$bruteforce_contents[1]));
+	return refresh('Password is incorrect');
 }
 function doLogout(){
 	session_destroy();
@@ -467,6 +489,7 @@ function doMove($subject, $path){
 
 	if (file_exists($to.'/'.$subject))
 		return refresh($subjectHTML . ' exists in ' . $toHTML);
+
 	rename($path . '/' . $subject, $to.'/'.$subject);
 	redirect();
 }
@@ -646,26 +669,29 @@ function getDirContents($path){
 	}
 	closedir($dirHandle);
 }
-//list directory contents functions
+
+/*
+ * the following two functions output the file list
+ */
 function getDirs($path){
 	global $dirContents, $pathURL;
 
-	if (!($l = count($dirContents['folders'])))
+	if (!count($dirContents['folders']))
 		return;
 
-	sort($dirContents['folders']); //TODO: Better sort (below also)
+	natcasesort($dirContents['folders']);
 
-	for ($i = 0; $i < $l; $i++){
-		$dirItem = $dirContents['folders'][$i];
+	foreach ($dirContents['folders'] as $dirItem){
 		$dirItemURL = escape($dirItem);
 		$dirItemHTML = htmlspecialchars($dirItem);
 		$fullPath = $path.'/'.$dirItem;
 
-		$mod = getmod($path.'/'.$dirItem);
+		$mtime = filemtime($fullPath);
+		$mod = getMod($path.'/'.$dirItem);
 
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="?path=' . escape($fullPath) . '" title="' . $dirItemHTML . '" class="dir">'.$dirItemHTML.'</a>'.
-		"\n\t" . '<span class="filemtime" title="file modified time">' . date('c', filemtime($fullPath)) . '</span>' .
+		"\n\t" . '<span class="filemtime" title="'.date('c',$mtime).'">' . date('y-m-d | H:i:s', $mtime) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a>' .
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
@@ -678,34 +704,36 @@ function getFiles($path){
 	global $dirContents, $pathURL, $codeMirrorModes;
 	$filePath = $path == '.' ? '/' : '/' . $path.'/';
 
-	if (!($l = count($dirContents['files'])))
+	if (!count($dirContents['files']))
 		return;
 
-	sort($dirContents['files']);
+	natcasesort($dirContents['files']);
 
 	$codeMirrorExists = (int)is_dir(CODEMIRROR_PATH);
+	$zipSupport = zipSupport();
 
-	for ($i = 0; $i < $l; $i++){
-		$dirItem = $dirContents['files'][$i];
+	foreach ($dirContents['files'] as $dirItem){
 		$dirItemURL = escape($dirItem);
 		$dirItemHTML = htmlspecialchars($dirItem);
 		$fullPath = $path.'/'.$dirItem;
 
-		$mod = getmod($fullPath);
+		$mtime = filemtime($fullPath);
+		$mod = getMod($fullPath);
 		$ext = getExt($dirItem);
+		$cmSupport = in_array($ext, $codeMirrorModes) ? 'cp ' : '';
 
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a>' .
 		"\n\t" . '<span class="fs"  title="file size">' . getfs($path.'/'.$dirItem) . '</span>' .
 		"\n\t" . '<span class="extension" title="file extension">' . $ext . '</span>' .
-		"\n\t" . '<span class="filemtime" title="file modified time">' . date('c', filemtime($fullPath)) . '</span>' .
+		"\n\t" . '<span class="filemtime" title="'.date('c',$mtime).'">' . date('y-m-d | H:i:s', $mtime) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
-		((zipSupport() && $ext == 'zip')
+		(($zipSupport && $ext == 'zip')
 			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'" title="Extract '.$dirItemHTML.'" class="extract b"></a>'
-			: null) .
-		(filesize($fullPath) <= (1048576 * MaxEditableSize) ? (in_array($ext, $codeMirrorModes)
-			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.getExt($dirItem).'\', '.$codeMirrorExists.'); return false;" class="edit cp b"></a>'
-			: "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', null); return false;" class="edit b"></a>') : null) .
+			: '') .
+		(filesize($fullPath) <= (1048576 * MaxEditableSize)
+			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$ext.'\', '.$codeMirrorExists.'); return false;" class="edit '.$cmSupport.'b"></a>'
+			: '') .
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a>' .
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
 		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a>' .
