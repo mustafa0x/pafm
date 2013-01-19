@@ -1,7 +1,7 @@
 /*
 	@filename: style.css
 
-	Copyright (C) 2007-2012 mustafa
+	Copyright (C) 2007-2013 mustafa
 	This program is free software; you can redistribute it and/or modify it under the terms of the
 	GNU General Public License as published by the Free Software Foundation.
 */
@@ -11,7 +11,7 @@ html, body {
 }
 body {
 	margin: 0;
-	font-family: Calibri, Consolas, Trebuchet, sans-serif;
+	font-family: Calibri, verdana, arial;
 }
 a {
 	text-decoration: none;
@@ -85,8 +85,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 	position: relative;
 	bottom: .05em;
 	right: .11em;
-	font-family: Consolas, MonoSpace;
-	font-weight: bold;
+	font: bold 14px verdana, arial;
 	color: black;
 }
 .dir {
@@ -107,13 +106,13 @@ a:hover.b, .b a:hover, #add a img:hover {
 	margin-top: .30em;
 }
 .fs {
-	margin-right: 3.2em;
+	margin-right: 5%;
 }
 .extension {
-	margin-right: 8em;
+	margin-right: 13%;
 }
 .filemtime {
-	margin-right: 13.4em;
+	margin-right: 20%;
 }
 
 /*end cols: file operations*/

@@ -2,7 +2,7 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.7 RC
+	@version:                 1.7 RC2
 	@date:                    January 19th, 2013
 
 	@author:                  mustafa
@@ -12,7 +12,7 @@
 	@server requirements:     PHP 5
 	@browser requirements:    modern browser
 
-	Copyright (C) 2007-2012 mustafa
+	Copyright (C) 2007-2013 mustafa
 	This program is free software; you can redistribute it and/or modify it under the terms of the
 	GNU General Public License as published by the Free Software Foundation. See COPYING
 */
@@ -73,7 +73,7 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.7 RC');
+define('VERSION', '1.7 RC2');
 
 define('CODEMIRROR_PATH', __DIR__ . '/_cm');
 
@@ -131,33 +131,28 @@ if (!isNull(ROOT) && is_dir(ROOT))
 	chdir(ROOT);
 
 if (!is_dir($path)) {
-	if ($path != '.') {
-		header('Location: ?path=.');
-		exit();
-	}
+	if ($path != '.')
+		exit(header('Location: ?path=.'));
 	else
-		echo 'path (' . $pathHTML . ') can\'t be read';
+		echo 'The current directory '.getcwd().' can\'t be read';
 }
 
 if (!is_readable($path)) {
-	chmod($path, 0777);
+	chmod($path, 0755);
 	if (!is_readable($path))
 		echo 'path (' . $pathHTML . ') can\'t be read';
-}
-
-/**
- * clean variables
- */
-if (isset($_GET['subject']) && !isNull($_GET['subject'])) {
-	$subject = str_replace('/', null, $_GET['subject']);
-	$subjectURL = escape($subject);
-	$subjectHTML = htmlspecialchars($subject);
 }
 
 /**
  * perform requested action
  */
 if ($do) {
+	if (isset($_GET['subject']) && !isNull($_GET['subject'])) {
+		$subject = str_replace('/', null, $_GET['subject']);
+		$subjectURL = escape($subject);
+		$subjectHTML = htmlspecialchars($subject);
+	}
+
 	switch ($do) {
 		case 'login':
 			exit(doLogin());
@@ -196,7 +191,7 @@ if ($do) {
 			nonce_check();
 			exit(doMove($subject, $path));
 		case 'moveList':
-			exit(moveList($subject, $path, $to));
+			exit(moveList($subject, $path));
 		case 'installCodeMirror':
 			exit(installCodeMirror());
 		case 'fileExists':
@@ -336,7 +331,6 @@ function doAuth(){
     }
     a {
         text-decoration: none;
-        font-style: italic;
         color: #B22424;
     }
     a:visited {
@@ -347,6 +341,7 @@ function doAuth(){
     }
     p {
         margin-top: 7.5em;
+        font: italic 12px verdana,arial;
     }
   </style>
 </head>
@@ -581,24 +576,6 @@ function doRemoteCopy($path){
 		return refresh($location . ' could not be copied to '. ($dest));
 	redirect();
 }
-function doMove($subject, $path){
-	global $pathHTML, $subjectHTML, $to, $toHTML;
-
-	if (isNull($subject, $path, $to))
-		return refresh('Values could not be read');
-
-	if ($path == $to)
-		return refresh('The source and destination are the same');
-
-	if (array_search($subject, explode('/', $to)) == array_search($subject, explode('/', $path . '/' . $subject)))
-		return refresh($toHTML . ' is a subfolder of ' . $pathHTML);
-
-	if (file_exists($to.'/'.$subject))
-		return refresh($subjectHTML . ' exists in ' . $toHTML);
-
-	rename($path . '/' . $subject, $to.'/'.$subject);
-	redirect();
-}
 function doRename($subject, $path){
 	$rename = isset($_POST['rename']) ? $_POST['rename'] : '';
 	if (isNull($subject, $rename))
@@ -640,6 +617,29 @@ function doSaveEdit($subject, $path){
 	else
 		return 'saved at ' . date('H:i:s', time() + $tz_offset);
 }
+function doMove($subject, $path){
+	global $pathHTML, $subjectHTML;
+
+	if (isset($_GET['to']) && !isNull($_GET['to'])) {
+		$to = $_GET['to'];
+		$toHTML = htmlspecialchars($to);
+		$toURL = escape($to);
+	}
+	if (isNull($subject, $path, $to))
+		return refresh('Values could not be read');
+
+	if ($path == $to)
+		return refresh('The source and destination are the same');
+
+	if (array_search($subject, explode('/', $to)) == array_search($subject, explode('/', $path . '/' . $subject)))
+		return refresh($toHTML . ' is a subfolder of ' . $pathHTML);
+
+	if (file_exists($to.'/'.$subject))
+		return refresh($subjectHTML . ' exists in ' . $toHTML);
+
+	rename($path . '/' . $subject, $to.'/'.$subject);
+	redirect();
+}
 function moveList($subject, $path){
 	global $pathURL, $pathHTML, $subjectURL, $subjectHTML, $nonce;
 
@@ -660,6 +660,8 @@ function moveList($subject, $path){
 	';
 	$crumbs = explode('/', $toHTML);
 	$crumbsLink = explode('/', $toURL);
+	$pathSplit = '';
+
 	for ($i = 0; $i < count($crumbs); $i++) {
 		$slash = $i ? '/' : null;
 		$pathSplit .= $slash . $crumbsLink[$i];
@@ -686,6 +688,7 @@ function moveList($subject, $path){
 		{attributes: {"id": "moveListUL"}}';
 
 	$j = 0;
+	//TODO: sort output
 	$handle = opendir($to);
 	while (($dirItem = readdir($handle)) !== false)	{
 		$fullPath = $to.'/'.$dirItem;
@@ -708,10 +711,12 @@ function moveList($subject, $path){
 					}
 				}
 			},
-			["img", {attributes: {"src": "'. (DEV ? 'pafm-files/' : '?r=') .'images/odir.png", "title": "Open '.$dirItemHTML.'"}}],
+			["img", {attributes: {"src": "'. (DEV ? 'pafm-files/' : '?r=')
+			.'images/odir.png", "title": "Open '.$dirItemHTML.'"}}],
 			"a",
 			{
-				attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$fullPathURL.'&nonce='.$nonce.'", "title" : "move '.$subject.' to '.$dirItemHTML.'", "class": "dir"},
+				attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$fullPathURL
+				.'&nonce='.$nonce.'", "title" : "move '.$subject.' to '.$dirItemHTML.'", "class": "dir"},
 				text: "'.$dirItemHTML.'"
 			}
 		]
@@ -726,7 +731,8 @@ function moveList($subject, $path){
 	$return .= ',
 	"a",
 	{
-		attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$toURL.'&nonce='.$nonce.'", "id": "movehere", "title": "move here ('.$toHTML.')"},
+		attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$toURL
+		.'&nonce='.$nonce.'", "id": "movehere", "title": "move here ('.$toHTML.')"},
 		text : "move here"
 	}]
 ]';
@@ -826,10 +832,10 @@ function getFiles($path){
 <html>
 <head>
   <meta charset="UTF-8">
-  <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
-  <style type="text/css">@import "<?php echo DEV ? "pafm-files/style.css" : "?r=css";?>";</style>
+  <title><?php echo str_replace('www.', '', $_SERVER['HTTP_HOST']); ?> | pafm</title>
+  <style type="text/css">@import "<?php echo DEV ? 'pafm-files/style.css' : '?r=css';?>";</style>
   <script type="text/javascript">var nonce = "<?php echo $_SESSION['nonce']; ?>";</script>
-  <script src="<?php echo DEV ? "pafm-files/js.js" : "?r=js";?>" type="text/javascript"></script>
+  <script src="<?php echo DEV ? 'pafm-files/js.js' : '?r=js';?>" type="text/javascript"></script>
 </head>
 <body>
 

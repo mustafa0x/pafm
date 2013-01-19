@@ -2,7 +2,7 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.7 RC
+	@version:                 1.7 RC2
 	@date:                    January 19th, 2013
 
 	@author:                  mustafa
@@ -12,7 +12,7 @@
 	@server requirements:     PHP 5
 	@browser requirements:    modern browser
 
-	Copyright (C) 2007-2012 mustafa
+	Copyright (C) 2007-2013 mustafa
 	This program is free software; you can redistribute it and/or modify it under the terms of the
 	GNU General Public License as published by the Free Software Foundation. See COPYING
 */
@@ -73,7 +73,7 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 0);
 
-define('VERSION', '1.7 RC');
+define('VERSION', '1.7 RC2');
 
 define('CODEMIRROR_PATH', __DIR__ . '/_cm');
 
@@ -96,7 +96,7 @@ $footer = '<a href="http://github.com/mustafa0x/pafm">pafm v'.VERSION.'</a> '
 $_R_HEADERS = array('js' => 'text/javascript', 'css' => 'text/css', 'png' => 'image/png', 'gif' => 'image/gif');
 $_R = array();
 $_R['js'] = 'function $(a){return document.getElementById(a)}var popup,fOp,edit,upload,shell,__AJAX_ACTIVE,__CODEMIRROR,__CODEMIRROR_MODE,__CODEMIRROR_LOADED,__CODEMIRROR_PATH="_cm",__CODEMIRROR_MODES={html:"htmlmixed",js:"javascript",py:"python",rb:"ruby",md:"markdown"};function ajax(b,g,e,c,a,d){__AJAX_ACTIVE=true;if(!a){json2markup(["div",{attributes:{id:"ajaxOverlay"}},"img",{attributes:{src:"?r=images/ajax.gif",id:"ajaxImg",title:"Loading",alt:"Loading"}}],document.body);$("ajaxOverlay").style.height=document.body.offsetHeight+"px";fade($("ajaxOverlay"),0,6,25,"in")}var f=window.ActiveXObject?new ActiveXObject("MSXML2.XMLHTTP.3.0"):new XMLHttpRequest();d&&f.upload.addEventListener("progress",d,false);f.open(g,b,true);f.onreadystatechange=function(){if(f.readyState!=4){return}__AJAX_ACTIVE=false;a||fade($("ajaxOverlay"),6,0,25,"out",function(){document.body.removeChild($("ajaxOverlay"));document.body.removeChild($("ajaxImg"))});if(f.status==200||f.statusText=="OK"){if(f.responseText=="Please refresh the page and login"){alert(f.responseText)}else{c(f.responseText)}}else{alert("AJAX request unsuccessful.\nStatus Code: "+f.status+"\nStatus Text: "+f.statusText+"\nParameters: "+b)}f=null};if(g.toLowerCase()=="post"&&!a){f.setRequestHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8")}f.send(e)}function json2markup(c,g){var b=0,a=c.length,d,f,e;for(;b<a;b++){if(c[b].constructor==Array){json2markup(c[b],d)}else{if(c[b].constructor==Object){if(c[b].attributes){for(f in c[b].attributes){switch(f.toLowerCase()){case"class":d.className=c[b].attributes[f];break;case"style":d.style.cssText=c[b].attributes[f];break;case"for":d.htmlFor=c[b].attributes[f];break;default:d.setAttribute(f,c[b].attributes[f])}}}if(c[b].events){for(e in c[b].events){d.addEventListener(e,c[b].events[e],false)}}if(c[b].preText){g.appendChild(document.createTextNode(c[b].preText))}if(c[b].text){d.appendChild(document.createTextNode(c[b].text))}switch(c[b].insert){case"before":g.parentNode.insertBefore(d,g);break;case"after":g.parentNode.insertBefore(d,g.nextSibling);break;case"under":default:g.appendChild(d)}if(c[b].postText){g.appendChild(document.createTextNode(c[b].postText))}}else{d=document.createElement(c[b])}}}}function fade(e,f,g,c,h,i){var d=e.style.opacity!=undefined,b,a;e.style[d?"opacity":"filter"]=d?f/10:"alpha(opacity="+f*10+")";a=setInterval(function(){if(h=="in"){f++;b=f<=g}else{if(h=="out"){f--;b=f>=g}}if(b){e.style[d?"opacity":"filter"]=d?f/10:"alpha(opacity="+f*10+")"}else{clearInterval(a);if(i){i()}}},c)}popup={init:function(d,a){json2markup(["div",{attributes:{id:"popOverlay"},events:{click:popup.close}}],document.body);json2markup(["div",{attributes:{id:"popup"}},["div",{attributes:{id:"head"}},["a",{attributes:{id:"x",href:"#"},events:{click:function(f){popup.close();f.preventDefault?f.preventDefault():f.returnValue=false}},text:"[x]"},"span",{text:d}],"div",{attributes:{id:"body"}}]],document.body);var e=$("popup"),c=$("popOverlay"),b;json2markup(a,$("body"));if(b=$("moveListUL")){if(b.offsetHeight>(document.body.offsetHeight-150)){b.style.height=document.body.offsetHeight-150+"px"}}e.style.marginTop="-"+parseInt(e.offsetHeight)/2+"px";e.style.marginLeft="-"+parseInt(e.offsetWidth)/2+"px";fade(c,0,6,25,"in");document.onkeydown=function(f){if((f||window.event).keyCode==27){popup.close();return false}}},close:function(){if(__AJAX_ACTIVE){return}if($("popup")){var a=$("popOverlay");fade(a,6,0,25,"out",function(){document.body.removeChild(a)});document.body.removeChild($("popup"))}document.onkeydown=null}};fOp={rename:function(a,b){popup.init("Rename:",["form",{attributes:{action:"?do=rename&subject="+a+"&path="+b+"&nonce="+nonce,method:"post"}},["input",{attributes:{title:"Rename To",type:"text",name:"rename",value:a}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},create:function(a,b){popup.init("Create "+a+":",["form",{attributes:{method:"post",action:"?do=create&path="+b+"&f_type="+a+"&nonce="+nonce}},["input",{attributes:{title:"Filename",type:"text",name:"f_name"}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},chmod:function(c,b,a){popup.init("Chmod "+unescape(b)+":",["form",{attributes:{method:"post",action:"?do=chmod&subject="+b+"&path="+c+"&nonce="+nonce}},["input",{attributes:{title:"chmod",type:"text",name:"mod",value:a}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},copy:function(a,b){popup.init("Copy "+unescape(a)+":",["form",{attributes:{method:"post",action:"?do=copy&subject="+a+"&path="+b+"&nonce="+nonce}},["input",{attributes:{title:"copy to",type:"text",name:"to",value:"copy-"+a}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},moveList:function(a,b,c){ajax(("?do=moveList&subject="+a+"&path="+b+"&to="+c),"get",null,function(d){if(!$("popup")){popup.init("Move "+unescape(a)+" to:",Function("return "+d)())}else{var f=$("popup"),e;$("body").innerHTML="";json2markup(Function("return "+d)(),$("body"));if((e=$("moveListUL")).offsetHeight>(document.body.offsetHeight-150)){e.style.height=document.body.offsetHeight-150+"px"}f.style.marginTop="-"+parseInt(f.offsetHeight)/2+"px";f.style.marginLeft="-"+parseInt(f.offsetWidth)/2+"px"}})},remoteCopy:function(a){popup.init("Remote Copy:",["form",{attributes:{method:"post",action:"?do=remoteCopy&path="+a+"&nonce="+nonce,id:"remote-copy"}},["legend",{text:"Location: "},["br",{},"input",{attributes:{title:"Remote Copy",type:"text",name:"location"},events:{change:function(b){$("remoteCopyName").value=this.value.substring(this.value.lastIndexOf("/")+1)}}}],"legend",{text:"Name: "},["br",{},"input",{attributes:{id:"remoteCopyName",title:"Name",type:"text",name:"to"}}],"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])}};edit={init:function(b,c,d,a){__CODEMIRROR_MODE=d;json2markup(["div",{attributes:{id:"editOverlay"}}],document.body);$("editOverlay").style.height="100%";json2markup(["div",{attributes:{id:"ea"}},["textarea",{attributes:{id:"ta",rows:"30",cols:"90"},events:{change:function(){window.__FILECHANGED=true}}},"br",{},"input",{attributes:{type:"text",value:unescape(b),readonly:""}},"input",{attributes:{type:"button",value:"CodeMirror"},events:{click:function(){if(a){edit.codeMirrorLoad()}else{if(confirm("Install CodeMirror?")){ajax("?do=installCodeMirror","get",null,function(e){if(e==""){edit.codeMirrorLoad()}else{alert("Install failed. Manually upload CodeMirrorand place it in _codemirror, in the same directory as pafm")}})}}this.disabled=true}}},"input",{attributes:{type:"button",value:"Save",id:"save"},events:{click:function(){edit.save(b,c)}}},"input",{attributes:{type:"button",value:"Exit",id:"exit"},events:{click:function(){edit.exit(b,c)}}},"span",{attributes:{id:"editMsg"}}]],document.body);document.onkeydown=function(f){if((f||window.event).keyCode==27){edit.exit(b,c);return false}};ajax("?do=readFile&path="+c+"&subject="+b,"get",null,function(e){$("ta").value=e});location="#header"},codeMirrorLoad:function(){if(!__CODEMIRROR_LOADED){json2markup(["script",{attributes:{src:__CODEMIRROR_PATH+"/cm.js",type:"text/javascript"},events:{load:function(){__CODEMIRROR_LOADED=true;edit.codeMirrorLoad()}}},"link",{attributes:{rel:"stylesheet",href:__CODEMIRROR_PATH+"/cm.css"}},],document.getElementsByTagName("head")[0])}else{var a=__CODEMIRROR_MODES[__CODEMIRROR_MODE]||__CODEMIRROR_MODE;__CODEMIRROR=CodeMirror.fromTextArea($("ta"),{onChange:function(){window.__FILECHANGED=true},lineNumbers:true});__CODEMIRROR.setOption("mode",a)}},save:function(b,c){__CODEMIRROR&&__CODEMIRROR.save();$("editMsg").innerHTML=null;var a="data="+encodeURIComponent($("ta").value);ajax("?do=saveEdit&subject="+b+"&path="+c+"&nonce="+nonce,"post",a,function(d){$("editMsg").className=d.indexOf("saved")==-1?"failed":"succeeded";$("editMsg").innerHTML=d});window.__FILESAVED=true;window.__FILECHANGED=false},exit:function(a,b){if(window.__FILECHANGED&&!confirm("Leave without saving?")){return}if(window.__FILESAVED){ajax("?do=getfs&path="+b+"&subject="+a,"get",null,function(e){var g=$("dirList").getElementsByTagName("li"),d=unescape(a),f=0,c=g.length;for(;f<c;f++){if(g[f].title==d){g[f].getElementsByTagName("span")[0].innerHTML=e;break}}})}__CODEMIRROR=null;document.body.removeChild($("ea"));document.body.removeChild($("editOverlay"));window.__FILESAVED=null;document.onkeydown=null}};shell={init:function(b,a){popup.init("Shell:",["textarea",{attributes:{id:"shell-history"},text:""},"form",{attributes:{id:"shell",action:"?do=shell&nonce="+nonce,method:"post"},events:{submit:shell.submit}},["input",{attributes:{type:"text",name:"cmd",id:"cmd","data-bash":"["+b+" "+a+"]"}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},submit:function(a){a.preventDefault();$("shell-history").innerHTML+=$("cmd").getAttribute("data-bash")+"> "+$("cmd").value;ajax($("shell").getAttribute("action"),"POST","cmd="+encodeURIComponent($("cmd").value),function(b){$("shell-history").innerHTML+="\n"+b;$("shell-history").scrollTop=$("shell-history").scrollHeight});$("cmd").value="";return false}};upload={init:function(b,a){popup.init("Upload:",["form",{attributes:{id:"upload",action:"?do=upload&path="+b,method:"post",enctype:"multipart/form-data",encoding:"multipart/form-data"}},["input",{attributes:{type:"hidden",name:"MAX_FILE_SIZE",value:a}},"input",{attributes:{type:"file",id:"file_input",name:"file"},events:{change:function(c){upload.chk(c.target.files[0].name,b)}}}],"div",{attributes:{id:"upload-drag"},events:{dragover:function(c){this.className="upload-dragover";c.preventDefault()},dragleave:function(){this.className=""},drop:function(c){c.preventDefault();upload.chk(c.dataTransfer.files[0].name,b,c.dataTransfer.files[0])},},text:"drag here"},"div",{attributes:{id:"response"},text:"php.ini upload limit: "+Math.floor(a/1048576)+" MB"}])},chk:function(a,d,b){var c=new FormData();c.append("file",b||$("file_input").files[0]);ajax("?do=fileExists&path="+d+"&subject="+a,"GET",null,function(e){if(e=="1"){json2markup(["input",{insert:"after",attributes:{type:"button",value:"Replace?"},events:{click:function(f){upload.submit(d,c)}}}],$("file_input"))}else{upload.submit(d,c)}})},submit:function(b,a){ajax("?do=upload&path="+b+"&nonce="+nonce,"POST",a,function(c){$("response").innerHTML=c;location.reload(true)},true,function(d){if(d.lengthComputable){var c=Math.round((d.loaded*100)/d.total);$("response").innerHTML="uploaded: "+c+"%"}})}};';
-$_R['css'] = 'html,body{height:100%;width:100%}body{margin:0;font-family:Calibri,Consolas,Trebuchet,sans-serif}a{text-decoration:none;color:#b22424}a:visited{color:#ff2f00}a:hover{color:#dd836f}img{border:0}a:hover.b,.b a:hover,#add a img:hover{border:1px dotted #b22424}#header{padding:.2em;background-color:#e8e8e8}#logout{float:right}.pathCrumbs a:hover{background-color:white}#dir-count{color:grey;font-size:small;margin:0 0 3px 10px}#dirList ul{list-style:none;margin:.5em 0 0 1.5em;padding:0}#dirList li{margin:.05em 0;padding:.1em 0 .1em .1em;width:98%}#dirList li:hover{background:#ebebeb;border-radius:5px}#body .pathCrumbs a:hover{background-color:#e8e8e8}#info li:hover{background:0}#file{padding-left:.3em;font-size:.7em;bottom:.10em}#fileop{position:absolute;right:3em;font-size:.7em;margin-top:.30em}.dir,.file{position:relative;bottom:.05em;right:.11em;font-family:Consolas,MonoSpace;font-weight:bold;color:black}.dir{background:url(?r=images/dir.png) no-repeat bottom left;padding-left:1.45em;padding-top:2px}.file{padding-left:.30em}.mode,.fs,.extension,.filemtime{position:absolute;right:15em;font-family:Calibri,sans-serif;font-size:.7em;margin-top:.30em}.fs{margin-right:3.2em}.extension{margin-right:8em}.filemtime{margin-right:13.4em}.del,.edit,.rename,.move,.copy,.chmod,.extract{position:absolute;margin-top:.11em;min-width:1em;min-height:1em}.del{background:url(?r=images/del.png) no-repeat top right;right:2.22em}.rename{background:url(?r=images/ren.gif) no-repeat top right;right:3.33em}.move{background:url(?r=images/move.gif) no-repeat top right;right:4.44em}.chmod{background:url(?r=images/chmod.gif) no-repeat top right;right:6.55em}.copy{background:url(?r=images/copy.png) no-repeat top right;right:5.56em}.extract{background:url(?r=images/extract.png) no-repeat top right;right:8.92em}.edit{background:url(?r=images/edit.png) no-repeat top right;right:7.65em}.cp{background:url(?r=images/cp.png) no-repeat top right;padding:0 0 1px 1px}#add{float:right;position:relative;right:2em;top:1em}#add a:hover,#add a:focus{border:0}#movelist{text-align:left;margin-left:.5em}#moveListUL{margin-top:.75em;margin-bottom:.5em;list-style:none;overflow:auto}#movelist a img{vertical-align:-15%}#movehere{margin-left:.5em;background:url(?r=images/movehere.gif) no-repeat center left;padding-left:.90em;font-family:Calibri,sans-serif}#ea{position:absolute;top:0;left:0;z-index:125}#editMsg{margin-left:2px}.failed,.succeeded{color:red;font-weight:bold}.succeeded{color:green}.CodeMirror-scroll{width:800px;height:600px!important;border:1px solid black}#footer{position:relative;top:3em;padding-bottom:1em;clear:both;text-align:center;font-size:.85em}#footer a{font-style:italic}#popup{position:fixed;left:50%;top:50%;min-width:15em;min-height:3em;border:2px solid #525252;background:white;z-index:150;padding-bottom:10px}#head{background-color:#e8e8e8;font-family:Calibri,sans-serif}#x{float:right}#body{text-align:center;margin:.5em 0;padding:0 15px 5px;white-space:nowrap}#response{font-weight:bold;font-size:small;margin-top:10px}#shell-history{width:400px;height:300px}#upload-drag{border:2px dashed;color:grey;height:20px;margin-top:7px;padding:7px 0 10px;width:97%}#upload-drag.upload-dragover{border:2px dashed blue}#remote-copy{text-align:left}#remote-copy input[type="text"]{width:300px}#remote-copy input[type="submit"]{float:right;margin-top:8px}#popOverlay,#editOverlay,#ajaxOverlay{width:100%;height:100%;position:fixed;left:0;top:0;z-index:105;background-color:#fff!important}#editOverlay{opacity:1;filter:alpha(opacity = 100);z-index:115}#ajaxOverlay{z-index:150}#ajaxImg{position:fixed;left:50%;top:50%;margin-left:-1.5em;margin-top:-1em;z-index:160}';
+$_R['css'] = 'html,body{height:100%;width:100%}body{margin:0;font-family:Calibri,Consolas,Trebuchet,sans-serif}a{text-decoration:none;color:#b22424}a:visited{color:#ff2f00}a:hover{color:#dd836f}img{border:0}a:hover.b,.b a:hover,#add a img:hover{border:1px dotted #b22424}#header{padding:.2em;background-color:#e8e8e8}#logout{float:right}.pathCrumbs a:hover{background-color:white}#dir-count{color:grey;font-size:small;margin:0 0 3px 10px}#dirList ul{list-style:none;margin:.5em 0 0 1.5em;padding:0}#dirList li{margin:.05em 0;padding:.1em 0 .1em .1em;width:98%}#dirList li:hover{background:#ebebeb;border-radius:5px}#body .pathCrumbs a:hover{background-color:#e8e8e8}#info li:hover{background:0}#file{padding-left:.3em;font-size:.7em;bottom:.10em}#fileop{position:absolute;right:3em;font-size:.7em;margin-top:.30em}.dir,.file{position:relative;bottom:.05em;right:.11em;font:bold 14px verdana,arial;color:black}.dir{background:url(?r=images/dir.png) no-repeat bottom left;padding-left:1.45em;padding-top:2px}.file{padding-left:.30em}.mode,.fs,.extension,.filemtime{position:absolute;right:15em;font-family:Calibri,sans-serif;font-size:.7em;margin-top:.30em}.fs{margin-right:5%}.extension{margin-right:13%}.filemtime{margin-right:20%}.del,.edit,.rename,.move,.copy,.chmod,.extract{position:absolute;margin-top:.11em;min-width:1em;min-height:1em}.del{background:url(?r=images/del.png) no-repeat top right;right:2.22em}.rename{background:url(?r=images/ren.gif) no-repeat top right;right:3.33em}.move{background:url(?r=images/move.gif) no-repeat top right;right:4.44em}.chmod{background:url(?r=images/chmod.gif) no-repeat top right;right:6.55em}.copy{background:url(?r=images/copy.png) no-repeat top right;right:5.56em}.extract{background:url(?r=images/extract.png) no-repeat top right;right:8.92em}.edit{background:url(?r=images/edit.png) no-repeat top right;right:7.65em}.cp{background:url(?r=images/cp.png) no-repeat top right;padding:0 0 1px 1px}#add{float:right;position:relative;right:2em;top:1em}#add a:hover,#add a:focus{border:0}#movelist{text-align:left;margin-left:.5em}#moveListUL{margin-top:.75em;margin-bottom:.5em;list-style:none;overflow:auto}#movelist a img{vertical-align:-15%}#movehere{margin-left:.5em;background:url(?r=images/movehere.gif) no-repeat center left;padding-left:.90em;font-family:Calibri,sans-serif}#ea{position:absolute;top:0;left:0;z-index:125}#editMsg{margin-left:2px}.failed,.succeeded{color:red;font-weight:bold}.succeeded{color:green}.CodeMirror-scroll{width:800px;height:600px!important;border:1px solid black}#footer{position:relative;top:3em;padding-bottom:1em;clear:both;text-align:center;font-size:.85em}#footer a{font-style:italic}#popup{position:fixed;left:50%;top:50%;min-width:15em;min-height:3em;border:2px solid #525252;background:white;z-index:150;padding-bottom:10px}#head{background-color:#e8e8e8;font-family:Calibri,sans-serif}#x{float:right}#body{text-align:center;margin:.5em 0;padding:0 15px 5px;white-space:nowrap}#response{font-weight:bold;font-size:small;margin-top:10px}#shell-history{width:400px;height:300px}#upload-drag{border:2px dashed;color:grey;height:20px;margin-top:7px;padding:7px 0 10px;width:97%}#upload-drag.upload-dragover{border:2px dashed blue}#remote-copy{text-align:left}#remote-copy input[type="text"]{width:300px}#remote-copy input[type="submit"]{float:right;margin-top:8px}#popOverlay,#editOverlay,#ajaxOverlay{width:100%;height:100%;position:fixed;left:0;top:0;z-index:105;background-color:#fff!important}#editOverlay{opacity:1;filter:alpha(opacity = 100);z-index:115}#ajaxOverlay{z-index:150}#ajaxImg{position:fixed;left:50%;top:50%;margin-left:-1.5em;margin-top:-1em;z-index:160}';
 $_R['images/copy.png'] = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAW0lEQVR42mNkgIKGhob/DEQCoFpGGJsR2YD6+nqCmhsbG+lgAEgRsQCnAcS6hvYGYPMOstxIcwG6odR3ATZ/YtOEDBixKcKXrGGugyVpsgyAqmHE6wJ8fkfOTACWlX8HDBsg/gAAAABJRU5ErkJggg==';
 $_R['images/cp.png'] = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABZUlEQVR4nKWTsYoaURhGz+hoJdqmFIvgiGyVZ4i1xbZbJ7W1jxBIlyyCJLAvYLVvYSVYGBCrweY6w8w49473zr/FblgtVk32g6/8DufncuGd8QCCIOgBX4E7oHlho4CfwLflcqkA6Pf797PZTLbbrex2u7MNw1Cm06kEQfADoNrtdj8PBoPvw+EQay1aa4wxb1ZE6HQ6LBaLT9baRx/42Gq1SNP0n26v1WqIyAdfRCp5npNl2dXjPM9JkgQRqfgAWmuSJAFgPp+fHfd6PeI4pigKAHyA/X5PHMcAjEajs4DJZMLhcKAsy1dAFEWEYYjv+xf1/5o6514BxhiUUhfH8Hw/cGrgnENrDcB4PL4KdGJwDLg2xwaltRZjzP8BnHPz42e5JiJClmWUZfmnqpQKG41GR2t943keRVGgtX6zaZqyXq+Jomi6Wq1+eS/QZrvd/lKv1289zzv7G0VEGWN+bzabByB9AqD9D+RrBi73AAAAAElFTkSuQmCC';
 $_R['images/del.png'] = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsSAAALEgHS3X78AAACYElEQVQ4jW1TTWtTURA9M/c+Hz6pidYKbU0LduWy2K4LXQiCP8Ot/8h/0K0guCiNQkTj3lUFE0lL0xYj9Zm5HzMukpcqOqthuOfMuWdmyMzQhJkREdlgMGgPh8OnRVHsAECM8VOn03m9sbHxvXnTYKghqOu6ZGbq9/sPu93uS2auzOwzABDRI1Wt9/b2nu/u7n5RVauqShYEdV3j8PDw1dbW1hMRSap60zn3HcDlvNHdnHObmX+VZemPj4/f7O/vP6uqCh4ARKQajUaP19fXixCCc85pTrlNRO3510BMGmMszYxHo9FjEamqqqo9AN9ut2sAB71e78XS0lIWkcJ7D1U1g8Gxo5QSl2UZr66u2Ht/MMd4r6rEzNjZ2bnc3NyEasbKyn2cnZ2hdfs2ETMmPyZYubeC8XgMABgOh5dEBFUlbtyMMdLJyQmOjro4Pz9Hr9fD18EAg8EAHz98xMXFBd6+e4fT01PEGKnBLQhU1WIIYGaIBDh2SCkh5zyvCRwzUkpQ1cUYfZOklCBEgBmCCEBATAmqBiKa1WaGI6WE/xJozjADpjKd1WKEsQIApiJQNchUoKbXBM0ipXk3w1wBCCllKCsMQJgKAIPIFMTcbO7fClKcSZMQQABSimB2IADTEObqAorCXytokpyzSRBozhZETKGIIYJdhs19sYXR9K+JIkKFL7C2ukreF7R8ZxneexAIhS/gnMPa+hqNz8YQEfqToHHkff9T/7zzoOMkiBGakzMQCAaz8kZJw2/DvL29/b6Z/uIaY4yYTCa3zMwDuL7xJmjGRUSp1Wr9LIoCAPAbCVuIcRUZG9UAAAAASUVORK5CYII=';
@@ -151,33 +151,28 @@ if (!isNull(ROOT) && is_dir(ROOT))
 	chdir(ROOT);
 
 if (!is_dir($path)) {
-	if ($path != '.') {
-		header('Location: ?path=.');
-		exit();
-	}
+	if ($path != '.')
+		exit(header('Location: ?path=.'));
 	else
-		echo 'path (' . $pathHTML . ') can\'t be read';
+		echo 'The current directory '.getcwd().' can\'t be read';
 }
 
 if (!is_readable($path)) {
-	chmod($path, 0777);
+	chmod($path, 0755);
 	if (!is_readable($path))
 		echo 'path (' . $pathHTML . ') can\'t be read';
-}
-
-/**
- * clean variables
- */
-if (isset($_GET['subject']) && !isNull($_GET['subject'])) {
-	$subject = str_replace('/', null, $_GET['subject']);
-	$subjectURL = escape($subject);
-	$subjectHTML = htmlspecialchars($subject);
 }
 
 /**
  * perform requested action
  */
 if ($do) {
+	if (isset($_GET['subject']) && !isNull($_GET['subject'])) {
+		$subject = str_replace('/', null, $_GET['subject']);
+		$subjectURL = escape($subject);
+		$subjectHTML = htmlspecialchars($subject);
+	}
+
 	switch ($do) {
 		case 'login':
 			exit(doLogin());
@@ -216,7 +211,7 @@ if ($do) {
 			nonce_check();
 			exit(doMove($subject, $path));
 		case 'moveList':
-			exit(moveList($subject, $path, $to));
+			exit(moveList($subject, $path));
 		case 'installCodeMirror':
 			exit(installCodeMirror());
 		case 'fileExists':
@@ -356,7 +351,6 @@ function doAuth(){
     }
     a {
         text-decoration: none;
-        font-style: italic;
         color: #B22424;
     }
     a:visited {
@@ -367,6 +361,7 @@ function doAuth(){
     }
     p {
         margin-top: 7.5em;
+        font: italic 12px verdana,arial;
     }
   </style>
 </head>
@@ -601,24 +596,6 @@ function doRemoteCopy($path){
 		return refresh($location . ' could not be copied to '. ($dest));
 	redirect();
 }
-function doMove($subject, $path){
-	global $pathHTML, $subjectHTML, $to, $toHTML;
-
-	if (isNull($subject, $path, $to))
-		return refresh('Values could not be read');
-
-	if ($path == $to)
-		return refresh('The source and destination are the same');
-
-	if (array_search($subject, explode('/', $to)) == array_search($subject, explode('/', $path . '/' . $subject)))
-		return refresh($toHTML . ' is a subfolder of ' . $pathHTML);
-
-	if (file_exists($to.'/'.$subject))
-		return refresh($subjectHTML . ' exists in ' . $toHTML);
-
-	rename($path . '/' . $subject, $to.'/'.$subject);
-	redirect();
-}
 function doRename($subject, $path){
 	$rename = isset($_POST['rename']) ? $_POST['rename'] : '';
 	if (isNull($subject, $rename))
@@ -660,6 +637,29 @@ function doSaveEdit($subject, $path){
 	else
 		return 'saved at ' . date('H:i:s', time() + $tz_offset);
 }
+function doMove($subject, $path){
+	global $pathHTML, $subjectHTML;
+
+	if (isset($_GET['to']) && !isNull($_GET['to'])) {
+		$to = $_GET['to'];
+		$toHTML = htmlspecialchars($to);
+		$toURL = escape($to);
+	}
+	if (isNull($subject, $path, $to))
+		return refresh('Values could not be read');
+
+	if ($path == $to)
+		return refresh('The source and destination are the same');
+
+	if (array_search($subject, explode('/', $to)) == array_search($subject, explode('/', $path . '/' . $subject)))
+		return refresh($toHTML . ' is a subfolder of ' . $pathHTML);
+
+	if (file_exists($to.'/'.$subject))
+		return refresh($subjectHTML . ' exists in ' . $toHTML);
+
+	rename($path . '/' . $subject, $to.'/'.$subject);
+	redirect();
+}
 function moveList($subject, $path){
 	global $pathURL, $pathHTML, $subjectURL, $subjectHTML, $nonce;
 
@@ -680,6 +680,8 @@ function moveList($subject, $path){
 	';
 	$crumbs = explode('/', $toHTML);
 	$crumbsLink = explode('/', $toURL);
+	$pathSplit = '';
+
 	for ($i = 0; $i < count($crumbs); $i++) {
 		$slash = $i ? '/' : null;
 		$pathSplit .= $slash . $crumbsLink[$i];
@@ -706,6 +708,7 @@ function moveList($subject, $path){
 		{attributes: {"id": "moveListUL"}}';
 
 	$j = 0;
+	//TODO: sort output
 	$handle = opendir($to);
 	while (($dirItem = readdir($handle)) !== false)	{
 		$fullPath = $to.'/'.$dirItem;
@@ -728,10 +731,12 @@ function moveList($subject, $path){
 					}
 				}
 			},
-			["img", {attributes: {"src": "'. (DEV ? 'pafm-files/' : '?r=') .'images/odir.png", "title": "Open '.$dirItemHTML.'"}}],
+			["img", {attributes: {"src": "'. (DEV ? 'pafm-files/' : '?r=')
+			.'images/odir.png", "title": "Open '.$dirItemHTML.'"}}],
 			"a",
 			{
-				attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$fullPathURL.'&nonce='.$nonce.'", "title" : "move '.$subject.' to '.$dirItemHTML.'", "class": "dir"},
+				attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$fullPathURL
+				.'&nonce='.$nonce.'", "title" : "move '.$subject.' to '.$dirItemHTML.'", "class": "dir"},
 				text: "'.$dirItemHTML.'"
 			}
 		]
@@ -746,7 +751,8 @@ function moveList($subject, $path){
 	$return .= ',
 	"a",
 	{
-		attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$toURL.'&nonce='.$nonce.'", "id": "movehere", "title": "move here ('.$toHTML.')"},
+		attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$toURL
+		.'&nonce='.$nonce.'", "id": "movehere", "title": "move here ('.$toHTML.')"},
 		text : "move here"
 	}]
 ]';
@@ -846,10 +852,10 @@ function getFiles($path){
 <html>
 <head>
   <meta charset="UTF-8">
-  <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
-  <style type="text/css">@import "<?php echo DEV ? "pafm-files/style.css" : "?r=css";?>";</style>
+  <title><?php echo str_replace('www.', '', $_SERVER['HTTP_HOST']); ?> | pafm</title>
+  <style type="text/css">@import "<?php echo DEV ? 'pafm-files/style.css' : '?r=css';?>";</style>
   <script type="text/javascript">var nonce = "<?php echo $_SESSION['nonce']; ?>";</script>
-  <script src="<?php echo DEV ? "pafm-files/js.js" : "?r=js";?>" type="text/javascript"></script>
+  <script src="<?php echo DEV ? 'pafm-files/js.js' : '?r=js';?>" type="text/javascript"></script>
 </head>
 <body>
 
