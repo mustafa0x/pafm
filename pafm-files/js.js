@@ -1,7 +1,7 @@
 /*
 	@filename: js.js
 
-	Copyright (C) 2007-2012 mustafa
+	Copyright (C) 2007-2013 mustafa
 	This program is free software; you can redistribute it and/or modify it under the terms of the
 	GNU General Public License as published by the Free Software Foundation.
 */
@@ -9,7 +9,7 @@
 function $(element) {
 	return document.getElementById(element);
 }
-var popup, fOp, edit, upload, __AJAX_ACTIVE,
+var popup, fOp, edit, upload, shell, __AJAX_ACTIVE,
 	__CODEMIRROR, __CODEMIRROR_MODE, __CODEMIRROR_LOADED, __CODEMIRROR_PATH = "_cm",
 	__CODEMIRROR_MODES = {
 		"html": "htmlmixed",
@@ -251,7 +251,7 @@ fOp = {
 			"form",
 			{
 				attributes : {
-					"action" : "?do=rename&subject=" + subject + "&path=" + path + "&token=" + token,
+					"action" : "?do=rename&subject=" + subject + "&path=" + path + "&nonce=" + nonce,
 					"method" : "post"
 				}
 			},
@@ -282,7 +282,7 @@ fOp = {
 			{
 				attributes : {
 					"method" : "post",
-					"action" : "?do=create&path=" + path + "&token=" + token
+					"action" : "?do=create&path=" + path + "&f_type=" + type + "&nonce=" + nonce
 				}
 			},
 			[
@@ -291,7 +291,7 @@ fOp = {
 					attributes : {
 						"title" : "Filename",
 						"type" : "text",
-						"name" : type
+						"name" : "f_name"
 					}
 				},
 				"input",
@@ -311,7 +311,7 @@ fOp = {
 			{
 				attributes : {
 					"method" : "post",
-					"action" : "?do=chmod&subject=" + subject + "&path=" + path + "&token=" + token
+					"action" : "?do=chmod&subject=" + subject + "&path=" + path + "&nonce=" + nonce
 				}
 			},
 			[
@@ -341,7 +341,7 @@ fOp = {
 			{
 				attributes : {
 					"method" : "post",
-					"action" : "?do=copy&subject=" + subject + "&path=" + path + "&token=" + token
+					"action" : "?do=copy&subject=" + subject + "&path=" + path + "&nonce=" + nonce
 				}
 			},
 			[
@@ -350,7 +350,7 @@ fOp = {
 					attributes : {
 						"title" : "copy to",
 						"type" : "text",
-						"name" : "name",
+						"name" : "to",
 						"value" : "copy-" + subject
 					}
 				},
@@ -386,24 +386,24 @@ fOp = {
 			{
 				attributes : {
 					"method" : "post",
-					"action" : "?do=remoteCopy&path=" + path + "&token=" + token
+					"action" : "?do=remoteCopy&path=" + path + "&nonce=" + nonce,
+					"id": "remote-copy"
 				}
 			},
 			[
 				"legend",
-				{
-					text : "Location: "
-				},
+				{text: "Location: "},
 				[
+					"br", {},
 					"input",
 					{
-						attributes : {
-							"title" : "Remote Copy",
-							"type" : "text",
-							"name" : "location"
+						attributes: {
+							"title": "Remote Copy",
+							"type": "text",
+							"name": "location"
 						},
-						events : {
-							change : function(e){
+						events: {
+							change: function(e){
 								$('remoteCopyName').value = this.value.substring(this.value.lastIndexOf('/') + 1);
 							}
 						}
@@ -412,22 +412,23 @@ fOp = {
 				"legend",
 				{text: "Name: "},
 				[
+					"br", {},
 					"input",
 					{
-						attributes : {
-							"id" : "remoteCopyName",
-							"title" : "Name",
-							"type" : "text",
-							"name" : "name"
+						attributes: {
+							"id": "remoteCopyName",
+							"title": "Name",
+							"type": "text",
+							"name": "to"
 						}
 					}
 				],
 				"input",
 				{
-					attributes : {
-						"title" : "Ok",
-						"type" : "submit",
-						"value" : "\u2713"
+					attributes: {
+						"title": "Ok",
+						"type": "submit",
+						"value": "\u2713"
 					}
 				}
 			]
@@ -443,31 +444,34 @@ edit = {
 				attributes: {"id": "editOverlay"}
 			}
 		], document.body)
-		$("editOverlay").style.height = document.body.offsetHeight + "px";
+		$("editOverlay").style.height = "100%";
 		json2markup([
 		"div",
 		{
-			attributes : {
-				"id" : "ea"
-			}
+			attributes : {"id": "ea"}
 		},
 		[
 			"textarea",
 			{
-				attributes : {
-					"id" : "ta",
-					"rows" : "30",
-					"cols" : "90"
+				attributes: {
+					"id": "ta",
+					"rows": "30",
+					"cols": "90"
+				},
+				events: {
+					change: function(){
+						window.__FILECHANGED = true;
+					}
 				}
 			},
 			"br",
 			{},
 			"input",
 			{
-				attributes : {
-					"type" : "text",
-					"value" : unescape(subject),
-					"readonly" : ""
+				attributes: {
+					"type": "text",
+					"value": unescape(subject),
+					"readonly": ""
 				}
 			},
 			"input",
@@ -485,7 +489,8 @@ edit = {
 								if (response == "")
 									edit.codeMirrorLoad();
 								else
-									alert("Install failed. Manually upload CodeMirror and place it in _codemirror, in the same directory as pafm");
+									alert("Install failed. Manually upload CodeMirror"
+									+ "and place it in _codemirror, in the same directory as pafm");
 							});
 						this.disabled = true;
 					}
@@ -563,6 +568,9 @@ edit = {
 			var modeName = __CODEMIRROR_MODES[__CODEMIRROR_MODE] || __CODEMIRROR_MODE;
 
 			__CODEMIRROR = CodeMirror.fromTextArea($("ta"), {
+				onChange: function(){
+					window.__FILECHANGED = true;
+				},
 				lineNumbers: true
 			});
 
@@ -574,13 +582,16 @@ edit = {
 		__CODEMIRROR && __CODEMIRROR.save();
 		$("editMsg").innerHTML = null;
 		var postData = "data=" + encodeURIComponent($("ta").value);
-		ajax("?do=saveEdit&subject=" + subject + "&path=" + path + "&token=" + token, "post", postData, function(response){
+		ajax("?do=saveEdit&subject=" + subject + "&path=" + path + "&nonce=" + nonce, "post", postData, function(response){
 			$("editMsg").className = response.indexOf("saved") == -1 ? "failed" : "succeeded"
 			$("editMsg").innerHTML = response;
 		});
 		window.__FILESAVED = true;
+		window.__FILECHANGED = false;
 	},
 	exit : function(subject, path){
+		if (window.__FILECHANGED && !confirm("Leave without saving?"))
+			return;
 		if (window.__FILESAVED) {
 			ajax("?do=getfs&path=" + path + "&subject=" + subject, "get", null, function(response){
 				var listItems = $("dirList").getElementsByTagName("li"), temp = unescape(subject), i = 0, l = listItems.length;
@@ -599,57 +610,128 @@ edit = {
 		document.onkeydown = null;
 	}
 };
+/**
+ * TODO: multiline commands
+ */
+shell = {
+	init: function(whoami, cwd) {
+		popup.init("Shell:", [
+			"textarea",
+			{
+				attributes: {"id" : "shell-history"},
+				text : ""
+			},
+			"form",
+			{
+				attributes: {
+					"id" : "shell",
+					"action" : "?do=shell&nonce=" + nonce,
+					"method" : "post"
+				},
+				events: {"submit": shell.submit}
+			},
+			[
+				"input",
+				{
+					attributes: {
+						"type": "text",
+						"name": "cmd",
+						"id": "cmd",
+						"data-bash": "[" + whoami + " " + cwd + "]"
+					}
+				},
+				"input",
+				{
+					attributes : {
+						"title" : "Ok",
+						"type" : "submit",
+						"value" : "\u2713"
+					}
+				}
+			]
+		]);
+	},
+	submit : function(e){
+		e.preventDefault();
+		$("shell-history").innerHTML += $("cmd").getAttribute("data-bash") + "> " + $("cmd").value;
+		ajax($("shell").getAttribute("action"), "POST", "cmd=" + encodeURIComponent($("cmd").value),
+			function (response) {
+				$("shell-history").innerHTML += "\n" + response;
+				$("shell-history").scrollTop = $("shell-history").scrollHeight
+			}
+		);
+		$("cmd").value = '';
+		return false;
+	}
+};
 upload = {
 	init : function(path, fsize) {
-		var uploadInput = {
-			attributes : {
-				"type" : "file",
-				"id" : "file_input",
-				"name" : "file[]",
-				"multiple" : ""
-			},
-			events : {
-				change : function(e) {
-					upload.chk(e.target.files[0].name, path);
-				}
-			}
-		};
 		popup.init("Upload:", [
 			"form",
 			{
-				attributes : {
-					"id" : "upload",
-					"action" : "?do=upload&path=" + path,
-					"method" : "post",
-					"enctype" : "multipart/form-data",
-					"encoding" : "multipart/form-data"
+				attributes: {
+					"id": "upload",
+					"action": "?do=upload&path=" + path,
+					"method": "post",
+					"enctype": "multipart/form-data",
+					"encoding": "multipart/form-data"
 				}
 			},
 			[
 				"input",
 				{
-					attributes : {
-						"type" : "hidden",
-						"name" : "MAX_FILE_SIZE",
-						"value" :  fsize
+					attributes: {
+						"type": "hidden",
+						"name": "MAX_FILE_SIZE",
+						"value":  fsize
 					}
 				},
 				"input",
-				uploadInput
+				{
+					attributes: {
+						"type": "file",
+						"id": "file_input",
+						"name": "file"
+					},
+					events: {
+						change: function(e) {
+							upload.chk(e.target.files[0].name, path);
+						}
+					}
+				}
 			],
 			"div",
 			{
-				attributes : {
-					"id" : "response"
+				attributes: {"id": "upload-drag"},
+				events: {
+					dragover: function(e) {
+						this.className = "upload-dragover";
+						e.preventDefault();
+					},
+					dragleave: function() {
+						this.className = "";
+					},
+					drop: function(e) {
+						e.preventDefault();
+						upload.chk(e.dataTransfer.files[0].name, path, e.dataTransfer.files[0]);
+					},
 				},
-				text : "php.ini upload limit: " + Math.floor(fsize/1048576) + " MB"
+				text: "drag here"
 			},
+			"div",
+			{
+				attributes: {
+					"id": "response"
+				},
+				text: "php.ini upload limit: " + Math.floor(fsize/1048576) + " MB"
+			}
 		]);
 	},
-	chk : function(subject, path) {
-		var name = subject.split(/\\|\//g);
-		name = name.push ? name[name.length-1] : name;
-		ajax("?do=fileExists&path="+path+"&subject=" + name, "GET", null, function(response){
+	chk : function(subject, path, dndFile) {
+		var uploadData = new FormData();
+		uploadData.append("file", dndFile || $("file_input").files[0]);
+
+		ajax("?do=fileExists&path="+path+"&subject=" + subject, "GET", null, function(response){
 			if (response == "1"){
 				json2markup([
 					"input",
@@ -661,21 +743,18 @@ upload = {
 						},
 						events : {
 							click : function(e){
-								upload.submit(path);
+								upload.submit(path, uploadData);
 							}
 						}
 					}
 				], $("file_input"));
 			}
 			else
-				upload.submit(path);
+				upload.submit(path, uploadData);
 		});
 	},
-	submit : function(path){
-		var uploadData = new FormData();
-		uploadData.append("file[]", $("file_input").files[0]);
-
-		ajax("?do=upload&path=" + path + "&token=" + token, "POST", uploadData,
+	submit: function(path, uploadData){
+		ajax("?do=upload&path=" + path + "&nonce=" + nonce, "POST", uploadData,
 			function (response) {
 				$("response").innerHTML = response;
 				location.reload(true); //TODO: auto-update file list
@@ -684,7 +763,7 @@ upload = {
 			function (e){
 				if (e.lengthComputable) {
 					var percentage = Math.round((e.loaded * 100) / e.total);
-					$("response").innerHTML = "uploaded:" + percentage + "%";
+					$("response").innerHTML = "uploaded: " + percentage + "%";
 				}
 			}
 		);

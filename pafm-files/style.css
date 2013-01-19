@@ -28,9 +28,10 @@ img {
 }
 a:hover.b, .b a:hover, #add a img:hover {
 	border: 1px dotted #B22424;
+	/*box-shadow: 2px 3px 3px rgba(0, 0, 0, 0.3);*/
 }
 #header {
-	padding: .2em;
+	padding: 0.2em;
 	background-color: #E8E8E8;
 }
 #logout {
@@ -41,6 +42,11 @@ a:hover.b, .b a:hover, #add a img:hover {
 }
 .pathCrumbs a:hover {
 	background-color: white;
+}
+#dir-count {
+	color: grey;
+	font-size: small;
+	margin: 0 0 3px 10px;
 }
 #dirList ul {
 	list-style: none;
@@ -54,6 +60,7 @@ a:hover.b, .b a:hover, #add a img:hover {
 }
 #dirList li:hover {
 	background: #EBEBEB;
+	border-radius: 5px;
 }
 #body .pathCrumbs a:hover {
 	background-color: #E8E8E8;
@@ -234,12 +241,38 @@ a:hover.b, .b a:hover, #add a img:hover {
 #body {
 	text-align: center;
 	margin: .5em 0;
+	padding: 0 15px 5px;
 	white-space: nowrap
 }
 #response {
 	font-weight: bold;
 	font-size: small;
 	margin-top: 10px;
+}
+#shell-history {
+	width: 400px;
+	height: 300px;
+}
+#upload-drag {
+    border: 2px dashed;
+    color: grey;
+    height: 20px;
+    margin-top: 7px;
+    padding: 7px 0 10px;
+    width: 97%;
+}
+#upload-drag.upload-dragover {
+	border: 2px dashed blue;
+}
+#remote-copy {
+	text-align: left;
+}
+#remote-copy input[type="text"] {
+	width: 300px;
+}
+#remote-copy input[type="submit"] {
+	float: right;
+	margin-top: 8px;
 }
 /*opacity/fade overlays*/
 #popOverlay, #editOverlay, #ajaxOverlay {

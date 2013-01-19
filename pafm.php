@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.6 RC
-	@date:                    September 24th, 2012
+	@version:                 1.7 RC
+	@date:                    January 19th, 2013
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -23,19 +23,21 @@
  */
 
 define('PASSWORD', 'auth');
+define('PASSWORD_SALT', 'P5`SU2"6]NALYR}');
 
-/*
+/**
+ * Local (absolute or relative) path of folder to manage.
  *
- * _relative_ path of root folder to manage.
+ * By default, the directory pafm is in is what is used.
  *
  * Setting this to a path outside of webroot works,
- * but your URIs will be broken.
+ * but will break URIs.
  *
  * This directive will be ignored if set to an
  * invalid directory.
  *
  */
-define('ROOT', '.');
+define('ROOT', '');
 
 /*
  * /configuration
@@ -45,31 +47,23 @@ define('ROOT', '.');
 /*
  * bruteforce prevention options
  */
-define('BRUTEFORCE_FILE', './_pafm_bruteforce');
+define('BRUTEFORCE_FILE', __DIR__ . '/_pafm_bruteforce');
 
 define('BRUTEFORCE_ATTEMPTS', 5);
 
-/*
- * in seconds
+/**
+ * Attempt limit lockout time
+ *
+ * @var int unit: Seconds
  */
 define('BRUTEFORCE_TIME_LOCK', 15 * 60);
 
 define('AUTHORIZE', true);
 
-/*
- * Checks for:
- *  - leading /
- *  - trailing /
- *  - ..
- *  - empty path
- *  - //
- */
-define('SanitizePath', true);
-
-/*
+/**
  * files larger than this are not editable
  *
- * the unit is mega-bytes
+ * @var int unit: MegaBytes
  */
 define('MaxEditableSize', 1);
 
@@ -79,32 +73,22 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 1);
 
-define('VERSION', '1.6 RC');
+define('VERSION', '1.7 RC');
 
-define('CODEMIRROR_PATH', dirname(realpath($_SERVER['SCRIPT_FILENAME'])) . '/_cm');
+define('CODEMIRROR_PATH', __DIR__ . '/_cm');
 
-$pathRegEx = SanitizePath ? '/\.\.|\/\/|\/$|^\/|^$/' : '//';
-
-$path = preg_match($pathRegEx, $_GET['path']) ? '.' : $_GET['path'];
+$path = isset($_GET['path']) ? $_GET['path'] : '.';
 $pathURL = escape($path);
 $pathHTML = htmlspecialchars($path);
-
-$pafm = basename($_SERVER['SCRIPT_NAME']);
 $redir = '?path=' . $pathURL;
 
 $codeMirrorModes = array('html', 'md', 'js', 'php', 'css', 'py', 'rb'); //TODO: complete array
 
 $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('upload_max_filesize')));
 $dirContents = array('folders' => array(), 'files' => array());
-$footer = '<a href="http://github.com/mustafa0x/pafm" title="pafm @ github">pafm v'.VERSION.'</a> by <a href="http://mus.tafa.us" title="mus.tafa.us">mustafa</a>';
-
-/*
- * A warning is issued when the timezone is not set
- *
- * TODO: Set timezone to user's timezone
- */
-if (function_exists('date_default_timezone_set'))
-	date_default_timezone_set('UTC');
+$dirCount = array('folders' => 0, 'files' => 0);
+$footer = '<a href="http://github.com/mustafa0x/pafm">pafm v'.VERSION.'</a> '
+	. 'by <a href="http://mus.tafa.us">mustafa</a>';
 
 /*
  * resource retrieval
@@ -117,24 +101,33 @@ if (!DEV && isset($_GET['r'])){
 	$is_image = strpos($r, '.') !== false;
 	//TODO: cache headers
 	header('Content-Type: ' . $_R_HEADERS[$is_image ? getExt($r) : $r]);
-	exit($is_image ? base64_decode($_R[$r]) : $_R[$r]); //security concern?
+	exit($is_image ? base64_decode($_R[$r]) : $_R[$r]);
 }
 
 /*
  * init
  */
-$do = $_GET['do'];
+$do = isset($_GET['do']) ? $_GET['do'] : null;
 
 if (AUTHORIZE) {
 	session_start();
 	doAuth();
 }
 
-$token = crypt(uniqid(), rand());
+$nonce = isset($_SESSION['nonce']) ? $_SESSION['nonce'] : '';
 
-/** directory checks and chdir **/
+/*
+ * A warning is issued when the timezone is not set.
+ */
+if (function_exists('date_default_timezone_set'))
+	date_default_timezone_set('UTC');
+$tz_offset = isset($_SESSION['tz_offset']) ? $_SESSION['tz_offset'] : 0;
 
-if (is_dir(ROOT))
+/**
+ * directory checks and chdir
+ */
+
+if (!isNull(ROOT) && is_dir(ROOT))
 	chdir(ROOT);
 
 if (!is_dir($path)) {
@@ -152,54 +145,55 @@ if (!is_readable($path)) {
 		echo 'path (' . $pathHTML . ') can\'t be read';
 }
 
-/** clean variables **/
-if (!isNull($_GET['subject'])) {
+/**
+ * clean variables
+ */
+if (isset($_GET['subject']) && !isNull($_GET['subject'])) {
 	$subject = str_replace('/', null, $_GET['subject']);
 	$subjectURL = escape($subject);
 	$subjectHTML = htmlspecialchars($subject);
 }
 
-if (!isNull($_GET['to'])) {
-	$to = preg_match($pathRegEx, $_GET['to']) ? null : $_GET['to'];
-	$toHTML = htmlspecialchars($to);
-	$toURL = escape($to);
-}
-
-/** perform requested action **/
+/**
+ * perform requested action
+ */
 if ($do) {
 	switch ($do) {
 		case 'login':
-			exit(doLogin($_POST['pwd']));
+			exit(doLogin());
 		case 'logout':
 			exit(doLogout());
+		case 'shell':
+			nonce_check();
+			exit(shell_exec($_POST['cmd']));
 		case 'create':
-			token_check();
-			exit(doCreate($_POST['file'], $_POST['folder'], $path));
+			nonce_check();
+			exit(doCreate($_POST['f_name'], $_GET['f_type'], $path));
 		case 'upload':
-			token_check();
+			nonce_check();
 			exit(doUpload($path));
 		case 'chmod':
-			token_check();
+			nonce_check();
 			exit(doChmod($subject, $path, $_POST['mod']));
 		case 'extract':
-			token_check();
+			nonce_check();
 			exit(doExtract($subject, $path));
 		case 'readFile':
 			exit(doReadFile($subject, $path));
 		case 'rename':
-			token_check();
+			nonce_check();
 			exit(doRename($subject, $path));
 		case 'delete':
-			token_check();
+			nonce_check();
 			exit(doDelete($subject, $path));
 		case 'saveEdit':
-			token_check();
+			nonce_check();
 			exit(doSaveEdit($subject, $path));
 		case 'copy':
-			token_check();
+			nonce_check();
 			exit(doCopy($subject, $path));
 		case 'move':
-			token_check();
+			nonce_check();
 			exit(doMove($subject, $path));
 		case 'moveList':
 			exit(moveList($subject, $path, $to));
@@ -210,18 +204,23 @@ if ($do) {
 		case 'getfs':
 			exit(getFs($path .'/'. $subject));
 		case 'remoteCopy':
-			token_check();
+			nonce_check();
 			exit(doRemoteCopy($path));
 	}
 }
 
-$_SESSION['token'] = $token;
-$_SESSION['token_time'] = time();
-
-/** no action; list current directory **/
+/**
+ * no action; list current directory
+ */
 getDirContents($path);
 
-// helper functions
+/**
+ * helper functions
+ */
+
+/**
+ * @return bool returns true if any empty values are passed
+ */
 function isNull() {
 	foreach (func_get_args() as $value)
 		if (!strlen($value))
@@ -298,10 +297,13 @@ function pathCrumbs(){
 	global $pathHTML, $pathURL;
 	$crumbs = explode('/', $pathHTML);
 	$crumbsLink = explode('/', $pathURL);
+	$pathSplit = '';
+	$crumb = str_replace('/', ' / ', dirname(getcwd())) . ' / ';
 	for ($i = 0; $i < count($crumbs); $i++) {
-		$slash = $i ? '/' : null;
-		$pathSplit .= $slash . escape($crumbs[$i]);
-		$crumb .= '<a href="?path=' . $pathSplit . '" title="Go to ' . $crumbs[$i] . '">' . ($i === 0 ? '<em>root</em>' : $crumbs[$i]) . '</a> /' . "\n";
+		$slash = $i ? '/' : '';
+		$pathSplit .= $slash . $crumbsLink[$i];
+		$crumb .= '<a href="?path=' . $pathSplit . '" title="Go to ' . $crumbs[$i] . '">'
+			. ($i ? $crumbs[$i] : '<em>'.basename(getcwd()).'</em>') . "</a> /\n";
 	}
 	return $crumb;
 }
@@ -309,139 +311,173 @@ function pathCrumbs(){
 //authorize functions
 function doAuth(){
 	global $do, $pathURL, $footer;
+	$pwd = isset($_SESSION['pwd']) ? $_SESSION['pwd'] : '';
 	if ($do == 'login' || $do == 'logout')
 		return; //TODO: login/logout take place here
-	if ($do && $_SESSION['pwd'] != PASSWORD)
-		exit('Please refresh the page and login');
-	if ($_SESSION['pwd'] != PASSWORD)
-		exit ('<!DOCTYPE html>
+	if ($pwd != crypt(PASSWORD, PASSWORD_SALT))
+		if ($do)
+			exit('Please refresh the page and login');
+		else
+			exit('<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <title>Log In | pafm</title>
   <style type="text/css">
-    /*<![CDATA[*/
     body {
-    	margin: auto;
-    	max-width: 20em;
-    	text-align: center;
+        margin: auto;
+        max-width: 20em;
+        text-align: center;
     }
     form {
-    	width:20em;
-    	position: fixed;
-    	top: 30%;
+        width: 20em;
+        position: fixed;
+        top: 30%;
     }
     a {
-    	text-decoration: none;
-    	font-style: italic;
-    	color: #B22424;
+        text-decoration: none;
+        font-style: italic;
+        color: #B22424;
     }
     a:visited {
-    	color: #FF2F00;
+        color: #FF2F00;
     }
     a:hover {
-    	color: #DD836F;
+        color: #DD836F;
     }
     p {
-    	margin-top: 7.5em;
+        margin-top: 7.5em;
     }
-    /*]]>*/
   </style>
 </head>
 <body>
-  <form action="?do=login&amp;path='. $pathURL .'" method="post">
+  <form action="?do=login&amp;path='.$pathURL.'" method="post">
     <fieldset>
       <legend style="text-align: left;">Log in</legend>
       <input type="password" name="pwd" title="Password" autofocus>
+      <input type="hidden" value="" id="tz_offset" name="tz_offset">
       <input type="submit" value="&#10003;" title="Log In">
     </fieldset>
     <p>'.$footer.'</p>
   </form>
+  <script type="text/javascript">
+	document.getElementById("tz_offset").value = (new Date()).getTimezoneOffset() * -60;
+  </script>
 </body>
 </html>');
 }
-function doLogin($pwd){
+function doLogin(){
+	$pwd = isset($_POST['pwd']) ? $_POST['pwd'] : '';
 	$bruteforce_file_exists = file_exists(BRUTEFORCE_FILE);
+
 	if ($bruteforce_file_exists){
-		$bruteforce_contents = file_get_contents(BRUTEFORCE_FILE);
-		$bruteforce_contents = explode('|', $bruteforce_contents);
+		$bruteforce_contents = explode('|', file_get_contents(BRUTEFORCE_FILE));
 		if ((time() - $bruteforce_contents[0]) < BRUTEFORCE_TIME_LOCK && $bruteforce_contents[1] >= BRUTEFORCE_ATTEMPTS)
-				return refresh('Attempt limit reached, please wait: ' . ($bruteforce_contents[0] + BRUTEFORCE_TIME_LOCK - time()) . ' seconds');
+				return refresh('Attempt limit reached, please wait: '
+					. ($bruteforce_contents[0] + BRUTEFORCE_TIME_LOCK - time()) . ' seconds');
 	}
+
 	if ($pwd == PASSWORD){
-		$_SESSION['pwd'] = PASSWORD;
+		$_SESSION['tz_offset'] = intval($_POST['tz_offset']);
+		$_SESSION['pwd'] = crypt(PASSWORD, PASSWORD_SALT);
+		$_SESSION['nonce'] = crypt(uniqid(), rand());
 		$bruteforce_file_exists && unlink(BRUTEFORCE_FILE);
 		return redirect();
 	}
-	file_put_contents(BRUTEFORCE_FILE, time() . '|' . ($bruteforce_contents[1] >= 5 ? '0' : ++$bruteforce_contents[1]));
+
+	$bruteforce_data = time() . '|';
+	/**
+	 * The second condition, if reached, implies an expired bruteforce lock
+	 */
+	if (!$bruteforce_file_exists || $bruteforce_contents[1] >= BRUTEFORCE_ATTEMPTS)
+		$bruteforce_data .= 1;
+	else
+		$bruteforce_data .= ++$bruteforce_contents[1];
+
+	file_put_contents(BRUTEFORCE_FILE, $bruteforce_data);
+	chmod(BRUTEFORCE_FILE, 0700); //prevent others from viewing
 	return refresh('Password is incorrect');
 }
 function doLogout(){
 	session_destroy();
 	redirect();
 }
-function token_check(){
-	if ($_GET['token'] != $_SESSION['token'] || (time() - $_SESSION['token_time']) >= 300)
-		exit(refresh('Invalid token, try again.'));
+function nonce_check(){
+	if (AUTHORIZE && $_GET['nonce'] != $_SESSION['nonce'])
+		exit(refresh('Invalid nonce, try again.'));
 }
 
 //fOp functions
-function doCreate($file, $folder, $path){
-	if (isNull($file) && isNull($folder))
+function doCreate($f_name, $f_type, $path){
+	if (isNull($f_name))
 		return refresh('A filename has not been entered');
 
 	$invalidChars = strpos(PHP_OS, 'WIN') !== false ? '/\\|\/|:|\*|\?|\"|\<|\>|\|/' : '/\//';
-	if (preg_match($invalidChars, $file ? $file : $folder))
+	if (preg_match($invalidChars, $f_name))
 		return refresh('Filename contains invalid characters');
 
-	if (!isNull($file) && !file_exists($path.'/'.$file))
-		fclose(fopen($path.'/'.$file, 'w'));
-	elseif (!isNull($folder) && !file_exists($path.'/'.$folder))
-		mkdir($path.'/'.$folder);
+	if ($f_type == 'file' && !file_exists($path.'/'.$f_name))
+		fclose(fopen($path.'/'.$f_name, 'w'));
+	elseif ($f_type == 'folder' && !file_exists($path.'/'.$f_name))
+		mkdir($path.'/'.$f_name);
 	else
-		return refresh(htmlspecialchars($file).htmlspecialchars($folder).' already exists');
+		return refresh(htmlspecialchars($f_name).' already exists');
 	redirect();
 }
 function installCodeMirror(){
 	mkdir(CODEMIRROR_PATH);
 	$cmjs = CODEMIRROR_PATH . '/cm.js';
 	$cmcss = CODEMIRROR_PATH . '/cm.css';
+	$out = null;
 
 	copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.js', $cmjs);
 	copy('http://cloud.github.com/downloads/mustafa0x/pafm/_codemirror.css', $cmcss);
 
-	/*
-	 * prevents using modified CodeMirror files
+	/**
+	 * avoid using modified CodeMirror files
 	 */
 	if (md5_file($cmjs) != '65f5ba3c8d38bb08544717fc93c14024')
 		$out = unlink($cmjs);
 	if (md5_file($cmcss) != '23d441d9125538e3c5d69448f8741bfe')
 		$out = unlink($cmcss);
-	return $out ? '-' : ''; 
+
+	return $out ? '-' : '';
 }
 function doUpload($path){
 	if (!$_FILES)
 		return refresh('$_FILES array can not be read. Check file size limits and the max execution time limit.');
-	$uploadErrors = array(null, 'The uploaded file exceeds the upload_max_filesize directive in php.ini.', 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.', 'The uploaded file was only partially uploaded.', 'No file was uploaded.', 'Missing a temporary folder.', 'Failed to write file to disk.', 'File upload stopped by extension.');
-	$l = count($_FILES['file']['name']);
-	for ($i = 0; $i < $l; $i++) { //FIXME: this loop is no longer relavent
-		if ($_FILES['file']['error'][$i]) {
-			if ($uploadErrors[$_FILES['file']['error'][$i]])
-				return refresh($uploadErrors[$_FILES['file']['error'][$i]] . ' Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>');
-			else
-				return refresh('Unknown error occurred. Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>');
-		}
 
-		if (!is_file($_FILES['file']['tmp_name'][$i]))
-			return refresh($_FILES['file']['name'][$i] . ' could not be uploaded. Possible causes could be the <b>post_max_size</b> and <b>memory_limit</b> directives in php.ini.');
+	$uploadErrors = array(null,
+		'The uploaded file exceeds the upload_max_filesize directive in php.ini.',
+		'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form.',
+		'The uploaded file was only partially uploaded.',
+		'No file was uploaded.',
+		'Missing a temporary folder.',
+		'Failed to write file to disk.',
+		'File upload stopped by extension.'
+	);
+	$error_message = ' Please see <a href="http://www.php.net/file-upload.errors">File Upload Error Messages</a>';
 
-		if (!is_uploaded_file($_FILES['file']['tmp_name'][$i]))
-			return refresh(basename($_FILES['file']['name'][$i]) . ' is not a POST-uploaded file');
+	$fail = false;
 
-		if (!move_uploaded_file($_FILES['file']['tmp_name'][$i], $path . '/' . basename($_FILES['file']['name'][$i])))
-			$fail = true;
+	if ($_FILES['file']['error']) {
+		if ($uploadErrors[$_FILES['file']['error']])
+			return refresh($uploadErrors[$_FILES['file']['error']] . $error_message);
+		else
+			return refresh('Unknown error occurred.' . $error_message);
 	}
-	return $fail ? 'One or more files could not be moved.' : $_FILES['file']['name'][0] . ' uploaded';
+
+	if (!is_file($_FILES['file']['tmp_name']))
+		return refresh($_FILES['file']['name'] . ' could not be uploaded.'
+			. 'Possible causes could be the <b>post_max_size</b> and <b>memory_limit</b> directives in php.ini.');
+
+	if (!is_uploaded_file($_FILES['file']['tmp_name']))
+		return refresh(basename($_FILES['file']['name']) . ' is not a POST-uploaded file');
+
+	if (!move_uploaded_file($_FILES['file']['tmp_name'], $path . '/' . basename($_FILES['file']['name'])))
+		$fail = true;
+
+	return $fail ? 'One or more files could not be moved.' : $_FILES['file']['name'] . ' uploaded';
 }
 function doChmod($subject, $path, $mod){
 	if (isNull($mod))
@@ -466,9 +502,12 @@ function doExtract($subject, $path){
 					mkdir($path.'/'.$zdir);
 				}
 				else {
-					$fopen = fopen($path.'/'.zip_entry_name($zip_entry), "w");
-					//TODO: file-exists check
-					fwrite($fopen, zip_entry_read($zip_entry, zip_entry_filesize($zip_entry)), zip_entry_filesize($zip_entry));
+					if (file_exists($path.'/'.zip_entry_name($zip_entry)))
+						return refresh(htmlspecialchars($path.'/'.zip_entry_name($zip_entry)) . ' exists!');
+
+					$fopen = fopen($path.'/'.zip_entry_name($zip_entry), 'w');
+					$ze_fs = zip_entry_filesize($zip_entry);
+					fwrite($fopen, zip_entry_read($zip_entry, $ze_fs), $ze_fs);
 				}
 				zip_entry_close($zip_entry);
 			}
@@ -490,27 +529,61 @@ function doReadFile($subject, $path){
 	return file_get_contents($path.'/'.$subject);
 }
 function doCopy($subject, $path){
-	if (isNull($subject, $path))
-		return refresh('Values could not be read');
-	$name = $_POST['name'];
-	//TODO: more var checks
+	$to = isset($_POST['to']) ? $_POST['to'] : '';
+	$dest = $path.'/'.$to;
 
-	if(!copy($path . '/' . $subject, $path.'/'.$name))
-		return refresh($subject.' could not be copied to '.$name);
+	if (isNull($subject, $path, $to))
+		return refresh('Values could not be read');
+
+	if (is_dir($path.'/'.$subject)) {
+		copyDir($path.'/'.$subject, $dest);
+		redirect();
+	}
+
+	if (file_exists($dest))
+		return refresh('Destination ('.$dest.') exists');
+
+	if(!copy($path.'/'.$subject, $dest))
+		return refresh($subject . ' could not be copied to ' . $to);
+
 	redirect();
 }
+function copyDir($subject, $to){
+	if (file_exists($to) || !mkdir($to))
+		return refresh('Destination exists or creation of destination failed.');
+
+	$handle = opendir($subject);
+	while(($dirItem = readdir($handle)) !== false)  {
+		if ($dirItem == '.' || $dirItem == '..')
+			continue;
+
+		$path = $subject.'/'.$dirItem;
+		if (is_dir($path))
+			copyDir($path, $to.'/'.$dirItem);
+		else
+			copy($path, $to.'/'.$dirItem);
+	}
+
+	closedir($handle);
+}
 function doRemoteCopy($path){
-	$location = $_POST['location'];
-	$name = $_POST['name'];
-	if (isNull($path, $location, $name))
+	$location = isset($_POST['location']) ? $_POST['location'] : '';
+	$to = isset($_POST['to']) ? $_POST['to'] : '';
+	$dest = $path.'/'.$to;
+
+	if (isNull($path, $location, $to))
 		return refresh('Values could not be read');
 
-	if(!copy($location, $path.'/'.$name)) //TODO: more checks of what location is
-		return refresh($location . ' could not be copied to '. ($path . '/' . $name));
+	if (file_exists($dest))
+		return refresh('Destination ('.$dest.') exists');
+
+	if(!copy($location, $dest))
+		return refresh($location . ' could not be copied to '. ($dest));
 	redirect();
 }
 function doMove($subject, $path){
 	global $pathHTML, $subjectHTML, $to, $toHTML;
+
 	if (isNull($subject, $path, $to))
 		return refresh('Values could not be read');
 
@@ -527,7 +600,7 @@ function doMove($subject, $path){
 	redirect();
 }
 function doRename($subject, $path){
-	$rename = $_POST['rename'];
+	$rename = isset($_POST['rename']) ? $_POST['rename'] : '';
 	if (isNull($subject, $rename))
 		return refresh('Values could not be read');
 
@@ -557,24 +630,24 @@ function doDelete($subject, $path){
 	redirect();
 }
 function doSaveEdit($subject, $path){
-	global $subjectHTML;
+	global $subjectHTML, $tz_offset;
 	$data =	get_magic_quotes_gpc() ? stripslashes($_POST['data']) : $_POST['data'];
 	if (!is_file($path .'/'. $subject))
 		return 'Error: ' . $subjectHTML . ' is not a valid file';
-	if (isNull($data))
-		return 'Error: There is nothing to save';
 
- 	if (file_put_contents($path .'/'. $subject, $data) === false)
+	if (file_put_contents($path .'/'. $subject, $data) === false)
 		return $subject . ' could not be saved';
 	else
-		return 'saved at ' . date('H:i:s');
+		return 'saved at ' . date('H:i:s', time() + $tz_offset);
 }
 function moveList($subject, $path){
-	global $pathURL, $pathHTML, $subjectURL, $subjectHTML, $to, $toURL, $toHTML, $token;
+	global $pathURL, $pathHTML, $subjectURL, $subjectHTML, $nonce;
 
-	$_SESSION['token'] = $token;
-	$_SESSION['token_time'] = time();
-
+	if (isset($_GET['to']) && !isNull($_GET['to'])) {
+		$to = $_GET['to'];
+		$toHTML = htmlspecialchars($to);
+		$toURL = escape($to);
+	}
 	if (isNull($subject, $path, $to))
 		return refresh('Values could not be read');
 
@@ -638,7 +711,7 @@ function moveList($subject, $path){
 			["img", {attributes: {"src": "'. (DEV ? 'pafm-files/' : '?r=') .'images/odir.png", "title": "Open '.$dirItemHTML.'"}}],
 			"a",
 			{
-				attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$fullPathURL.'&token='.$token.'", "title" : "move '.$subject.' to '.$dirItemHTML.'", "class": "dir"},
+				attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$fullPathURL.'&nonce='.$nonce.'", "title" : "move '.$subject.' to '.$dirItemHTML.'", "class": "dir"},
 				text: "'.$dirItemHTML.'"
 			}
 		]
@@ -653,29 +726,33 @@ function moveList($subject, $path){
 	$return .= ',
 	"a",
 	{
-		attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$toURL.'&token='.$token.'", "id": "movehere", "title": "move here ('.$toHTML.')"},
+		attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$toURL.'&nonce='.$nonce.'", "id": "movehere", "title": "move here ('.$toHTML.')"},
 		text : "move here"
 	}]
 ]';
 	return $return;
 }
 function getDirContents($path){
-	global $dirContents;
+	global $dirContents, $dirCount;
+	$itemType = '';
+
 	$dirHandle = opendir($path);
 	while (($dirItem = readdir($dirHandle)) !== false) {
 		if ($dirItem == '.' || $dirItem == '..')
 			continue;
 		$fullPath = $path.'/'.$dirItem;
-		$dirContents[is_file($fullPath) ? 'files' : 'folders'][] = $dirItem;
+		$itemType = is_file($fullPath) ? 'files' : 'folders';
+		$dirContents[$itemType][] = $dirItem;
+		$dirCount[$itemType]++;
 	}
 	closedir($dirHandle);
 }
 
-/*
- * the following two functions output the file list
+/**
+ * Output the file list
  */
 function getDirs($path){
-	global $dirContents, $pathURL, $token;
+	global $dirContents, $pathURL, $nonce, $tz_offset;
 
 	if (!count($dirContents['folders']))
 		return;
@@ -692,17 +769,18 @@ function getDirs($path){
 
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="?path=' . escape($fullPath) . '" title="' . $dirItemHTML . '" class="dir">'.$dirItemHTML.'</a>'.
-		"\n\t" . '<span class="filemtime" title="'.date('c', $mtime).'">' . date('y-m-d | H:i:s', $mtime) . '</span>' .
+		"\n\t" . '<span class="filemtime" title="'.date('c', $mtime).'">' . date('y-m-d | H:i:s', $mtime + $tz_offset) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a>' .
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
+		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a>' .
 		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a>' .
-		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;token=' . $token.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>' .
+		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;nonce=' . $nonce.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>' .
 		"\n  </li>\n";
 	}
 }
 function getFiles($path){
-	global $dirContents, $pathURL, $codeMirrorModes, $token;
+	global $dirContents, $pathURL, $codeMirrorModes, $nonce, $tz_offset;
 	$filePath = $path == '.' ? '/' : '/' . $path.'/';
 
 	if (!count($dirContents['files']))
@@ -727,10 +805,10 @@ function getFiles($path){
 		"\n\t" . '<a href="' . escape(ROOT . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a>' .
 		"\n\t" . '<span class="fs"  title="file size">' . getfs($path.'/'.$dirItem) . '</span>' .
 		"\n\t" . '<span class="extension" title="file extension">' . $ext . '</span>' .
-		"\n\t" . '<span class="filemtime" title="'.date('c', $mtime).'">' . date('y-m-d | H:i:s', $mtime) . '</span>' .
+		"\n\t" . '<span class="filemtime" title="'.date('c', $mtime).'">' . date('y-m-d | H:i:s', $mtime + $tz_offset) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		(($zipSupport && $ext == 'zip')
-			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;token=' . $token.'" title="Extract '.$dirItemHTML.'" class="extract b"></a>'
+			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;nonce=' . $nonce.'" title="Extract '.$dirItemHTML.'" class="extract b"></a>'
 			: '') .
 		(filesize($fullPath) <= (1048576 * MaxEditableSize)
 			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$ext.'\', '.$codeMirrorExists.'); return false;" class="edit '.$cmSupport.'b"></a>'
@@ -739,7 +817,7 @@ function getFiles($path){
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
 		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a>' .
 		"\n\t" . '<a href="#" title="Rename '.$dirItemHTML.'" onclick="fOp.rename(\''.$dirItemHTML.'\', \''.$pathURL.'\'); return false;" class="rename b"></a>' .
-		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;token=' . $token.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>'.
+		"\n\t" . '<a href="?do=delete&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;nonce=' . $nonce.'" title="Delete '.$dirItemHTML.'" onclick="return confirm(\'Are you sure you want to delete '.removeQuotes($dirItem).'?\');" class="del b"></a>'.
 		"\n  </li>\n";
 	}
 }
@@ -750,7 +828,7 @@ function getFiles($path){
   <meta charset="UTF-8">
   <title><?php echo str_replace('www.', null, $_SERVER['HTTP_HOST']); ?> | pafm</title>
   <style type="text/css">@import "<?php echo DEV ? "pafm-files/style.css" : "?r=css";?>";</style>
-  <script type="text/javascript">var token = "<?php echo $token; ?>";</script>
+  <script type="text/javascript">var nonce = "<?php echo $_SESSION['nonce']; ?>";</script>
   <script src="<?php echo DEV ? "pafm-files/js.js" : "?r=js";?>" type="text/javascript"></script>
 </head>
 <body>
@@ -763,7 +841,11 @@ function getFiles($path){
   <?php
 	endif;
   ?>
-  <span class="pathCrumbs"><?php echo pathCrumbs(); ?></span>
+  <span class="pathCrumbs"><?php echo pathCrumbs(); ?>
+    <span id="dir-count">
+		folders: <?php echo $dirCount['folders']; ?> | files: <?php echo $dirCount['files']; ?>
+    </span>
+  </span>
 </div>
 
 <div id="dirList">
@@ -779,33 +861,28 @@ function getFiles($path){
 </ul>
 
 <ul>
-<?php
-getDirs($path);
-?>
+<?php getDirs($path);?>
 </ul>
 
 <ul>
-<?php
-getFiles($path);
-?>
+<?php getFiles($path);?>
 </ul>
 </div>
 
 <div id="add" class="b">
-  <a href="#" title="Remote Copy File" onclick="fOp.remoteCopy('<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/remotecopy.png" alt="Remote Copy"></a>
   <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/addfile.gif" alt="Create File"></a>
   <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/addfolder.gif" alt="Create Folder"></a>
+  <br>
+  <a href="#" title="Remote Copy File" onclick="fOp.remoteCopy('<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/remotecopy.png" alt="Remote Copy"></a>
   <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/upload.gif" alt="Upload File"></a>
+  <br>
+  <a href="#" title="Open Shell" onclick="shell.init('<?php echo @trim(shell_exec('whoami')); ?>', '<?php echo @trim(shell_exec('pwd')); ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/terminal.png" alt="Terminal"></a>
 </div>
 
 <div id="footer">
   <p><?php echo $footer; ?></p>
   <?php
-  	if (PASSWORD == 'auth'):
-  ?>
-  	<span>change your password</span>
-  <?php
-  	endif;
+	if (PASSWORD == 'auth') echo '<span>change your password</span>';
   ?>
 </div>
 

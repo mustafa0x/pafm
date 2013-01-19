@@ -1,9 +1,13 @@
 # PHP AJAX File Manager
 
 ## About
-PHP AJAX File Manager (PAFM) is a web file manager influenced by the [KISS Principle](http://en.wikipedia.org/wiki/KISS_principle "Keep it simple, stupid").
+PHP AJAX File Manager (PAFM) is a web file manager based on the [KISS Principle](http://en.wikipedia.org/wiki/KISS_principle "Keep it simple, stupid").
+
+It is intended for use by web masters who need a simple way to interact with their files. As much control as possible is given, which makes it only suitable for those who already have complete access.
 
 ## Installation
+
+Get [build/pafm.php](https://raw.github.com/mustafa0x/pafm/master/build/pafm.php) or see the downloads at [Sourceforge](http://sourceforge.net/projects/pafm/files/).
 
 Open pafm.php with your code editor of choice (note that you can change the password of pafm *using* pafm)
 then scroll down till you see `/** configuration **/`
@@ -12,7 +16,7 @@ then scroll down till you see `/** configuration **/`
 
 * `ROOT` is the path to the directory you want to
   manage (this is done by `chdir`).
-  *  E.g. if you want to manage your home directoy,
+  *  E.g. if you want to manage your home directory,
   change `ROOT` to `/home`
 
 ## Screenshots
@@ -33,6 +37,20 @@ then scroll down till you see `/** configuration **/`
 [3]: http://mus.tafa.us/projects/pafm/images/upload-sm.png "the upload window"
 
 ## Recent Changes
+
+### 1.7
+  * Added experimental terminal/shell
+  * Added drag-and-drop upload
+  * Added support for copying entire directories
+  * Added file & folder count
+  * The complete path is now shown in the breadcrumbs
+  * Timezone offset is now used when displaying timestamps
+  * Changed CSRF protection; the nonce is now generated per session
+  * Paths are no longer sanitized, as pafm doesn't
+    attempt to prevent the user from intentional behavior
+  * When leaving file editing, the user is prompted if unsaved changes were made.
+  * The password is now encrypted before being stored in the session
+  * Minor fixes and style changes
 
 ### 1.6
   * Added CSRF protection
@@ -67,7 +85,7 @@ then scroll down till you see `/** configuration **/`
 ### 1.4
   *   One-file release
 
-    > This is made possible by [Makefile](https://github.com/mustafa0x/pafm/blob/master/Makefile), which combines the project into a single file, for portablility.
+    > This is made possible by [Makefile](https://github.com/mustafa0x/pafm/blob/master/Makefile), which combines the project into a single file, for portability.
 
 ### 1.3
   * HTML5 uploading
@@ -75,7 +93,7 @@ then scroll down till you see `/** configuration **/`
 ### 1.2
   * File Copying
   * Remote Copy
-  * File Last Modifed Column
+  * File Last Modified Column
 
 ### 1.0.6
   * Removed CodePress
@@ -87,5 +105,6 @@ then scroll down till you see `/** configuration **/`
 ## Future
   * Rewrite folder/file loops
   * Remove onclick events
-  * PHP Shell
   * Hash file operations (e.g. `#edit&file=foo.bar`)
+  * AJAX-ify existing refreshes
+  * File and folder sorting
