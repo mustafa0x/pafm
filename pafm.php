@@ -269,13 +269,32 @@ function refresh($message, $speed = 2){
 	global $redir;
 	return '<meta http-equiv="refresh" content="'.$speed.';url='.$redir.'">'.$message;
 }
-function getFs($file){
-	if (filesize($file) <= 1024)
-		return filesize($file).' <b title="Bytes" style="background-color: #B9D4B8">B</b>';
-	elseif (filesize($file) <= 1024000)
-		return round(filesize($file)/1024, 2).' <b title="KiloBytes" style="background-color: yellow">KB</b>';
+function getFs($file, $hr = true){
+	if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+		if (class_exists("COM")) {
+			$fsobj = new COM('Scripting.FileSystemObject');
+			$f = $fsobj->GetFile(realpath($file));
+			$size = $f->Size;
+		} else {
+			$size = trim(exec("for %F in (\"" . $file . "\") do @echo %~zF"));
+		}
+	} elseif (PHP_OS == 'Darwin') {
+		$size = trim(shell_exec("stat -f %z " . escapeshellarg($file)));
+	} elseif ((PHP_OS == 'Linux') || (PHP_OS == 'FreeBSD') || (PHP_OS == 'Unix') || (PHP_OS == 'SunOS')) {
+		$size = trim(shell_exec("stat -c%s " . escapeshellarg($file)));
+	} else {
+		$size = filesize($file);
+    }
+	if(!$hr)
+		return $size;
+	elseif ($size <= 1024)
+		return $size.' <b title="Bytes" style="background-color: #B9D4B8">B</b>';
+	elseif ($size <= 1048576)
+		return round($size/1024, 2).' <b title="KiloBytes" style="background-color: yellow">KB</b>';
+	elseif ($size < 1073741824) 
+		return round($size/1048576, 2).' <b title="MegaBytes" style="background-color: red">MB</b>';
 	else
-		return round(filesize($file)/1024000, 2).' <b title="MegaBytes" style="background-color: red">MB</b>';
+		return round($size/1073741824, 2).' <b title="GigaBytes" style="background-color: green">GB</b>';
 }
 function rrd($dir){
 	$handle = opendir($dir);
@@ -816,7 +835,7 @@ function getFiles($path){
 		(($zipSupport && $ext == 'zip')
 			? "\n\t" . '<a href="?do=extract&amp;path='.$pathURL.'&amp;subject='.$dirItemURL.'&amp;nonce=' . $nonce.'" title="Extract '.$dirItemHTML.'" class="extract b"></a>'
 			: '') .
-		(filesize($fullPath) <= (1048576 * MaxEditableSize)
+		(getFs($fullPath, false) <= (1048576 * MaxEditableSize)
 			? "\n\t" . '<a href="#" title="Edit '.$dirItemHTML.'" onclick="edit.init(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$ext.'\', '.$codeMirrorExists.'); return false;" class="edit '.$cmSupport.'b"></a>'
 			: '') .
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a>' .
