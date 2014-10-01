@@ -1,6 +1,7 @@
 <?php
 /*
-	@name:                    PHP AJAX File Manager (PAFM)
+	@name:                    PHP AJAX File Manager (PAFM) 
+	@url:			  https://github.com/mustafa0x/pafm (Sourseforge version no more maintained)
 	@filename:                pafm.php
 	@version:                 1.8 RC1
 	@date:                    October 1, 2014
