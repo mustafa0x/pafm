@@ -37,7 +37,7 @@ define('PASSWORD_SALT', 'P5`SU2"6]NALYR}');
  * invalid directory.
  *
  */
-define('ROOT', '.');
+define('ROOT', '.');  //or '..' or '../..' or etc...
 
 /*
  * /configuration
