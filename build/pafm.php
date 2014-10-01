@@ -967,7 +967,7 @@ chdir(dirname(__file__));
 			//remove starting dot
 			//$foldernameee = substr($foldernameee,1);
 			
-		$new_zip_filename=basename($foldernameee).'___compressed';	
+		$new_zip_filename=basename($foldernameee).'___compressed.zip';	
 		
 		$excl_var	=$_GET['exlcud'];
 		$excl_var 	= preg_replace("/%u([0-9a-f]{3,4})/i","&#x\\1;",urldecode($excl_var)); 
