@@ -2,8 +2,8 @@
 /*
 	@name:                    PHP AJAX File Manager (PAFM)
 	@filename:                pafm.php
-	@version:                 1.7 RC2
-	@date:                    January 19th, 2013
+	@version:                 1.8 RC1 (TT modification)
+	@date:                    October 1, 2014
 
 	@author:                  mustafa
 	@website:                 http://mus.tafa.us
@@ -37,7 +37,7 @@ define('PASSWORD_SALT', 'P5`SU2"6]NALYR}');
  * invalid directory.
  *
  */
-define('ROOT', '');
+define('ROOT', '..');
 
 /*
  * /configuration
@@ -95,8 +95,7 @@ $footer = '<a href="http://github.com/mustafa0x/pafm">pafm v'.VERSION.'</a> '
  */
 $_R_HEADERS = array('js' => 'text/javascript', 'css' => 'text/css', 'png' => 'image/png', 'gif' => 'image/gif');
 $_R = array();
-$_R['js'] = 'function $(a){return document.getElementById(a)}var popup,fOp,edit,upload,shell,__AJAX_ACTIVE,__CODEMIRROR,__CODEMIRROR_MODE,__CODEMIRROR_LOADED,__CODEMIRROR_PATH="_cm",__CODEMIRROR_MODES={html:"htmlmixed",js:"javascript",py:"python",rb:"ruby",md:"markdown"};function ajax(b,g,e,c,a,d){__AJAX_ACTIVE=true;if(!a){json2markup(["div",{attributes:{id:"ajaxOverlay"}},"img",{attributes:{src:"?r=images/ajax.gif",id:"ajaxImg",title:"Loading",alt:"Loading"}}],document.body);$("ajaxOverlay").style.height=document.body.offsetHeight+"px";fade($("ajaxOverlay"),0,6,25,"in")}var f=window.ActiveXObject?new ActiveXObject("MSXML2.XMLHTTP.3.0"):new XMLHttpRequest();d&&f.upload.addEventListener("progress",d,false);f.open(g,b,true);f.onreadystatechange=function(){if(f.readyState!=4){return}__AJAX_ACTIVE=false;a||fade($("ajaxOverlay"),6,0,25,"out",function(){document.body.removeChild($("ajaxOverlay"));document.body.removeChild($("ajaxImg"))});if(f.status==200||f.statusText=="OK"){if(f.responseText=="Please refresh the page and login"){alert(f.responseText)}else{c(f.responseText)}}else{alert("AJAX request unsuccessful.\nStatus Code: "+f.status+"\nStatus Text: "+f.statusText+"\nParameters: "+b)}f=null};if(g.toLowerCase()=="post"&&!a){f.setRequestHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8")}f.send(e)}function json2markup(c,g){var b=0,a=c.length,d,f,e;for(;b<a;b++){if(c[b].constructor==Array){json2markup(c[b],d)}else{if(c[b].constructor==Object){if(c[b].attributes){for(f in c[b].attributes){switch(f.toLowerCase()){case"class":d.className=c[b].attributes[f];break;case"style":d.style.cssText=c[b].attributes[f];break;case"for":d.htmlFor=c[b].attributes[f];break;default:d.setAttribute(f,c[b].attributes[f])}}}if(c[b].events){for(e in c[b].events){d.addEventListener(e,c[b].events[e],false)}}if(c[b].preText){g.appendChild(document.createTextNode(c[b].preText))}if(c[b].text){d.appendChild(document.createTextNode(c[b].text))}switch(c[b].insert){case"before":g.parentNode.insertBefore(d,g);break;case"after":g.parentNode.insertBefore(d,g.nextSibling);break;case"under":default:g.appendChild(d)}if(c[b].postText){g.appendChild(document.createTextNode(c[b].postText))}}else{d=document.createElement(c[b])}}}}function fade(e,f,g,c,h,i){var d=e.style.opacity!=undefined,b,a;e.style[d?"opacity":"filter"]=d?f/10:"alpha(opacity="+f*10+")";a=setInterval(function(){if(h=="in"){f++;b=f<=g}else{if(h=="out"){f--;b=f>=g}}if(b){e.style[d?"opacity":"filter"]=d?f/10:"alpha(opacity="+f*10+")"}else{clearInterval(a);if(i){i()}}},c)}popup={init:function(d,a){json2markup(["div",{attributes:{id:"popOverlay"},events:{click:popup.close}}],document.body);json2markup(["div",{attributes:{id:"popup"}},["div",{attributes:{id:"head"}},["a",{attributes:{id:"x",href:"#"},events:{click:function(f){popup.close();f.preventDefault?f.preventDefault():f.returnValue=false}},text:"[x]"},"span",{text:d}],"div",{attributes:{id:"body"}}]],document.body);var e=$("popup"),c=$("popOverlay"),b;json2markup(a,$("body"));if(b=$("moveListUL")){if(b.offsetHeight>(document.body.offsetHeight-150)){b.style.height=document.body.offsetHeight-150+"px"}}e.style.marginTop="-"+parseInt(e.offsetHeight)/2+"px";e.style.marginLeft="-"+parseInt(e.offsetWidth)/2+"px";fade(c,0,6,25,"in");document.onkeydown=function(f){if((f||window.event).keyCode==27){popup.close();return false}}},close:function(){if(__AJAX_ACTIVE){return}if($("popup")){var a=$("popOverlay");fade(a,6,0,25,"out",function(){document.body.removeChild(a)});document.body.removeChild($("popup"))}document.onkeydown=null}};fOp={rename:function(a,b){popup.init("Rename:",["form",{attributes:{action:"?do=rename&subject="+a+"&path="+b+"&nonce="+nonce,method:"post"}},["input",{attributes:{title:"Rename To",type:"text",name:"rename",value:a}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},create:function(a,b){popup.init("Create "+a+":",["form",{attributes:{method:"post",action:"?do=create&path="+b+"&f_type="+a+"&nonce="+nonce}},["input",{attributes:{title:"Filename",type:"text",name:"f_name"}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},chmod:function(c,b,a){popup.init("Chmod "+unescape(b)+":",["form",{attributes:{method:"post",action:"?do=chmod&subject="+b+"&path="+c+"&nonce="+nonce}},["input",{attributes:{title:"chmod",type:"text",name:"mod",value:a}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},copy:function(a,b){popup.init("Copy "+unescape(a)+":",["form",{attributes:{method:"post",action:"?do=copy&subject="+a+"&path="+b+"&nonce="+nonce}},["input",{attributes:{title:"copy to",type:"text",name:"to",value:"copy-"+a}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},moveList:function(a,b,c){ajax(("?do=moveList&subject="+a+"&path="+b+"&to="+c),"get",null,function(d){if(!$("popup")){popup.init("Move "+unescape(a)+" to:",Function("return "+d)())}else{var f=$("popup"),e;$("body").innerHTML="";json2markup(Function("return "+d)(),$("body"));if((e=$("moveListUL")).offsetHeight>(document.body.offsetHeight-150)){e.style.height=document.body.offsetHeight-150+"px"}f.style.marginTop="-"+parseInt(f.offsetHeight)/2+"px";f.style.marginLeft="-"+parseInt(f.offsetWidth)/2+"px"}})},remoteCopy:function(a){popup.init("Remote Copy:",["form",{attributes:{method:"post",action:"?do=remoteCopy&path="+a+"&nonce="+nonce,id:"remote-copy"}},["legend",{text:"Location: "},["br",{},"input",{attributes:{title:"Remote Copy",type:"text",name:"location"},events:{change:function(b){$("remoteCopyName").value=this.value.substring(this.value.lastIndexOf("/")+1)}}}],"legend",{text:"Name: "},["br",{},"input",{attributes:{id:"remoteCopyName",title:"Name",type:"text",name:"to"}}],"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])}};edit={init:function(b,c,d,a){__CODEMIRROR_MODE=d;json2markup(["div",{attributes:{id:"editOverlay"}}],document.body);$("editOverlay").style.height="100%";json2markup(["div",{attributes:{id:"ea"}},["textarea",{attributes:{id:"ta",rows:"30",cols:"90"},events:{change:function(){window.__FILECHANGED=true}}},"br",{},"input",{attributes:{type:"text",value:unescape(b),readonly:""}},"input",{attributes:{type:"button",value:"CodeMirror"},events:{click:function(){if(a){edit.codeMirrorLoad()}else{if(confirm("Install CodeMirror?")){ajax("?do=installCodeMirror","get",null,function(e){if(e==""){edit.codeMirrorLoad()}else{alert("Install failed. Manually upload CodeMirrorand place it in _codemirror, in the same directory as pafm")}})}}this.disabled=true}}},"input",{attributes:{type:"button",value:"Save",id:"save"},events:{click:function(){edit.save(b,c)}}},"input",{attributes:{type:"button",value:"Exit",id:"exit"},events:{click:function(){edit.exit(b,c)}}},"span",{attributes:{id:"editMsg"}}]],document.body);document.onkeydown=function(f){if((f||window.event).keyCode==27){edit.exit(b,c);return false}};ajax("?do=readFile&path="+c+"&subject="+b,"get",null,function(e){$("ta").value=e});location="#header"},codeMirrorLoad:function(){if(!__CODEMIRROR_LOADED){json2markup(["script",{attributes:{src:__CODEMIRROR_PATH+"/cm.js",type:"text/javascript"},events:{load:function(){__CODEMIRROR_LOADED=true;edit.codeMirrorLoad()}}},"link",{attributes:{rel:"stylesheet",href:__CODEMIRROR_PATH+"/cm.css"}},],document.getElementsByTagName("head")[0])}else{var a=__CODEMIRROR_MODES[__CODEMIRROR_MODE]||__CODEMIRROR_MODE;__CODEMIRROR=CodeMirror.fromTextArea($("ta"),{onChange:function(){window.__FILECHANGED=true},lineNumbers:true});__CODEMIRROR.setOption("mode",a)}},save:function(b,c){__CODEMIRROR&&__CODEMIRROR.save();$("editMsg").innerHTML=null;var a="data="+encodeURIComponent($("ta").value);ajax("?do=saveEdit&subject="+b+"&path="+c+"&nonce="+nonce,"post",a,function(d){$("editMsg").className=d.indexOf("saved")==-1?"failed":"succeeded";$("editMsg").innerHTML=d});window.__FILESAVED=true;window.__FILECHANGED=false},exit:function(a,b){if(window.__FILECHANGED&&!confirm("Leave without saving?")){return}if(window.__FILESAVED){ajax("?do=getfs&path="+b+"&subject="+a,"get",null,function(e){var g=$("dirList").getElementsByTagName("li"),d=unescape(a),f=0,c=g.length;for(;f<c;f++){if(g[f].title==d){g[f].getElementsByTagName("span")[0].innerHTML=e;break}}})}__CODEMIRROR=null;document.body.removeChild($("ea"));document.body.removeChild($("editOverlay"));window.__FILESAVED=null;document.onkeydown=null}};shell={init:function(b,a){popup.init("Shell:",["textarea",{attributes:{id:"shell-history"},text:""},"form",{attributes:{id:"shell",action:"?do=shell&nonce="+nonce,method:"post"},events:{submit:shell.submit}},["input",{attributes:{type:"text",name:"cmd",id:"cmd","data-bash":"["+b+" "+a+"]"}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},submit:function(a){a.preventDefault();$("shell-history").innerHTML+=$("cmd").getAttribute("data-bash")+"> "+$("cmd").value;ajax($("shell").getAttribute("action"),"POST","cmd="+encodeURIComponent($("cmd").value),function(b){$("shell-history").innerHTML+="\n"+b;$("shell-history").scrollTop=$("shell-history").scrollHeight});$("cmd").value="";return false}};upload={init:function(b,a){popup.init("Upload:",["form",{attributes:{id:"upload",action:"?do=upload&path="+b,method:"post",enctype:"multipart/form-data",encoding:"multipart/form-data"}},["input",{attributes:{type:"hidden",name:"MAX_FILE_SIZE",value:a}},"input",{attributes:{type:"file",id:"file_input",name:"file"},events:{change:function(c){upload.chk(c.target.files[0].name,b)}}}],"div",{attributes:{id:"upload-drag"},events:{dragover:function(c){this.className="upload-dragover";c.preventDefault()},dragleave:function(){this.className=""},drop:function(c){c.preventDefault();upload.chk(c.dataTransfer.files[0].name,b,c.dataTransfer.files[0])},},text:"drag here"},"div",{attributes:{id:"response"},text:"php.ini upload limit: "+Math.floor(a/1048576)+" MB"}])},chk:function(a,d,b){var c=new FormData();c.append("file",b||$("file_input").files[0]);ajax("?do=fileExists&path="+d+"&subject="+a,"GET",null,function(e){if(e=="1"){json2markup(["input",{insert:"after",attributes:{type:"button",value:"Replace?"},events:{click:function(f){upload.submit(d,c)}}}],$("file_input"))}else{upload.submit(d,c)}})},submit:function(b,a){ajax("?do=upload&path="+b+"&nonce="+nonce,"POST",a,function(c){$("response").innerHTML=c;location.reload(true)},true,function(d){if(d.lengthComputable){var c=Math.round((d.loaded*100)/d.total);$("response").innerHTML="uploaded: "+c+"%"}})}};';
-$_R['css'] = 'html,body{height:100%;width:100%}body{margin:0;font-family:Calibri,Consolas,Trebuchet,sans-serif}a{text-decoration:none;color:#b22424}a:visited{color:#ff2f00}a:hover{color:#dd836f}img{border:0}a:hover.b,.b a:hover,#add a img:hover{border:1px dotted #b22424}#header{padding:.2em;background-color:#e8e8e8}#logout{float:right}.pathCrumbs a:hover{background-color:white}#dir-count{color:grey;font-size:small;margin:0 0 3px 10px}#dirList ul{list-style:none;margin:.5em 0 0 1.5em;padding:0}#dirList li{margin:.05em 0;padding:.1em 0 .1em .1em;width:98%}#dirList li:hover{background:#ebebeb;border-radius:5px}#body .pathCrumbs a:hover{background-color:#e8e8e8}#info li:hover{background:0}#file{padding-left:.3em;font-size:.7em;bottom:.10em}#fileop{position:absolute;right:3em;font-size:.7em;margin-top:.30em}.dir,.file{position:relative;bottom:.05em;right:.11em;font:bold 14px verdana,arial;color:black}.dir{background:url(?r=images/dir.png) no-repeat bottom left;padding-left:1.45em;padding-top:2px}.file{padding-left:.30em}.mode,.fs,.extension,.filemtime{position:absolute;right:15em;font-family:Calibri,sans-serif;font-size:.7em;margin-top:.30em}.fs{margin-right:5%}.extension{margin-right:13%}.filemtime{margin-right:20%}.del,.edit,.rename,.move,.copy,.chmod,.extract{position:absolute;margin-top:.11em;min-width:1em;min-height:1em}.del{background:url(?r=images/del.png) no-repeat top right;right:2.22em}.rename{background:url(?r=images/ren.gif) no-repeat top right;right:3.33em}.move{background:url(?r=images/move.gif) no-repeat top right;right:4.44em}.chmod{background:url(?r=images/chmod.gif) no-repeat top right;right:6.55em}.copy{background:url(?r=images/copy.png) no-repeat top right;right:5.56em}.extract{background:url(?r=images/extract.png) no-repeat top right;right:8.92em}.edit{background:url(?r=images/edit.png) no-repeat top right;right:7.65em}.cp{background:url(?r=images/cp.png) no-repeat top right;padding:0 0 1px 1px}#add{float:right;position:relative;right:2em;top:1em}#add a:hover,#add a:focus{border:0}#movelist{text-align:left;margin-left:.5em}#moveListUL{margin-top:.75em;margin-bottom:.5em;list-style:none;overflow:auto}#movelist a img{vertical-align:-15%}#movehere{margin-left:.5em;background:url(?r=images/movehere.gif) no-repeat center left;padding-left:.90em;font-family:Calibri,sans-serif}#ea{position:absolute;top:0;left:0;z-index:125}#editMsg{margin-left:2px}.failed,.succeeded{color:red;font-weight:bold}.succeeded{color:green}.CodeMirror-scroll{width:800px;height:600px!important;border:1px solid black}#footer{position:relative;top:3em;padding-bottom:1em;clear:both;text-align:center;font-size:.85em}#footer a{font-style:italic}#popup{position:fixed;left:50%;top:50%;min-width:15em;min-height:3em;border:2px solid #525252;background:white;z-index:150;padding-bottom:10px}#head{background-color:#e8e8e8;font-family:Calibri,sans-serif}#x{float:right}#body{text-align:center;margin:.5em 0;padding:0 15px 5px;white-space:nowrap}#response{font-weight:bold;font-size:small;margin-top:10px}#shell-history{width:400px;height:300px}#upload-drag{border:2px dashed;color:grey;height:20px;margin-top:7px;padding:7px 0 10px;width:97%}#upload-drag.upload-dragover{border:2px dashed blue}#remote-copy{text-align:left}#remote-copy input[type="text"]{width:300px}#remote-copy input[type="submit"]{float:right;margin-top:8px}#popOverlay,#editOverlay,#ajaxOverlay{width:100%;height:100%;position:fixed;left:0;top:0;z-index:105;background-color:#fff!important}#editOverlay{opacity:1;filter:alpha(opacity = 100);z-index:115}#ajaxOverlay{z-index:150}#ajaxImg{position:fixed;left:50%;top:50%;margin-left:-1.5em;margin-top:-1em;z-index:160}';
+$_R['js'] = 'function $(a){return document.getElementById(a)}var popup,fOp,edit,upload,shell,__AJAX_ACTIVE,__CODEMIRROR,__CODEMIRROR_MODE,__CODEMIRROR_LOADED,__CODEMIRROR_PATH="_cm",__CODEMIRROR_MODES={html:"htmlmixed",js:"javascript",py:"python",rb:"ruby",md:"markdown"};function ajax(b,g,e,c,a,d){__AJAX_ACTIVE=true;if(!a){json2markup(["div",{attributes:{id:"ajaxOverlay"}},"img",{attributes:{src:"'.$_R['images/ajax.gif'].'",id:"ajaxImg",title:"Loading",alt:"Loading"}}],document.body);$("ajaxOverlay").style.height=document.body.offsetHeight+"px";fade($("ajaxOverlay"),0,6,25,"in")}var f=window.ActiveXObject?new ActiveXObject("MSXML2.XMLHTTP.3.0"):new XMLHttpRequest();d&&f.upload.addEventListener("progress",d,false);f.open(g,b,true);f.onreadystatechange=function(){if(f.readyState!=4){return}__AJAX_ACTIVE=false;a||fade($("ajaxOverlay"),6,0,25,"out",function(){document.body.removeChild($("ajaxOverlay"));document.body.removeChild($("ajaxImg"))});if(f.status==200||f.statusText=="OK"){if(f.responseText=="Please refresh the page and login"){alert(f.responseText)}else{c(f.responseText)}}else{alert("AJAX request unsuccessful.\nStatus Code: "+f.status+"\nStatus Text: "+f.statusText+"\nParameters: "+b)}f=null};if(g.toLowerCase()=="post"&&!a){f.setRequestHeader("Content-Type","application/x-www-form-urlencoded;charset=UTF-8")}f.send(e)}function json2markup(c,g){var b=0,a=c.length,d,f,e;for(;b<a;b++){if(c[b].constructor==Array){json2markup(c[b],d)}else{if(c[b].constructor==Object){if(c[b].attributes){for(f in c[b].attributes){switch(f.toLowerCase()){case"class":d.className=c[b].attributes[f];break;case"style":d.style.cssText=c[b].attributes[f];break;case"for":d.htmlFor=c[b].attributes[f];break;default:d.setAttribute(f,c[b].attributes[f])}}}if(c[b].events){for(e in c[b].events){d.addEventListener(e,c[b].events[e],false)}}if(c[b].preText){g.appendChild(document.createTextNode(c[b].preText))}if(c[b].text){d.appendChild(document.createTextNode(c[b].text))}switch(c[b].insert){case"before":g.parentNode.insertBefore(d,g);break;case"after":g.parentNode.insertBefore(d,g.nextSibling);break;case"under":default:g.appendChild(d)}if(c[b].postText){g.appendChild(document.createTextNode(c[b].postText))}}else{d=document.createElement(c[b])}}}}function fade(e,f,g,c,h,i){var d=e.style.opacity!=undefined,b,a;e.style[d?"opacity":"filter"]=d?f/10:"alpha(opacity="+f*10+")";a=setInterval(function(){if(h=="in"){f++;b=f<=g}else{if(h=="out"){f--;b=f>=g}}if(b){e.style[d?"opacity":"filter"]=d?f/10:"alpha(opacity="+f*10+")"}else{clearInterval(a);if(i){i()}}},c)}popup={init:function(d,a){json2markup(["div",{attributes:{id:"popOverlay"},events:{click:popup.close}}],document.body);json2markup(["div",{attributes:{id:"popup"}},["div",{attributes:{id:"head"}},["a",{attributes:{id:"x",href:"#"},events:{click:function(f){popup.close();f.preventDefault?f.preventDefault():f.returnValue=false}},text:"[x]"},"span",{text:d}],"div",{attributes:{id:"body"}}]],document.body);var e=$("popup"),c=$("popOverlay"),b;json2markup(a,$("body"));if(b=$("moveListUL")){if(b.offsetHeight>(document.body.offsetHeight-150)){b.style.height=document.body.offsetHeight-150+"px"}}e.style.marginTop="-"+parseInt(e.offsetHeight)/2+"px";e.style.marginLeft="-"+parseInt(e.offsetWidth)/2+"px";fade(c,0,6,25,"in");document.onkeydown=function(f){if((f||window.event).keyCode==27){popup.close();return false}}},close:function(){if(__AJAX_ACTIVE){return}if($("popup")){var a=$("popOverlay");fade(a,6,0,25,"out",function(){document.body.removeChild(a)});document.body.removeChild($("popup"))}document.onkeydown=null}};fOp={rename:function(a,b){popup.init("Rename:",["form",{attributes:{action:"?do=rename&subject="+a+"&path="+b+"&nonce="+nonce,method:"post"}},["input",{attributes:{title:"Rename To",type:"text",name:"rename",value:a}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},create:function(a,b){popup.init("Create "+a+":",["form",{attributes:{method:"post",action:"?do=create&path="+b+"&f_type="+a+"&nonce="+nonce}},["input",{attributes:{title:"Filename",type:"text",name:"f_name"}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},chmod:function(c,b,a){popup.init("Chmod "+unescape(b)+":",["form",{attributes:{method:"post",action:"?do=chmod&subject="+b+"&path="+c+"&nonce="+nonce}},["input",{attributes:{title:"chmod",type:"text",name:"mod",value:a}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},copy:function(a,b){popup.init("Copy "+unescape(a)+":",["form",{attributes:{method:"post",action:"?do=copy&subject="+a+"&path="+b+"&nonce="+nonce}},["input",{attributes:{title:"copy to",type:"text",name:"to",value:"copy-"+a}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},moveList:function(a,b,c){ajax(("?do=moveList&subject="+a+"&path="+b+"&to="+c),"get",null,function(d){if(!$("popup")){popup.init("Move "+unescape(a)+" to:",Function("return "+d)())}else{var f=$("popup"),e;$("body").innerHTML="";json2markup(Function("return "+d)(),$("body"));if((e=$("moveListUL")).offsetHeight>(document.body.offsetHeight-150)){e.style.height=document.body.offsetHeight-150+"px"}f.style.marginTop="-"+parseInt(f.offsetHeight)/2+"px";f.style.marginLeft="-"+parseInt(f.offsetWidth)/2+"px"}})},remoteCopy:function(a){popup.init("Remote Copy:",["form",{attributes:{method:"post",action:"?do=remoteCopy&path="+a+"&nonce="+nonce,id:"remote-copy"}},["legend",{text:"Location: "},["br",{},"input",{attributes:{title:"Remote Copy",type:"text",name:"location"},events:{change:function(b){$("remoteCopyName").value=this.value.substring(this.value.lastIndexOf("/")+1)}}}],"legend",{text:"Name: "},["br",{},"input",{attributes:{id:"remoteCopyName",title:"Name",type:"text",name:"to"}}],"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])}};edit={init:function(b,c,d,a){__CODEMIRROR_MODE=d;json2markup(["div",{attributes:{id:"editOverlay"}}],document.body);$("editOverlay").style.height="100%";json2markup(["div",{attributes:{id:"ea"}},["textarea",{attributes:{id:"ta",rows:"30",cols:"90"},events:{change:function(){window.__FILECHANGED=true}}},"br",{},"input",{attributes:{type:"text",value:unescape(b),readonly:""}},"input",{attributes:{type:"button",value:"CodeMirror"},events:{click:function(){if(a){edit.codeMirrorLoad()}else{if(confirm("Install CodeMirror?")){ajax("?do=installCodeMirror","get",null,function(e){if(e==""){edit.codeMirrorLoad()}else{alert("Install failed. Manually upload CodeMirrorand place it in _codemirror, in the same directory as pafm")}})}}this.disabled=true}}},"input",{attributes:{type:"button",value:"Save",id:"save"},events:{click:function(){edit.save(b,c)}}},"input",{attributes:{type:"button",value:"Exit",id:"exit"},events:{click:function(){edit.exit(b,c)}}},"span",{attributes:{id:"editMsg"}}]],document.body);document.onkeydown=function(f){if((f||window.event).keyCode==27){edit.exit(b,c);return false}};ajax("?do=readFile&path="+c+"&subject="+b,"get",null,function(e){$("ta").value=e});location="#header"},codeMirrorLoad:function(){if(!__CODEMIRROR_LOADED){json2markup(["script",{attributes:{src:__CODEMIRROR_PATH+"/cm.js",type:"text/javascript"},events:{load:function(){__CODEMIRROR_LOADED=true;edit.codeMirrorLoad()}}},"link",{attributes:{rel:"stylesheet",href:__CODEMIRROR_PATH+"/cm.css"}},],document.getElementsByTagName("head")[0])}else{var a=__CODEMIRROR_MODES[__CODEMIRROR_MODE]||__CODEMIRROR_MODE;__CODEMIRROR=CodeMirror.fromTextArea($("ta"),{onChange:function(){window.__FILECHANGED=true},lineNumbers:true});__CODEMIRROR.setOption("mode",a)}},save:function(b,c){__CODEMIRROR&&__CODEMIRROR.save();$("editMsg").innerHTML=null;var a="data="+encodeURIComponent($("ta").value);ajax("?do=saveEdit&subject="+b+"&path="+c+"&nonce="+nonce,"post",a,function(d){$("editMsg").className=d.indexOf("saved")==-1?"failed":"succeeded";$("editMsg").innerHTML=d});window.__FILESAVED=true;window.__FILECHANGED=false},exit:function(a,b){if(window.__FILECHANGED&&!confirm("Leave without saving?")){return}if(window.__FILESAVED){ajax("?do=getfs&path="+b+"&subject="+a,"get",null,function(e){var g=$("dirList").getElementsByTagName("li"),d=unescape(a),f=0,c=g.length;for(;f<c;f++){if(g[f].title==d){g[f].getElementsByTagName("span")[0].innerHTML=e;break}}})}__CODEMIRROR=null;document.body.removeChild($("ea"));document.body.removeChild($("editOverlay"));window.__FILESAVED=null;document.onkeydown=null}};shell={init:function(b,a){popup.init("Shell:",["textarea",{attributes:{id:"shell-history"},text:""},"form",{attributes:{id:"shell",action:"?do=shell&nonce="+nonce,method:"post"},events:{submit:shell.submit}},["input",{attributes:{type:"text",name:"cmd",id:"cmd","data-bash":"["+b+" "+a+"]"}},"input",{attributes:{title:"Ok",type:"submit",value:"\u2713"}}]])},submit:function(a){a.preventDefault();$("shell-history").innerHTML+=$("cmd").getAttribute("data-bash")+"> "+$("cmd").value;ajax($("shell").getAttribute("action"),"POST","cmd="+encodeURIComponent($("cmd").value),function(b){$("shell-history").innerHTML+="\n"+b;$("shell-history").scrollTop=$("shell-history").scrollHeight});$("cmd").value="";return false}};upload={init:function(b,a){popup.init("Upload:",["form",{attributes:{id:"upload",action:"?do=upload&path="+b,method:"post",enctype:"multipart/form-data",encoding:"multipart/form-data"}},["input",{attributes:{type:"hidden",name:"MAX_FILE_SIZE",value:a}},"input",{attributes:{type:"file",id:"file_input",name:"file"},events:{change:function(c){upload.chk(c.target.files[0].name,b)}}}],"div",{attributes:{id:"upload-drag"},events:{dragover:function(c){this.className="upload-dragover";c.preventDefault()},dragleave:function(){this.className=""},drop:function(c){c.preventDefault();upload.chk(c.dataTransfer.files[0].name,b,c.dataTransfer.files[0])},},text:"drag here"},"div",{attributes:{id:"response"},text:"php.ini upload limit: "+Math.floor(a/1048576)+" MB"}])},chk:function(a,d,b){var c=new FormData();c.append("file",b||$("file_input").files[0]);ajax("?do=fileExists&path="+d+"&subject="+a,"GET",null,function(e){if(e=="1"){json2markup(["input",{insert:"after",attributes:{type:"button",value:"Replace?"},events:{click:function(f){upload.submit(d,c)}}}],$("file_input"))}else{upload.submit(d,c)}})},submit:function(b,a){ajax("?do=upload&path="+b+"&nonce="+nonce,"POST",a,function(c){$("response").innerHTML=c;location.reload(true)},true,function(d){if(d.lengthComputable){var c=Math.round((d.loaded*100)/d.total);$("response").innerHTML="uploaded: "+c+"%"}})}};';
 $_R['images/copy.png'] = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAW0lEQVR42mNkgIKGhob/DEQCoFpGGJsR2YD6+nqCmhsbG+lgAEgRsQCnAcS6hvYGYPMOstxIcwG6odR3ATZ/YtOEDBixKcKXrGGugyVpsgyAqmHE6wJ8fkfOTACWlX8HDBsg/gAAAABJRU5ErkJggg==';
 $_R['images/cp.png'] = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABZUlEQVR4nKWTsYoaURhGz+hoJdqmFIvgiGyVZ4i1xbZbJ7W1jxBIlyyCJLAvYLVvYSVYGBCrweY6w8w49473zr/FblgtVk32g6/8DufncuGd8QCCIOgBX4E7oHlho4CfwLflcqkA6Pf797PZTLbbrex2u7MNw1Cm06kEQfADoNrtdj8PBoPvw+EQay1aa4wxb1ZE6HQ6LBaLT9baRx/42Gq1SNP0n26v1WqIyAdfRCp5npNl2dXjPM9JkgQRqfgAWmuSJAFgPp+fHfd6PeI4pigKAHyA/X5PHMcAjEajs4DJZMLhcKAsy1dAFEWEYYjv+xf1/5o6514BxhiUUhfH8Hw/cGrgnENrDcB4PL4KdGJwDLg2xwaltRZjzP8BnHPz42e5JiJClmWUZfmnqpQKG41GR2t943keRVGgtX6zaZqyXq+Jomi6Wq1+eS/QZrvd/lKv1289zzv7G0VEGWN+bzabByB9AqD9D+RrBi73AAAAAElFTkSuQmCC';
 $_R['images/del.png'] = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsSAAALEgHS3X78AAACYElEQVQ4jW1TTWtTURA9M/c+Hz6pidYKbU0LduWy2K4LXQiCP8Ot/8h/0K0guCiNQkTj3lUFE0lL0xYj9Zm5HzMukpcqOqthuOfMuWdmyMzQhJkREdlgMGgPh8OnRVHsAECM8VOn03m9sbHxvXnTYKghqOu6ZGbq9/sPu93uS2auzOwzABDRI1Wt9/b2nu/u7n5RVauqShYEdV3j8PDw1dbW1hMRSap60zn3HcDlvNHdnHObmX+VZemPj4/f7O/vP6uqCh4ARKQajUaP19fXixCCc85pTrlNRO3510BMGmMszYxHo9FjEamqqqo9AN9ut2sAB71e78XS0lIWkcJ7D1U1g8Gxo5QSl2UZr66u2Ht/MMd4r6rEzNjZ2bnc3NyEasbKyn2cnZ2hdfs2ETMmPyZYubeC8XgMABgOh5dEBFUlbtyMMdLJyQmOjro4Pz9Hr9fD18EAg8EAHz98xMXFBd6+e4fT01PEGKnBLQhU1WIIYGaIBDh2SCkh5zyvCRwzUkpQ1cUYfZOklCBEgBmCCEBATAmqBiKa1WaGI6WE/xJozjADpjKd1WKEsQIApiJQNchUoKbXBM0ipXk3w1wBCCllKCsMQJgKAIPIFMTcbO7fClKcSZMQQABSimB2IADTEObqAorCXytokpyzSRBozhZETKGIIYJdhs19sYXR9K+JIkKFL7C2ukreF7R8ZxneexAIhS/gnMPa+hqNz8YQEfqToHHkff9T/7zzoOMkiBGakzMQCAaz8kZJw2/DvL29/b6Z/uIaY4yYTCa3zMwDuL7xJmjGRUSp1Wr9LIoCAPAbCVuIcRUZG9UAAAAASUVORK5CYII=';
@@ -115,6 +114,9 @@ $_R['images/move.gif'] = 'R0lGODlhEAAQANU/AD+0OnvbSEG2OrW2tk7BO0y/O0S5O+7u8rGxsV
 $_R['images/movehere.gif'] = 'R0lGODlhEAAQANU/APn5+VHDPE7BOz+0OnvbSLm6uUK3O7W2tky/O0S5O/39/fT09u7u8vz8/PX197Gxsc/Pz/b2+Pr6+7GysbKxsvj4+kC2Ovz/k+ry60i8O0i8PO3t8LGyspTmW+/v83bhOpriZojcZ4vgUPDz8rj7ZcnJybKxsejo7Zrrh6Pmgr6+vc/P0F/QPk2/PJvqffb595jjeO718LGxssr6hEHIE772drKysszNzMHCwsbFxZnpWvLy9fDw89HR0f///////yH5BAEAAD8ALAAAAAAQABAAAAaMwJ9wSCwOe70VctkDGHu+qNSHrBShjCzDc1pefbyweEP9BnbodJkI8QUCi3jcBxkiWoI8KjBy+H03QxosISEwKS4CGBERPiVDCTQEHToiBB8tFRU+OUMWhCAzNSQaMRISPjhDA6wWBhcJLw2zPipFBT6sCru7PgVFB7lTUgdFMhMmNhwUDw/ME0bRRkEAOw==';
 $_R['images/ren.gif'] = 'R0lGODlhEAAQANU/APHy8/zbmqyVYyEhIV5eXsPDw5ucnKqrq/7BZ7Kysuu1SoKCgnx8fPzShS8wMejo6NfX2fz67vj4+ERERL29ve7v7//Zc4uLi+Xl5f79+lRUU2BPL7mtlfT19//IWd7h5ZKSknR0dP3+/vf4+9avtf7rx1lZWXpnQ/rcqElNVGhbQMOvhP+gtu/Mdv/PYZKUmZ6fora3uNvTwtelRNrCjeS9YPXO3VJVXOzs6//kkVBQUPn5+ff392ZmZv///////yH5BAEAAD8ALAAAAAAQABAAAAbAwN9OwuPtjkeJZNexsX4GBoFwKFASh4MhxIGQfqCew1Hw4SCLQ0LQ4FR+F8KYsntATC+aZXYa/RZyZCJ2MCsWChs3PD8hPRo6DBcLIQKHGw4mi409PSYaKSo1HidjGoudIBgfHzItLgEfDAM6pzowPj4ROa+4F7OLBBMGPhkBHg0ZIzsLvz8mwj4lCA0RHRUAzLTO0AEoPAA4Dw/Mpj+cwxkiI+DiDCYEHeYTCwUxMQlYWSETPRI//wADChxIMGAQADs=';
 $_R['images/upload.gif'] = 'R0lGODlhGAAYAOZ/AOrNmf398v/rmPj4+OfJk9z5Yv/heuzs7vbdrv/igqLfJv/ebbbWVaa8Ne7ToezQnKLcLPHWpXC6DP/njaniLunp69zc3P/wqf/Xa/zcd+fIlOXl5vLYqP/yu//tpfT09Nb3W87yVP/plqzkMbTmOejLlsfwTLnqP/P09P/51/79+6PYRf/75b3rQf/APv/vof/wpffju/Hx8f7+/qW3L//64pDYFP/WX5DXFf/bZYTTCJzdIevr7LrdaP/deP/2zqrFPNzeu7PtK9f5V8HvVOv22P/ISvz8/Pn5+fvac6/PUf/lhbXPTprcHvn6+druuJXQHJbaGv/ojL/lgozWEfTz87rgef/Zav/nkNLGR4bJGf/QXNjgmJHQIJvXJrLmN//wrvTaqvTbrKThKavpMP/urv/SW+bm5//rnsTyQP/kiOLi4uPj5M7es5fRO3vCEtf1n+/w7f/OU63nKv/76Pj979Dyk9j2Xv/RV//NUf+/PP/ISf/DQ3zPAP///////yH5BAEAAH8ALAAAAAAYABgAAAf/gH+Cg4SFhoeIiYRIPAeOjwc8SIMBZHCHPH6am5sVg0RDQkWGBzOmp6Z+nn92aXcFZHWFFUdItre2Z2dtcwUkLSAraxsHgmdOKB8fKChVyh9FECAjFBQnLVNIFoJsAzLf4N9xKyZjO+c7LQpP238x7/DxTCQmFDj3OCchUEGCCAF0aggcWKNHDwhfdCjUEcKNFS7+WFyYSLGiFwp9MvYxwYAFAkFiUsAYSbJkFwUa+5xgkEKMoDA/XsicSVNLk5QjlPwII4jDDwFAgwIVIeWNjZQKgHTgIChChwlQoy4xsGCBBCopozQAE0GQgw4JwiagmqNsDgk20qpt4MGB1zI+ZOJeuUG3Lo27eGlkQeP2zwMPGDCYwUO4sOHDIh4IAiBii5w8kCNLnpwHi+I/ACYY2cO5s+fPnNUAEFQiAZ/TqFOrRp2gBOkkLvTInk27th4XGVz/UUFAA4HfwIMLB65CkXFCgQAAOw==';
+$_R['css'] = 'html,body{height:100%;width:100%}body{margin:0;font-family:Calibri,Consolas,Trebuchet,sans-serif}a{text-decoration:none;color:#b22424}a:visited{color:#ff2f00}a:hover{color:#dd836f}img{border:0}a:hover.b,.b a:hover,#add a img:hover{border:1px dotted #b22424}#header{padding:.2em;background-color:#e8e8e8}#logout{float:right}.pathCrumbs a:hover{background-color:white}#dir-count{color:grey;font-size:small;margin:0 0 3px 10px}#dirList ul{list-style:none;margin:.5em 0 0 1.5em;padding:0}#dirList li{margin:.05em 0;padding:.1em 0 .1em .1em;width:98%}#dirList li:hover{background:#ebebeb;border-radius:5px}#body .pathCrumbs a:hover{background-color:#e8e8e8}#info li:hover{background:0}#file{padding-left:.3em;font-size:.7em;bottom:.10em}#fileop{position:absolute;right:3em;font-size:.7em;margin-top:.30em}.dir,.file{position:relative;bottom:.05em;right:.11em;font:bold 14px verdana,arial;color:black}.dir{background:url('.$_R['images/dir.png'].') no-repeat bottom left;padding-left:1.45em;padding-top:2px}.file{padding-left:.30em}.mode,.fs,.extension,.filemtime{position:absolute;right:15em;font-family:Calibri,sans-serif;font-size:.7em;margin-top:.30em}.fs{margin-right:5%}.extension{margin-right:13%}.filemtime{margin-right:20%}.del,.edit,.rename,.move,.copy,.chmod,.extract{position:absolute;margin-top:.11em;min-width:1em;min-height:1em}.del{background:url('.$_R['images/del.png'].') no-repeat top right;right:2.22em}.rename{background:url('.$_R['images/ren.gif'].') no-repeat top right;right:3.33em}.move{background:url('.$_R['images/move.gif'].') no-repeat top right;right:4.44em}.chmod{background:url('.$_R['images/chmod.gif'].') no-repeat top right;right:6.55em}.copy{background:url('.$_R['images/copy.png'].') no-repeat top right;right:5.56em}.extract{background:url('.$_R['images/extract.png'].') no-repeat top right;right:8.92em}.edit{background:url('.$_R['images/edit.png'].') no-repeat top right;right:7.65em} .my_zip{font-size:0.8em;background-color:yellow;color:black;position: absolute;right:9.55em;} .cp{background:url('.$_R['images/cp.png'].') no-repeat top right;padding:0 0 1px 1px}#add{float:right;position:relative;right:2em;top:1em}#add a:hover,#add a:focus{border:0}#movelist{text-align:left;margin-left:.5em}#moveListUL{margin-top:.75em;margin-bottom:.5em;list-style:none;overflow:auto}#movelist a img{vertical-align:-15%}#movehere{margin-left:.5em;background:url('.$_R['images/movehere.gif'].') no-repeat center left;padding-left:.90em;font-family:Calibri,sans-serif}#ea{position:absolute;top:0;left:0;z-index:125}#editMsg{margin-left:2px}.failed,.succeeded{color:red;font-weight:bold}.succeeded{color:green}.CodeMirror-scroll{width:800px;height:600px!important;border:1px solid black}#footer{position:relative;top:3em;padding-bottom:1em;clear:both;text-align:center;font-size:.85em}#footer a{font-style:italic}#popup{position:fixed;left:50%;top:50%;min-width:15em;min-height:3em;border:2px solid #525252;background:white;z-index:150;padding-bottom:10px}#head{background-color:#e8e8e8;font-family:Calibri,sans-serif}#x{float:right}#body{text-align:center;margin:.5em 0;padding:0 15px 5px;white-space:nowrap}#response{font-weight:bold;font-size:small;margin-top:10px}#shell-history{width:400px;height:300px}#upload-drag{border:2px dashed;color:grey;height:20px;margin-top:7px;padding:7px 0 10px;width:97%}#upload-drag.upload-dragover{border:2px dashed blue}#remote-copy{text-align:left}#remote-copy input[type="text"]{width:300px}#remote-copy input[type="submit"]{float:right;margin-top:8px}#popOverlay,#editOverlay,#ajaxOverlay{width:100%;height:100%;position:fixed;left:0;top:0;z-index:105;background-color:#fff!important}#editOverlay{opacity:1;filter:alpha(opacity = 100);z-index:115}#ajaxOverlay{z-index:150}#ajaxImg{position:fixed;left:50%;top:50%;margin-left:-1.5em;margin-top:-1em;z-index:160}';
+
+
 
 if (!DEV && isset($_GET['r'])){
 	$r = $_GET['r'];
@@ -731,8 +733,7 @@ function moveList($subject, $path){
 					}
 				}
 			},
-			["img", {attributes: {"src": "'. (DEV ? 'pafm-files/' : '?r=')
-			.'images/odir.png", "title": "Open '.$dirItemHTML.'"}}],
+			["img", {attributes: {"src": "'. $_R['images/odir.png'] .'", "title": "Open '.$dirItemHTML.'"}}],
 			"a",
 			{
 				attributes: {"href": "?do=move&subject='.$subjectURL.'&path='.$pathURL.'&to='.$fullPathURL
@@ -785,6 +786,30 @@ function getDirs($path){
 
 	natcasesort($dirContents['folders']);
 
+	
+	
+	
+	//-------------------------edit ttt
+	echo
+	'<script>
+	function myzip_func(pathhh, foldernamee)
+	{
+		var excludeFiles= prompt("If you need, you can exclude folders/files (separated by comma). example:\r\n " + foldernamee + "/folder1," + foldernamee + "/folder2,\r\n\r\nOtherwise, just click OK.", "");
+		if (excludeFiles != null)
+		{
+			var finalURL="?startzip=1&pathh=" + encodeURIComponent(pathhh) + "&exlcud=" + encodeURIComponent(excludeFiles); 
+			window.open(finalURL, \'target="_blank"\');
+		}
+		else
+		{
+			alert("You have canceled operation");
+		}
+	}
+	</script>';
+	//------------------------###edit ttt	
+	
+	
+	
 	foreach ($dirContents['folders'] as $dirItem){
 		$dirItemURL = escape($dirItem);
 		$dirItemHTML = htmlspecialchars($dirItem);
@@ -793,10 +818,26 @@ function getDirs($path){
 		$mtime = filemtime($fullPath);
 		$mod = getMod($path.'/'.$dirItem);
 
+		//-------------------------edit ttt
+			//remove starting dot
+			$rawpathhh=substr($pathURL, 1);//if (substr($pathURL, 0, 2) == './')
+		$myzip_pathh = ROOT.$rawpathhh.'/'.$dirItemHTML;
+		//------------------------###edit ttt
+		
+		
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="?path=' . escape($fullPath) . '" title="' . $dirItemHTML . '" class="dir">'.$dirItemHTML.'</a>'.
 		"\n\t" . '<span class="filemtime" title="'.date('c', $mtime).'">' . date('y-m-d | H:i:s', $mtime + $tz_offset) . '</span>' .
 		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
+		
+		
+		
+		//-------------------------edit ttt
+		"\n\t" . '<a href="javascript:myzip_func(\''.$myzip_pathh.'\',\''.$dirItemHTML.'\');"  class="myclass my_zip b">Zip</a>' .
+		//------------------------###edit ttt
+		
+		
+		
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a>' .
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
 		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a>' .
@@ -847,6 +888,146 @@ function getFiles($path){
 		"\n  </li>\n";
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//-------------------------edit ttt
+// ====================================================== ZIPPER ====================================== //
+if (!empty($_GET['startzip'])) 
+{
+//trick with PAFM
+chdir('./'.basename(dirname(__FILE__)));
+
+	//***************built from https://gist.github.com/ninadsp/6098467 ******
+	class ModifiedFlxZipArchive extends ZipArchive {
+		public function addDirDoo($location, $name , $prohib_filenames=false) {
+		
+			
+			if (!file_exists($location)) {	die("maybe file/folder path ( $location ) incorrect:");}
+			$this->addEmptyDir($name);
+			$name .= '/';
+			$location .= "/";
+			$dir = opendir ($location);   // Read all Files in Dir
+			
+			while ($file = readdir($dir)){
+				if ($file == '.' || $file == '..') continue;
+				if (!in_array($name.$file,$prohib_filenames)){
+					if (filetype( $location . $file) == 'dir'){
+						$this->addDirDoo($location . $file, $name . $file,$prohib_filenames );
+					}
+					else {
+						$this->addFile($location . $file, $name . $file);
+					}
+				}
+			}
+		}
+		
+		public function downld($zip_name){
+			ob_get_clean();
+			if (stristr($zip_name,'..')) {die("incorrrrrrect fileeee..");}
+			header("Pragma: public");	header("Expires: 0");	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+			header("Cache-Control: private", false);	header("Content-Type: application/zip");
+			header("Content-Disposition: attachment; filename=" . basename($zip_name) . ";" );
+			header("Content-Transfer-Encoding: binary");
+			header("Content-Length: " . filesize($zip_name));
+			readfile($zip_name);
+		}
+	}
+
+	//set memory limits
+	set_time_limit(3000);
+	ini_set('max_execution_time', 3000);
+	ini_set('memory_limit','100M');
+
+
+
+	
+	if (!empty($_GET['pathh']))
+	{
+					
+		$foldernameee	= $_GET['pathh'];
+		$foldernameee	= preg_replace("/%u([0-9a-f]{3,4})/i","&#x\\1;",urldecode($foldernameee)); 
+		$foldernameee	= html_entity_decode($foldernameee,null,'UTF-8');
+			//remove starting dot
+			//$foldernameee = substr($foldernameee,1);
+			
+		$new_zip_filename=basename($foldernameee).'___compressed';	
+		
+		$excl_var	=$_GET['exlcud'];
+		$excl_var 	= preg_replace("/%u([0-9a-f]{3,4})/i","&#x\\1;",urldecode($excl_var)); 
+		$excl_var	= html_entity_decode($excl_var,null,'UTF-8');
+		$exclude_some_files= explode(',',$excl_var);
+		// delte previous action
+		if (file_exists($new_zip_filename)) {unlink($new_zip_filename);}
+		$za = new ModifiedFlxZipArchive;
+		//create an archive
+		if	($za->open($new_zip_filename, ZipArchive::CREATE)) {
+			$za->addDirDoo($foldernameee, basename($foldernameee), $exclude_some_files); $za->close();
+		}else {die('cantttt start zipper_99');}
+
+		//download archive
+		//on the same execution,this made problems in some hostings, so better redirect
+		//$za -> downld($new_zip_filename)
+		//header("location:?startzip=ok&fildown=".$new_zip_filename);
+		die('Download archive: <a href="?startzip=ok&fildown='.$new_zip_filename.'".$new_zip_filename">'.$new_zip_filename.'</a> <br/><br/>Delete file after download: <a href="?startzip=ok&dell='.$new_zip_filename.'".$new_zip_filename">delete</a> ');
+	}
+	
+	
+	if (!empty($_GET['fildown']))
+	{
+		$za = new ModifiedFlxZipArchive;
+		$za -> downld($_GET['fildown']);
+	}
+	if (!empty($_GET['dell']))
+	{
+		if	(unlink($_GET['dell'])) {die('file_deleted');} 
+		else						{die("file doesnt exist");}
+	}
+}
+//-------------------------###edit ttt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -896,13 +1077,13 @@ function getFiles($path){
 </div>
 
 <div id="add" class="b">
-  <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/addfile.gif" alt="Create File"></a>
-  <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/addfolder.gif" alt="Create Folder"></a>
+  <a href="#" title="Create File" onclick="fOp.create('file', '<?php echo $pathURL; ?>'); return false;"><img src="<?php echo $_R['images/addfile.gif'];?>" alt="Create File"></a>
+  <a href="#" title="Create Folder" onclick="fOp.create('folder', '<?php echo $pathURL; ?>'); return false;"><img src="<?php echo $_R['images/addfolder.gif'];?>" alt="Create Folder"></a>
   <br>
-  <a href="#" title="Remote Copy File" onclick="fOp.remoteCopy('<?php echo $pathURL; ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/remotecopy.png" alt="Remote Copy"></a>
-  <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/upload.gif" alt="Upload File"></a>
+  <a href="#" title="Remote Copy File" onclick="fOp.remoteCopy('<?php echo $pathURL; ?>'); return false;"><img src="<?php echo $_R['images/remotecopy.png'];?>" alt="Remote Copy"></a>
+  <a href="#" title="Upload File" onclick="upload.init('<?php echo $pathURL; ?>', <?php echo $maxUpload; ?>); return false;"><img src="<?php echo $_R['images/upload.gif'];?>" alt="Upload File"></a>
   <br>
-  <a href="#" title="Open Shell" onclick="shell.init('<?php echo @trim(shell_exec('whoami')); ?>', '<?php echo @trim(shell_exec('pwd')); ?>'); return false;"><img src="<?php echo DEV ? "pafm-files/" : "?r="?>images/terminal.png" alt="Terminal"></a>
+  <a href="#" title="Open Shell" onclick="shell.init('<?php echo @trim(shell_exec('whoami')); ?>', '<?php echo @trim(shell_exec('pwd')); ?>'); return false;"><img src="<?php echo $_R['images/terminal.png'];?>" alt="Terminal"></a>
 </div>
 
 <div id="footer">
