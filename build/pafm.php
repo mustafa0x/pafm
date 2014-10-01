@@ -943,7 +943,7 @@ chdir(dirname(__file__));
 		
 		public function downld($zip_name){
 			ob_get_clean();
-			if (stristr($zip_name,'..')) {die("incorrrrrrect fileeee..");}
+			//if (stristr($zip_name,'..')) {die("incorrrrrrect fileeee..");}
 			header("Pragma: public");	header("Expires: 0");	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 			header("Cache-Control: private", false);	header("Content-Type: application/zip");
 			header("Content-Disposition: attachment; filename=" . basename($zip_name) . ";" );
@@ -985,7 +985,9 @@ chdir(dirname(__file__));
 		//on the same execution,this made problems in some hostings, so better redirect
 		//$za -> downld($new_zip_filename)
 		//header("location:?startzip=ok&fildown=".$new_zip_filename);
-		die('Download archive: <a href="?startzip=ok&fildown='.$new_zip_filename.'".$new_zip_filename">'.$new_zip_filename.'</a> <br/><br/>Delete file after download: <a href="?startzip=ok&dell='.$new_zip_filename.'".$new_zip_filename">delete</a> ');
+		$new_zip_filename_final = dirname($foldernameee).'/'.$new_zip_filename;
+		rename($new_zip_filename,$new_zip_filename_final );
+		die('Download archive: <a href="?startzip=ok&fildown='.$new_zip_filename_final.'".$new_zip_filename">'.$new_zip_filename_final.'</a> <br/><br/>Delete file after download: <a href="?startzip=ok&dell='.$new_zip_filename_final.'".$new_zip_filename">delete</a> ');
 	}
 	
 	
