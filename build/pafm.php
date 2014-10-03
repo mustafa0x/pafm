@@ -73,7 +73,7 @@ define('MaxEditableSize', 1);
  */
 define('DEV', 0);
 
-define('VERSION', '1.7 RC2');
+define('VERSION', '1.8 RC1');
 
 define('CODEMIRROR_PATH', __DIR__ . '/_cm');
 
@@ -88,7 +88,7 @@ $maxUpload = min(return_bytes(ini_get('post_max_size')), return_bytes(ini_get('u
 $dirContents = array('folders' => array(), 'files' => array());
 $dirCount = array('folders' => 0, 'files' => 0);
 $footer = '<a href="http://github.com/mustafa0x/pafm">pafm v'.VERSION.'</a> '
-	. 'by <a href="http://mus.tafa.us">mustafa</a>';
+	. 'by <a href="http://mus.tafa.us">mustafa</a> and selnomeria';
 
 /*
  * resource retrieval
@@ -114,7 +114,7 @@ $_R['images/move.gif'] = 'data:image/gif;base64,R0lGODlhEAAQANU/AD+0OnvbSEG2OrW2
 $_R['images/movehere.gif'] = 'data:image/gif;base64,R0lGODlhEAAQANU/APn5+VHDPE7BOz+0OnvbSLm6uUK3O7W2tky/O0S5O/39/fT09u7u8vz8/PX197Gxsc/Pz/b2+Pr6+7GysbKxsvj4+kC2Ovz/k+ry60i8O0i8PO3t8LGyspTmW+/v83bhOpriZojcZ4vgUPDz8rj7ZcnJybKxsejo7Zrrh6Pmgr6+vc/P0F/QPk2/PJvqffb595jjeO718LGxssr6hEHIE772drKysszNzMHCwsbFxZnpWvLy9fDw89HR0f///////yH5BAEAAD8ALAAAAAAQABAAAAaMwJ9wSCwOe70VctkDGHu+qNSHrBShjCzDc1pefbyweEP9BnbodJkI8QUCi3jcBxkiWoI8KjBy+H03QxosISEwKS4CGBERPiVDCTQEHToiBB8tFRU+OUMWhCAzNSQaMRISPjhDA6wWBhcJLw2zPipFBT6sCru7PgVFB7lTUgdFMhMmNhwUDw/ME0bRRkEAOw==';
 $_R['images/ren.gif'] = 'data:image/gif;base64,R0lGODlhEAAQANU/APHy8/zbmqyVYyEhIV5eXsPDw5ucnKqrq/7BZ7Kysuu1SoKCgnx8fPzShS8wMejo6NfX2fz67vj4+ERERL29ve7v7//Zc4uLi+Xl5f79+lRUU2BPL7mtlfT19//IWd7h5ZKSknR0dP3+/vf4+9avtf7rx1lZWXpnQ/rcqElNVGhbQMOvhP+gtu/Mdv/PYZKUmZ6fora3uNvTwtelRNrCjeS9YPXO3VJVXOzs6//kkVBQUPn5+ff392ZmZv///////yH5BAEAAD8ALAAAAAAQABAAAAbAwN9OwuPtjkeJZNexsX4GBoFwKFASh4MhxIGQfqCew1Hw4SCLQ0LQ4FR+F8KYsntATC+aZXYa/RZyZCJ2MCsWChs3PD8hPRo6DBcLIQKHGw4mi409PSYaKSo1HidjGoudIBgfHzItLgEfDAM6pzowPj4ROa+4F7OLBBMGPhkBHg0ZIzsLvz8mwj4lCA0RHRUAzLTO0AEoPAA4Dw/Mpj+cwxkiI+DiDCYEHeYTCwUxMQlYWSETPRI//wADChxIMGAQADs=';
 $_R['images/upload.gif'] = 'data:image/gif;base64,R0lGODlhGAAYAOZ/AOrNmf398v/rmPj4+OfJk9z5Yv/heuzs7vbdrv/igqLfJv/ebbbWVaa8Ne7ToezQnKLcLPHWpXC6DP/njaniLunp69zc3P/wqf/Xa/zcd+fIlOXl5vLYqP/yu//tpfT09Nb3W87yVP/plqzkMbTmOejLlsfwTLnqP/P09P/51/79+6PYRf/75b3rQf/APv/vof/wpffju/Hx8f7+/qW3L//64pDYFP/WX5DXFf/bZYTTCJzdIevr7LrdaP/deP/2zqrFPNzeu7PtK9f5V8HvVOv22P/ISvz8/Pn5+fvac6/PUf/lhbXPTprcHvn6+druuJXQHJbaGv/ojL/lgozWEfTz87rgef/Zav/nkNLGR4bJGf/QXNjgmJHQIJvXJrLmN//wrvTaqvTbrKThKavpMP/urv/SW+bm5//rnsTyQP/kiOLi4uPj5M7es5fRO3vCEtf1n+/w7f/OU63nKv/76Pj979Dyk9j2Xv/RV//NUf+/PP/ISf/DQ3zPAP///////yH5BAEAAH8ALAAAAAAYABgAAAf/gH+Cg4SFhoeIiYRIPAeOjwc8SIMBZHCHPH6am5sVg0RDQkWGBzOmp6Z+nn92aXcFZHWFFUdItre2Z2dtcwUkLSAraxsHgmdOKB8fKChVyh9FECAjFBQnLVNIFoJsAzLf4N9xKyZjO+c7LQpP238x7/DxTCQmFDj3OCchUEGCCAF0aggcWKNHDwhfdCjUEcKNFS7+WFyYSLGiFwp9MvYxwYAFAkFiUsAYSbJkFwUa+5xgkEKMoDA/XsicSVNLk5QjlPwII4jDDwFAgwIVIeWNjZQKgHTgIChChwlQoy4xsGCBBCopozQAE0GQgw4JwiagmqNsDgk20qpt4MGB1zI+ZOJeuUG3Lo27eGlkQeP2zwMPGDCYwUO4sOHDIh4IAiBii5w8kCNLnpwHi+I/ACYY2cO5s+fPnNUAEFQiAZ/TqFOrRp2gBOkkLvTInk27th4XGVz/UUFAA4HfwIMLB65CkXFCgQAAOw==';
-$_R['css'] = 'html,body{height:100%;width:100%}body{margin:0;font-family:Calibri,Consolas,Trebuchet,sans-serif}a{text-decoration:none;color:#b22424}a:visited{color:#ff2f00}a:hover{color:#dd836f}img{border:0}a:hover.b,.b a:hover,#add a img:hover{border:1px dotted #b22424}#header{padding:.2em;background-color:#e8e8e8}#logout{float:right}.pathCrumbs a:hover{background-color:white}#dir-count{color:grey;font-size:small;margin:0 0 3px 10px}#dirList ul{list-style:none;margin:.5em 0 0 1.5em;padding:0}#dirList li{margin:.05em 0;padding:.1em 0 .1em .1em;width:98%}#dirList li:hover{background:#ebebeb;border-radius:5px}#body .pathCrumbs a:hover{background-color:#e8e8e8}#info li:hover{background:0}#file{padding-left:.3em;font-size:.7em;bottom:.10em}#fileop{position:absolute;right:3em;font-size:.7em;margin-top:.30em}.dir,.file{position:relative;bottom:.05em;right:.11em;font:bold 14px verdana,arial;color:black}.dir{background:url('.$_R['images/dir.png'].') no-repeat bottom left;padding-left:1.45em;padding-top:2px}.file{padding-left:.30em}.mode,.fs,.extension,.filemtime{position:absolute;right:15em;font-family:Calibri,sans-serif;font-size:.7em;margin-top:.30em}.fs{margin-right:5%}.extension{margin-right:13%}.filemtime{margin-right:20%}.del,.edit,.rename,.move,.copy,.chmod,.extract{position:absolute;margin-top:.11em;min-width:1em;min-height:1em}.del{background:url('.$_R['images/del.png'].') no-repeat top right;right:2.22em}.rename{background:url('.$_R['images/ren.gif'].') no-repeat top right;right:3.33em}.move{background:url('.$_R['images/move.gif'].') no-repeat top right;right:4.44em}.chmod{background:url('.$_R['images/chmod.gif'].') no-repeat top right;right:6.55em}.copy{background:url('.$_R['images/copy.png'].') no-repeat top right;right:5.56em}.extract{background:url('.$_R['images/extract.png'].') no-repeat top right;right:8.92em}.edit{background:url('.$_R['images/edit.png'].') no-repeat top right;right:7.65em} .my_zip{font-size:0.8em;background-color:yellow;color:black;position: absolute;right:9.55em;} .cp{background:url('.$_R['images/cp.png'].') no-repeat top right;padding:0 0 1px 1px}#add{float:right;position:relative;right:2em;top:1em}#add a:hover,#add a:focus{border:0}#movelist{text-align:left;margin-left:.5em}#moveListUL{margin-top:.75em;margin-bottom:.5em;list-style:none;overflow:auto}#movelist a img{vertical-align:-15%}#movehere{margin-left:.5em;background:url('.$_R['images/movehere.gif'].') no-repeat center left;padding-left:.90em;font-family:Calibri,sans-serif}#ea{position:absolute;top:0;left:0;z-index:125}#editMsg{margin-left:2px}.failed,.succeeded{color:red;font-weight:bold}.succeeded{color:green}.CodeMirror-scroll{width:800px;height:600px!important;border:1px solid black}#footer{position:relative;top:3em;padding-bottom:1em;clear:both;text-align:center;font-size:.85em}#footer a{font-style:italic}#popup{position:fixed;left:50%;top:50%;min-width:15em;min-height:3em;border:2px solid #525252;background:white;z-index:150;padding-bottom:10px}#head{background-color:#e8e8e8;font-family:Calibri,sans-serif}#x{float:right}#body{text-align:center;margin:.5em 0;padding:0 15px 5px;white-space:nowrap}#response{font-weight:bold;font-size:small;margin-top:10px}#shell-history{width:400px;height:300px}#upload-drag{border:2px dashed;color:grey;height:20px;margin-top:7px;padding:7px 0 10px;width:97%}#upload-drag.upload-dragover{border:2px dashed blue}#remote-copy{text-align:left}#remote-copy input[type="text"]{width:300px}#remote-copy input[type="submit"]{float:right;margin-top:8px}#popOverlay,#editOverlay,#ajaxOverlay{width:100%;height:100%;position:fixed;left:0;top:0;z-index:105;background-color:#fff!important}#editOverlay{opacity:1;filter:alpha(opacity = 100);z-index:115}#ajaxOverlay{z-index:150}#ajaxImg{position:fixed;left:50%;top:50%;margin-left:-1.5em;margin-top:-1em;z-index:160}';
+$_R['css'] = 'html,body{height:100%;width:100%}body{margin:0;font-family:Calibri,Consolas,Trebuchet,sans-serif}a{text-decoration:none;color:#b22424}a:visited{color:#ff2f00}a:hover{color:#dd836f}img{border:0}a:hover.b,.b a:hover,#add a img:hover{border:1px dotted #b22424}#header{padding:.2em;background-color:#e8e8e8}#logout{float:right}.pathCrumbs a:hover{background-color:white}#dir-count{color:grey;font-size:small;margin:0 0 3px 10px}#dirList ul{list-style:none;margin:.5em 0 0 1.5em;padding:0}#dirList li{margin:.05em 0;padding:.1em 0 .1em .1em;width:98%}#dirList li:hover{background:#ebebeb;border-radius:5px}#body .pathCrumbs a:hover{background-color:#e8e8e8}#info li:hover{background:0}#file{padding-left:.3em;font-size:.7em;bottom:.10em}#fileop{position:absolute;right:3em;font-size:.7em;margin-top:.30em}.dir,.file{position:relative;bottom:.05em;right:.11em;font:bold 14px verdana,arial;color:black}.dir{background:url('.$_R['images/dir.png'].') no-repeat bottom left;padding-left:1.45em;padding-top:2px}.file{padding-left:.30em}.mode,.fs,.extension,.filemtime{position:absolute;right:15em;font-family:Calibri,sans-serif;font-size:.7em;margin-top:.30em}.fs{margin-right:5%}.extension{margin-right:13%}.filemtime{margin-right:20%}.del,.edit,.rename,.move,.copy,.chmod,.extract{position:absolute;margin-top:.11em;min-width:1em;min-height:1em}.del{background:url('.$_R['images/del.png'].') no-repeat top right;right:2.22em}.rename{background:url('.$_R['images/ren.gif'].') no-repeat top right;right:3.33em}.move{background:url('.$_R['images/move.gif'].') no-repeat top right;right:4.44em}.chmod{background:url('.$_R['images/chmod.gif'].') no-repeat top right;right:6.55em}.copy{background:url('.$_R['images/copy.png'].') no-repeat top right;right:5.56em}.extract{background:url('.$_R['images/extract.png'].') no-repeat top right;right:8.92em}.edit{background:url('.$_R['images/edit.png'].') no-repeat top right;right:7.65em} .backRestor{margin: 20px 0px 0px 20%;} .backRestor div{padding: 5px;display: inline-block; border-radius: 20px;}  .backRestor .backupp{background-color: rgb(96, 219, 10);} .backRestor .restoree{background-color: pink;} .backRestor .db_backResto{float:right; background-color: yellow;}  .my_zip{font-size:0.8em;background-color:yellow;color:black;position: absolute;right:9.55em;} .cp{background:url('.$_R['images/cp.png'].') no-repeat top right;padding:0 0 1px 1px}#add{float:right;position:relative;right:2em;top:1em}#add a:hover,#add a:focus{border:0}#movelist{text-align:left;margin-left:.5em}#moveListUL{margin-top:.75em;margin-bottom:.5em;list-style:none;overflow:auto}#movelist a img{vertical-align:-15%}#movehere{margin-left:.5em;background:url('.$_R['images/movehere.gif'].') no-repeat center left;padding-left:.90em;font-family:Calibri,sans-serif}#ea{position:absolute;top:0;left:0;z-index:125}#editMsg{margin-left:2px}.failed,.succeeded{color:red;font-weight:bold}.succeeded{color:green}.CodeMirror-scroll{width:800px;height:600px!important;border:1px solid black}#footer{position:relative;top:3em;padding-bottom:1em;clear:both;text-align:center;font-size:.85em}#footer a{font-style:italic}#popup{position:fixed;left:50%;top:50%;min-width:15em;min-height:3em;border:2px solid #525252;background:white;z-index:150;padding-bottom:10px}#head{background-color:#e8e8e8;font-family:Calibri,sans-serif}#x{float:right}#body{text-align:center;margin:.5em 0;padding:0 15px 5px;white-space:nowrap}#response{font-weight:bold;font-size:small;margin-top:10px}#shell-history{width:400px;height:300px}#upload-drag{border:2px dashed;color:grey;height:20px;margin-top:7px;padding:7px 0 10px;width:97%}#upload-drag.upload-dragover{border:2px dashed blue}#remote-copy{text-align:left}#remote-copy input[type="text"]{width:300px}#remote-copy input[type="submit"]{float:right;margin-top:8px}#popOverlay,#editOverlay,#ajaxOverlay{width:100%;height:100%;position:fixed;left:0;top:0;z-index:105;background-color:#fff!important}#editOverlay{opacity:1;filter:alpha(opacity = 100);z-index:115}#ajaxOverlay{z-index:150}#ajaxImg{position:fixed;left:50%;top:50%;margin-left:-1.5em;margin-top:-1em;z-index:160}';
 
 
 
@@ -792,9 +792,10 @@ function getDirs($path){
 	//-------------------------edit ttt
 	echo
 	'<script>
-	function myzip_func(pathhh, foldernamee)
+	var FreeSpacemessage ="";
+	function myzip_func(pathhh, foldernamee_just_for_reference)
 	{
-		var excludeFiles= prompt("If you need, you can exclude folders/files (separated by comma). example:\r\n " + foldernamee + "/folder1," + foldernamee + "/folder2,\r\n\r\nOtherwise, just click OK.", "");
+		var excludeFiles= prompt("If you need, you can exclude folders/files (separated by comma). example:\r\n " + foldernamee_just_for_reference + "/folder1," + foldernamee_just_for_reference + "/folder2,\r\n\r\nOtherwise, just click OK.\r\n\r\n(NOTICE: Ensure, if you have enough free space" + FreeSpacemessage + " on your FTP to create archive of this folder. Otherwise, you will only be able to do download this directory backup from HOSTING PANEL) ", "");
 		if (excludeFiles != null)
 		{
 			var finalURL="?startzip=1&pathh=" + encodeURIComponent(pathhh) + "&exlcud=" + encodeURIComponent(excludeFiles); 
@@ -866,6 +867,7 @@ function getFiles($path){
 		$mtime = filemtime($fullPath);
 		$mod = getMod($fullPath);
 		$ext = getExt($dirItem);
+		
 		$cmSupport = in_array($ext, $codeMirrorModes) ? 'cp ' : '';
 
 		echo '  <li title="' . $dirItemHTML . '">' .
@@ -906,52 +908,60 @@ function getFiles($path){
 
 
 //-------------------------edit ttt
-// ====================================================== ZIPPER ====================================== //
-if (!empty($_GET['startzip'])) 
+function downld($zip_name)
 {
-//trick with PAFM
-chdir(dirname(__file__));
+	ob_get_clean();
+	//if (stristr($zip_name,'..')) {die("incorrrrrrect fileeee..");}
+	header("Pragma: public");	header("Expires: 0");	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+	header("Cache-Control: private", false);	header("Content-Type: application/zip");
+	header("Content-Disposition: attachment; filename=" . basename($zip_name) . ";" );
+	header("Content-Transfer-Encoding: binary");
+	header("Content-Length: " . filesize($zip_name));
+	readfile($zip_name);
+}	
+
+if (!empty($_GET['delete_filee']))
+{
+	chdir(dirname(__file__));
+	if	(unlink($_GET['delete_filee'])) {die('file_deleted');} 
+	else						{die("file doesnt exist");}
+}
+if (!empty($_GET['fildown']))
+{
+	chdir(dirname(__file__));
+	downld($_GET['fildown']);
+}
 
 
-	
-	//***************built from https://gist.github.com/ninadsp/6098467 ******
-	class ModifiedFlxZipArchive extends ZipArchive 
+
+// ====================================================== ZIPPER ====================================== //
+class ModifiedFlxZipArchive extends ZipArchive 
+{
+	public function addDirDoo($location, $name , $prohib_filenames=false) 
 	{
-	
-		public function addDirDoo($location, $name , $prohib_filenames=false) 
-		{
+		if (!file_exists($location)) {	die("maybe file/folder path ( $location ) incorrect:");}
+		$this->addEmptyDir($name);
+		$name .= '/';
+		$location .= "/";
+		$dir = opendir ($location);   // Read all Files in Dir
 		
-			
-			if (!file_exists($location)) {	die("maybe file/folder path ( $location ) incorrect:");}
-			$this->addEmptyDir($name);
-			$name .= '/';
-			$location .= "/";
-			$dir = opendir ($location);   // Read all Files in Dir
-			
-			while ($file = readdir($dir)){
-				if ($file == '.' || $file == '..') continue;
-				if (!in_array($name.$file,$prohib_filenames)){
-					if (filetype( $location . $file) == 'dir'){
-						$this->addDirDoo($location . $file, $name . $file,$prohib_filenames );
-					}
-					else {
-						$this->addFile($location . $file, $name . $file);
-					}
+		while ($file = readdir($dir)){
+			if ($file == '.' || $file == '..') continue;
+			if (!in_array($name.$file,$prohib_filenames)){
+				if (filetype( $location . $file) == 'dir'){
+					$this->addDirDoo($location . $file, $name . $file,$prohib_filenames );
+				}
+				else {
+					$this->addFile($location . $file, $name . $file);
 				}
 			}
 		}
-		
-		public function downld($zip_name){
-			ob_get_clean();
-			//if (stristr($zip_name,'..')) {die("incorrrrrrect fileeee..");}
-			header("Pragma: public");	header("Expires: 0");	header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-			header("Cache-Control: private", false);	header("Content-Type: application/zip");
-			header("Content-Disposition: attachment; filename=" . basename($zip_name) . ";" );
-			header("Content-Transfer-Encoding: binary");
-			header("Content-Length: " . filesize($zip_name));
-			readfile($zip_name);
-		}
 	}
+}
+	
+if (!empty($_GET['startzip'])) 
+{
+	chdir(dirname(__file__));
 
 	//set memory limits
 	set_time_limit(3000);
@@ -960,7 +970,7 @@ chdir(dirname(__file__));
 	
 	if (!empty($_GET['pathh']))
 	{
-					
+		
 		$foldernameee	= $_GET['pathh'];
 		$foldernameee	= preg_replace("/%u([0-9a-f]{3,4})/i","&#x\\1;",urldecode($foldernameee)); 
 		$foldernameee	= html_entity_decode($foldernameee,null,'UTF-8');
@@ -983,25 +993,165 @@ chdir(dirname(__file__));
 
 		//download archive
 		//on the same execution,this made problems in some hostings, so better redirect
-		//$za -> downld($new_zip_filename)
+		//downld($new_zip_filename);
 		//header("location:?startzip=ok&fildown=".$new_zip_filename);
 		$new_zip_filename_final = dirname($foldernameee).'/'.$new_zip_filename;
 		rename($new_zip_filename,$new_zip_filename_final );
-		die('Download archive: <a href="?startzip=ok&fildown='.$new_zip_filename_final.'".$new_zip_filename">'.$new_zip_filename_final.'</a> <br/><br/>Delete file after download: <a href="?startzip=ok&dell='.$new_zip_filename_final.'".$new_zip_filename">delete</a> ');
-	}
-	
-	
-	if (!empty($_GET['fildown']))
-	{
-		$za = new ModifiedFlxZipArchive;
-		$za -> downld($_GET['fildown']);
-	}
-	if (!empty($_GET['dell']))
-	{
-		if	(unlink($_GET['dell'])) {die('file_deleted');} 
-		else						{die("file doesnt exist");}
+		die('Download archive: <a target="_blank" href="?fildown='.$new_zip_filename_final.'">'.$new_zip_filename_final.'</a> <br/><br/>After downloading, <a target="_blank" href="?delete_filee='.$new_zip_filename_final.'">delete it!</a> ');
 	}
 }
+
+// ====================================================== ###ZIPPER### ====================================== //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ====================================================== DataBase RESTORE ====================================== //
+function export_tables($host,$user,$pass,$name,$tables = '*', $backup_name = false )
+{
+	$link = mysqli_connect($host,$user,$pass,$name);
+	// Check connection
+	if (mysqli_connect_errno())	  {	  echo "Failed to connect to MySQL: " . mysqli_connect_error();	  }
+  
+	mysqli_select_db($link,$name);
+	mysqli_query($link,"SET NAMES 'utf8'");
+	
+	//get all of the tables
+	if($tables == '*')
+	{
+		$tables = array();
+		$result = mysqli_query($link,'SHOW TABLES');
+		while($row = mysqli_fetch_row($result))
+		{
+			$tables[] = $row[0];
+		}
+	}
+	else
+	{
+		$tables = is_array($tables) ? $tables : explode(',',$tables);
+	}
+	$return='';
+	//cycle through
+	foreach($tables as $table)
+	{
+		$result = mysqli_query($link,'SELECT * FROM '.$table);
+		$num_fields = mysqli_num_fields($result);
+		
+		$row2 = mysqli_fetch_row(mysqli_query($link,'SHOW CREATE TABLE '.$table));
+		$return.= "\n\n".$row2[1].";\n\n";
+		
+		for ($i = 0; $i < $num_fields; $i++) 
+		{
+			while($row = mysqli_fetch_row($result))
+			{
+				$return.= 'INSERT INTO '.$table.' VALUES(';
+				for($j=0; $j<$num_fields; $j++) 
+				{
+					$row[$j] = addslashes($row[$j]);
+					$row[$j] = str_replace("\n","\\n",$row[$j]);
+					if (isset($row[$j])) { $return.= '"'.$row[$j].'"' ; } else { $return.= '""'; }
+					if ($j<($num_fields-1)) { $return.= ','; }
+				}
+				$return.= ");\n";
+			}
+		}
+		$return.="\n\n\n";
+	}
+	
+	//save file
+	$backup_name = $backup_name ? $backup_name : rand(1,11111111).'.sql';
+	file_put_contents($backup_name,$return);
+	die('SUCCESS. Download BACKUP file: <a target="_blank" href="?startzip=ok&fildown='.$backup_name.'">'.$backup_name.'</a> <br/><br/>After download, <a target="_blank" href="?startzip=ok&delete_filee='.$backup_name.'">Delete it!</a> ');
+			
+}
+
+
+function import_tables($host,$user,$pass,$dbname,$sql_file,  $clear_or_not=false )
+{
+	if (!file_exists($sql_file)) {die('Input the SQL filename correctly! <button onclick="window.history.back();">Click Back</button>');}
+	
+	// Connect to MySQL server
+		//$link = mysqli_connect($host,$user,$pass,$name);
+		//mysqli_select_db($link,$mysqli);
+	$mysqli = new mysqli($host, $user, $pass, $dbname);
+	// Check connection
+	if (mysqli_connect_errno())	  {	  echo "Failed to connect to MySQL: " . mysqli_connect_error();	  }
+	
+	if($clear_or_not) 
+	{
+		$zzzzzz = $mysqli->query('SET foreign_key_checks = 0');
+		if ($result = $mysqli->query("SHOW TABLES"))
+		{
+			while($row = $result->fetch_array(MYSQLI_NUM))
+			{
+				$mysqli->query('DROP TABLE IF EXISTS '.$row[0]);
+			}
+		}
+		$zzzzzz = $mysqli->query('SET foreign_key_checks = 1');
+	}
+
+	$mysqli->query("SET NAMES 'utf8'");
+	// Temporary variable, used to store current query
+	$templine = '';
+	// Read in entire file
+	$lines = file($sql_file);
+	// Loop through each line
+	foreach ($lines as $line)
+	{
+		// Skip it if it's a comment
+		if (substr($line, 0, 2) == '--' || $line == '')
+			continue;
+		// Add this line to the current segment
+		$templine .= $line;
+		// If it has a semicolon at the end, it's the end of the query
+		if (substr(trim($line), -1, 1) == ';')
+		{
+			// Perform the query
+			$mysqli->query($templine) or print('Error performing query \'<strong>' . $templine . '\': ' . $mysqli->error . '<br /><br />');
+			// Reset temp variable to empty
+			$templine = '';
+		}
+	}
+	 echo 'Tables imported successfully. <button onclick="window.history.back();">Go Back</button>';
+}
+
+
+
+
+	
+
+if (!empty($_POST['dbaction']))
+{
+	chdir(dirname(__file__));
+	$dbhost = $_POST['dbHOST'];
+	$dbuser = $_POST['dbUSER'];
+	$dbpass = $_POST['dbPASS'];
+	$dbname = $_POST['dbNAME'];
+	if ($_POST['dbaction'] == 'exportt')
+	{
+		export_tables($dbhost,$dbuser,$dbpass,$dbname);
+	}
+	elseif ($_POST['dbaction'] == 'importt')
+	{
+		$deleteAllTablesBeforeImport = $_POST['dbCLEAR'] == 'y' ? true : false;
+		$sql_file_name = $_POST['sqlfilenamee'];
+		import_tables($dbhost,$dbuser,$dbpass,$dbname, $sql_file_name, $deleteAllTablesBeforeImport);
+	}
+
+	exit;
+}
+// ====================================================== ###DataBase RESTORE### ====================================== //
+
 //-------------------------###edit ttt
 
 
@@ -1040,7 +1190,7 @@ chdir(dirname(__file__));
   <title><?php echo str_replace('www.', '', $_SERVER['HTTP_HOST']); ?> | pafm</title>
   <style type="text/css"><?php echo $_R['css'] ;?>";</style>
   <script type="text/javascript">var nonce = "<?php echo $_SESSION['nonce']; ?>";</script>
-  <script src="<?php echo DEV ? 'pafm-files/js.js' : '?r=js';?>" type="text/javascript"></script>
+  <script type="text/javascript"><?php echo $_R['js'];?></script>
 </head>
 <body>
 
@@ -1059,25 +1209,110 @@ chdir(dirname(__file__));
   </span>
 </div>
 
+
+<div class="backRestor">
+	<?php 
+	$foldr_name = basename($_GET['path']);
+	$myzip_pathh = ROOT . substr($pathURL, 1);
+	?>
+	<div class="backupp">
+		<!-- <a href="javascript:myzip_func('<?php echo $myzip_pathh;?>','<?php echo $foldr_name;?>')">Backup (zip) this directory</a> -->
+		<a href="javascript:alert('To bakcup this directory, then go to upper directory, and click \'ZIP\' button. It will make a backup archive');"> Backup (zip) this directory</a>
+	</div>
+	<div class="restoree">
+		<a href="javascript:alert('To restore this directory (lets be glad with what I was able to do :) : \r\n1) Go to upper directory and delete this directory\r\n2) upload(upload button is in the bottom) the backup file , \r\n3) then click EXTRACT button (that button will be placed in the uploaded file\'s row, on the right side)');">Restore this directory (from backup)</a>
+	</div>
+	
+	<div class="db_backResto">
+		<span style="font-size:1.2em;color:green;">DATABASE</span>: <a href="javascript:export_import_db('exportt');">Backup</a> | <a href="javascript:export_import_db('importt');">Restore</a>
+	</div>
+
+
+	<script type="text/javascript">
+	var dddNAME="<?php if (function_exists('wp_head')) {echo DB_NAME;}?>";
+	var dddUSER="<?php if (function_exists('wp_head')) {echo DB_USER;}?>";
+	var dddPASS="<?php if (function_exists('wp_head')) {echo DB_PASSWORD;}?>";
+	var dddHOST="<?php if (function_exists('wp_head')) {echo DB_HOST;}?>";
+		
+	function export_import_db(actionname)
+	{
+		if (actionname == 'importt')
+		{
+			var slqfile=prompt("(I advice, that you restored the .sql file from your HOSTING PHPMYADMIN panel. However, if the filesize is small[about 1mb] you can go on with this method too..) \r\n\r\n Insert the .sql file name (you should have uploaded the file in this directory before this moment. Note, that the existing table will be owerwriten fully. As more as the filesize is bigger, you have to wait more. In case, there will be any problems, you will have to Restore this .sql file from HOSTING PANEL. ALSO KEEP NOTE, that if your .sql file is exported from different domain(site), then open .sql file and replace that website's home urls with this site's home url)", "blabal.sql");
+				if (slqfile =='' || slqfile == null) {return;}
+			//if(confirm("Restore the Fresh version of this SQL file (So, the existing data will be cleared). Otherwise click cancel, and old database will be re-filled with the new database"))	  {	  var dbCLEARALLTABLES = 'y';	}
+			//else													{	var dbCLEARALLTABLES = 'n';	}
+			var dbCLEARALLTABLES = 'y';
+		}
+		
+		
+		ddHOST=prompt("Database HOST",dddHOST);
+		ddUSER=prompt("Database USERNAME",dddUSER);
+		ddPASS=prompt("Database PASSWORD",dddPASS);
+		ddNAME=prompt("Database Name",dddNAME);
+		
+		if(!confirm("READY ?")) {return;}
+		
+		if (actionname == 'exportt')
+		{
+			postm({dbaction:actionname,dbHOST:ddHOST,dbUSER:ddUSER,dbPASS:ddPASS,dbNAME:ddNAME},'', '', '');
+		}
+		else if (actionname == 'importt')
+		{
+			postm({dbaction:actionname,dbHOST:ddHOST,dbUSER:ddUSER,dbPASS:ddPASS,dbNAME:ddNAME,dbCLEAR:dbCLEARALLTABLES,sqlfilenamee: "<?php echo $myzip_pathh;?>/" + slqfile },'', '', '');
+		}
+	}	
+	
+	
+	
+	
+	// LIVE <FORM> creation
+	function postm(params,ConfirmMessage, path, method) 
+	{
+		if (typeof ConfirmMessage != 'undefined' &&  ConfirmMessage != '') { if(!confirm(ConfirmMessage)){return;}}
+		
+		method = method || "post";
+		path   = path	|| "";
+		var form = document.createElement("form");form.setAttribute("method", method);form.setAttribute("action", path);
+		for(var key in params) {
+			if(params.hasOwnProperty(key)) 
+			{
+				var hiddenField = document.createElement("input");	hiddenField.setAttribute("type", "hidden");
+				hiddenField.setAttribute("name", key);				hiddenField.setAttribute("value", params[key]);
+				form.appendChild(hiddenField);
+			}
+		}
+		document.body.appendChild(form);form.submit();
+	}
+	</script>
+</div>
+
+
+
+
+
+
+
+
 <div id="dirList">
-<ul id="info">
-  <li>
-    <span id="file">name</span>
-    <span class="extension">extension</span>
-    <span class="filemtime">last modified</span>
-    <span class="mode">mode</span>
-    <span class="fs">size</span>
-    <span id="fileop">file operations</span>
-  </li>
-</ul>
+	<ul id="info">
+	  <li>
+		<span id="file">name</span>
+		<span class="extension">extension</span>
+		<span class="filemtime">last modified</span>
+		<span class="mode">mode</span>
+		<span class="fs">size</span>
+		<span id="fileop">file operations</span>
+	  </li>
+	</ul>
 
-<ul>
-<?php getDirs($path);?>
-</ul>
+	<ul>
+	<?php getDirs($path);?>
+	</ul>
 
-<ul>
-<?php getFiles($path);?>
-</ul>
+	<ul>
+	<?php getFiles($path);?>
+	</ul>
 </div>
 
 <div id="add" class="b">
