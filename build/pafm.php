@@ -119,7 +119,7 @@ $_R['images/upload.gif'] = 'R0lGODlhGAAYAOZ/AOrNmf398v/rmPj4+OfJk9z5Yv/heuzs7vbd
 if (!DEV && isset($_GET['r'])){
 	$r = $_GET['r'];
 	$is_image = strpos($r, '.') !== false;
-	//TODO: cache headers
+	header('Cache-Control: max-age=2592000');
 	header('Content-Type: ' . $_R_HEADERS[$is_image ? getExt($r) : $r]);
 	exit($is_image ? base64_decode($_R[$r]) : $_R[$r]);
 }
