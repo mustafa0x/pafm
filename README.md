@@ -66,9 +66,7 @@ then scroll down till you see `/** configuration **/`
   * Added warning when the password is default
 
 ### 1.4
-  *   One-file release
-
-    > This is made possible by [Makefile](https://github.com/mustafa0x/pafm/blob/master/Makefile), which combines the project into a single file, for portability.
+  * One-file release (thanks to `make`, which combines all of the assets into one file).
 
 ### 1.3
   * HTML5 uploading
