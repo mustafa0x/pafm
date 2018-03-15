@@ -19,23 +19,6 @@ then scroll down till you see `/** configuration **/`
   *  E.g. if you want to manage your home directory,
   change `ROOT` to `/home`
 
-## Screenshots
-
-### Login:
-
-![pafm login][1]
-[1]: http://mus.tafa.us/projects/pafm/images/login-sm.png "login window"
-
-### File List:
-
-![pafm list][2]
-[2]: http://mus.tafa.us/projects/pafm/images/list-sm.png "file listing and functions"
-
-### Upload:
-
-![pafm upload][3]
-[3]: http://mus.tafa.us/projects/pafm/images/upload-sm.png "the upload window"
-
 ## Recent Changes
 
 ### 1.7
