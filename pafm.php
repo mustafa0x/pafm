@@ -22,7 +22,6 @@
  * configuration
  */
 
-
 define('PASSWORD', '123');
 define('PASSWORD_SALT', 'P5`SU2"6]NALYR}');
 $allowed_IPs = []; // leave empty to allow all IPs
