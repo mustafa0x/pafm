@@ -260,8 +260,6 @@ function isNull() {
 	return false;
 }
 function zipSupport(){
-	if (function_exists('zip_open'))
-		return 'function';
 	if (class_exists('ZipArchive'))
 		return 'class';
 	if (strpos(PHP_OS, 'WIN') === false && @shell_exec('unzip'))
@@ -553,30 +551,6 @@ function doChmod($subject, $path, $mod){
 function doExtract($subject, $path){
 	global $subjectHTML;
 	switch (zipSupport()) {
-		case 'function':
-			if (!is_resource($zip = zip_open($path.'/'.$subject)))
-				return refresh($subjectHTML . ' could not be read for extracting');
-
-			while ($zip_entry = zip_read($zip)){
-				zip_entry_open($zip, $zip_entry);
-				if (substr(zip_entry_name($zip_entry), -1) == '/') {
-					$zdir = substr(zip_entry_name($zip_entry), 0, -1);
-					if (file_exists($path.'/'.$zdir))
-						return refresh(htmlspecialchars($zdir) . ' exists!');
-					mkdir($path.'/'.$zdir);
-				}
-				else {
-					if (file_exists($path.'/'.zip_entry_name($zip_entry)))
-						return refresh(htmlspecialchars($path.'/'.zip_entry_name($zip_entry)) . ' exists!');
-
-					$fopen = fopen($path.'/'.zip_entry_name($zip_entry), 'w');
-					$ze_fs = zip_entry_filesize($zip_entry);
-					fwrite($fopen, zip_entry_read($zip_entry, $ze_fs), $ze_fs);
-				}
-				zip_entry_close($zip_entry);
-			}
-			zip_close($zip);
-			break;
 		case 'class':
 			$zip = new ZipArchive();
 			if ($zip->open($path.'/'.$subject) !== true)
