@@ -281,7 +281,7 @@ function removeQuotes($subject, $single = true, $double = true) {
 function return_bytes($val) { //for upload. http://php.net/ini_get
     $val = trim($val);
     $last = strtolower($val[strlen($val)-1]);
-	$val = (int) $val;
+    $val = (int) $val;
     switch($last) {
         case 'g':
             $val *= 1024;
