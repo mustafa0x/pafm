@@ -864,7 +864,8 @@ function getDirs($path){
 		echo '  <li title="' . $dirItemHTML . '">' .
 		"\n\t" . '<a href="?path=' . escape($fullPath) . '" title="' . $dirItemHTML . '" class="dir">'.$dirItemHTML.'</a>'.
 		"\n\t" . '<span class="filemtime" title="'.date('c', $mtime).'">' . date('y-m-d | H:i:s', $mtime + $tz_offset) . '</span>' .
-		"\n\t" . '<a href="?do=archive&amp;path='.$zip_path.'&amp;subject='.$dirItemURL.'&amp;nonce=' . $nonce.'" target="_blank" title="Zip '.$dirItemHTML.'" onclick="return confirm(\'This action will create '.removeQuotes($dirItem).'.zip file in the current directory\');" class="zip b">Zip</a>' ."\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
+		"\n\t" . '<a href="?do=archive&amp;path='.$zip_path.'&amp;subject='.$dirItemURL.'&amp;nonce=' . $nonce.'" target="_blank" title="Zip '.$dirItemHTML.'" onclick="return confirm(\'This action will create '.removeQuotes($dirItem).'.zip file in the current directory\');" class="zip b">Zip</a>' .
+		"\n\t" . '<span class="mode" title="mode">' . $mod . '</span>' .
 		"\n\t" . '<a href="#" title="Chmod '.$dirItemHTML.'" onclick="fOp.chmod(\''.$pathURL.'\', \''.$dirItemURL.'\', \''.$mod.'\'); return false;" class="chmod b"></a>' .
 		"\n\t" . '<a href="#" title="Move '.$dirItemHTML.'" onclick="fOp.moveList(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="move b"></a>' .
 		"\n\t" . '<a href="#" title="Copy '.$dirItemHTML.'" onclick="fOp.copy(\''.$dirItemURL.'\', \''.$pathURL.'\', \''.$pathURL.'\'); return false;" class="copy b"></a>' .
