@@ -23,7 +23,6 @@
  */
 
 
-define('AUTHORIZE', true);
 define('PASSWORD', '123');
 define('PASSWORD_SALT', 'P5`SU2"6]NALYR}');
 $allowed_IPs = []; // leave empty to allow all IPs
@@ -65,6 +64,8 @@ define('BRUTEFORCE_ATTEMPTS', 5);
  * @var int unit: Seconds
  */
 define('BRUTEFORCE_TIME_LOCK', 15 * 60);
+
+define('AUTHORIZE', true);
 
 /**
  * files larger than this are not editable
