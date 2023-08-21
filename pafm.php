@@ -893,9 +893,8 @@ function getFiles($path){
 		$ext = getExt($dirItem);
 		$cmSupport = in_array($ext, $codeMirrorModes) ? 'cp ' : '';
 
-		$pafmDir = dirname($_SERVER['PHP_SELF']);
 		echo '  <li title="' . $dirItemHTML . '">' .
-		"\n\t" . '<a href="' . escape($pafmDir . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a>' .
+		"\n\t" . '<a href="' . escape(dirname($_SERVER['PHP_SELF']) . $filePath . $dirItem) . '" title="' . $dirItemHTML . '" class="file">'.$dirItemHTML.'</a>' .
 		"\n\t" . '<span class="fs"  title="file size">' . getfs($path.'/'.$dirItem) . '</span>' .
 		"\n\t" . '<span class="extension" title="file extension">' . $ext . '</span>' .
 		"\n\t" . '<span class="filemtime" title="'.date('c', $mtime).'">' . date('y-m-d | H:i:s', $mtime + $tz_offset) . '</span>' .
